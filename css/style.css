@@ -1,40 +1,40 @@
-/* ── Comunidade Imersão · identidade lara.dam ── */
+/* ── Comunidade Imersão · tema escuro (mesmo mundo do login) ── */
 :root {
-    --coral: #C8441A;
-    --coral-claro: #D4572A;
-    --coral-suave: #F6E3DB;
-    --creme: #FFF8F2;
-    --creme-fundo: #FDF3EA;
-    --branco: #FFFFFF;
-    --grafite: #1B1B1B;
-    --cinza: #6E6259;
-    --cinza-claro: #A79C93;
-    --borda: #EADCD0;
-    --verde: #2F7D5D;
-    --raio: 14px;
-    --sombra: 0 1px 2px rgba(27, 27, 27, .04), 0 8px 24px rgba(27, 27, 27, .05);
-    --transicao: 180ms cubic-bezier(.2, .7, .3, 1);
+    --noite: #05070E;
+    --fumo: #0B0F1A;
+    --carvao: #10141F;
+    --leite: #ECE7DE;
+    --claro: #FFFFFF;
+    --neblina: rgba(236, 231, 222, .60);
+    --fumaca: rgba(236, 231, 222, .40);
+    --fio: rgba(236, 231, 222, .12);
+    --fio-forte: rgba(236, 231, 222, .22);
+    --vidro: rgba(255, 255, 255, .045);
+    --vidro-alto: rgba(255, 255, 255, .08);
+    --verde: #6FE3B0;
+    --raio: 16px;
+    --transicao: 200ms cubic-bezier(.2, .7, .3, 1);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     font-family: 'Outfit', system-ui, sans-serif;
-    background: var(--creme-fundo);
-    color: var(--grafite);
+    background: var(--noite);
+    color: var(--leite);
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; line-height: 1.2; }
+h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 400; line-height: 1.15; color: var(--claro); }
 
-a { color: var(--coral); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a { color: var(--leite); text-decoration: none; border-bottom: 1px solid var(--fio-forte); }
+a:hover { color: var(--claro); border-bottom-color: var(--leite); }
 
 button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 
 :focus-visible {
-    outline: 2px solid var(--coral);
+    outline: 2px solid rgba(160, 200, 255, .8);
     outline-offset: 2px;
     border-radius: 6px;
 }
@@ -42,27 +42,30 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 input, textarea, select {
     font-family: inherit;
     font-size: 15px;
-    color: var(--grafite);
-    background: var(--branco);
-    border: 1px solid var(--borda);
-    border-radius: 10px;
+    color: var(--claro);
+    background: var(--vidro);
+    border: 1px solid var(--fio);
+    border-radius: 12px;
     padding: 12px 14px;
     width: 100%;
-    transition: border-color var(--transicao), box-shadow var(--transicao);
+    transition: border-color var(--transicao), background var(--transicao);
 }
 input:focus, textarea:focus, select:focus {
     outline: none;
-    border-color: var(--coral);
-    box-shadow: 0 0 0 3px var(--coral-suave);
+    border-color: rgba(180, 220, 255, .5);
+    background: var(--vidro-alto);
 }
-input::placeholder, textarea::placeholder { color: var(--cinza-claro); }
+input::placeholder, textarea::placeholder { color: rgba(236, 231, 222, .34); }
+select option { background: var(--carvao); color: var(--leite); }
 
 label {
     display: block;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
-    color: var(--cinza);
-    margin-bottom: 6px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--fumaca);
+    margin-bottom: 7px;
 }
 
 /* ── Botões ── */
@@ -71,63 +74,80 @@ label {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: var(--coral);
-    color: var(--branco);
-    font-size: 15px;
+    background: var(--leite);
+    color: #0A0C14;
+    font-size: 13px;
     font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
     padding: 12px 22px;
     border-radius: 999px;
     transition: transform var(--transicao), background var(--transicao), opacity var(--transicao);
 }
-.btn:hover { background: var(--coral-claro); transform: translateY(-1px); }
-.btn:active { transform: translateY(0); }
-.btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.btn:hover { background: var(--claro); transform: translateY(-1px); }
+.btn:active { transform: none; }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
 .btn-bloco { width: 100%; }
+.btn-pequeno { font-size: 11.5px; padding: 9px 16px; }
 .btn-fantasma {
     background: transparent;
-    color: var(--grafite);
-    border: 1px solid var(--borda);
+    color: var(--leite);
+    border: 1px solid var(--fio);
 }
-.btn-fantasma:hover { background: var(--branco); border-color: var(--cinza-claro); }
-.btn-pequeno { font-size: 13px; padding: 8px 16px; }
+.btn-fantasma:hover { background: var(--vidro); border-color: var(--fio-forte); color: var(--claro); }
 
-/* ── Avisos de erro/sucesso ── */
+/* ── Superfícies de vidro ── */
+.vidro {
+    background: var(--vidro);
+    border: 1px solid var(--fio);
+    border-radius: var(--raio);
+    backdrop-filter: blur(14px);
+}
+
+/* ── Recados ── */
 .recado {
-    font-size: 14px;
-    padding: 12px 14px;
-    border-radius: 10px;
+    font-size: 13.5px;
+    padding: 11px 15px;
+    border-radius: 12px;
     margin-top: 14px;
     display: none;
 }
 .recado.show { display: block; }
-.recado.erro { background: #FDEDE8; color: #9B2C0E; border: 1px solid #F3CFC3; }
-.recado.ok { background: #E9F4EF; color: var(--verde); border: 1px solid #C6E3D6; }
+.recado.erro { background: rgba(255, 120, 100, .1); border: 1px solid rgba(255, 140, 120, .3); color: #FFC4B8; }
+.recado.ok { background: rgba(110, 230, 190, .1); border: 1px solid rgba(110, 230, 190, .3); color: #A7EFD6; }
 
 /* ── Avatar ── */
 .avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--coral-suave);
-    color: var(--coral);
-    font-weight: 600;
-    font-size: 14px;
+    background: var(--vidro-alto);
+    border: 1px solid var(--fio);
+    color: var(--leite);
+    font-weight: 500;
+    font-size: 13px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    object-fit: cover;
     overflow: hidden;
 }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
 .vazio {
     text-align: center;
-    color: var(--cinza);
-    padding: 48px 20px;
+    color: var(--fumaca);
+    padding: 54px 20px;
     font-size: 15px;
 }
-.vazio strong { display: block; font-size: 17px; color: var(--grafite); margin-bottom: 6px; }
+.vazio strong {
+    display: block;
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 19px;
+    color: var(--claro);
+    margin-bottom: 8px;
+}
 
 @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }

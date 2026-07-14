@@ -7,281 +7,361 @@
     <title>Comunidade Imersão</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .casca { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+        body {
+            background:
+                radial-gradient(120% 80% at 78% -10%, #141B2B 0%, transparent 55%),
+                radial-gradient(90% 70% at 0% 100%, #0D1220 0%, transparent 60%),
+                var(--noite);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .casca { display: grid; grid-template-columns: 252px 1fr; min-height: 100vh; }
 
         /* ── Menu lateral ── */
         .lateral {
-            background: var(--creme);
-            border-right: 1px solid var(--borda);
-            padding: 28px 18px;
+            border-right: 1px solid var(--fio);
+            background: rgba(8, 11, 19, .55);
+            backdrop-filter: blur(18px);
+            padding: 26px 16px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
             position: sticky;
             top: 0;
             height: 100vh;
         }
-        .logo {
-            font-family: 'Fraunces', serif;
-            font-size: 19px;
-            font-weight: 600;
-            padding: 0 12px 22px;
+        .marca {
+            padding: 0 12px 24px;
             line-height: 1.25;
         }
-        .logo small {
+        .marca small {
             display: block;
-            font-family: 'Outfit', sans-serif;
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 600;
-            letter-spacing: .16em;
+            letter-spacing: .18em;
             text-transform: uppercase;
-            color: var(--coral);
-            margin-bottom: 4px;
+            color: var(--fumaca);
+            margin-bottom: 5px;
+        }
+        .marca b {
+            font-family: 'Fraunces', serif;
+            font-weight: 400;
+            font-size: 20px;
+            color: var(--claro);
         }
         .item {
             display: flex;
             align-items: center;
-            gap: 11px;
+            gap: 12px;
             padding: 11px 12px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--cinza);
+            border-radius: 11px;
+            font-size: 14.5px;
+            color: var(--neblina);
             width: 100%;
             text-align: left;
-            transition: background var(--transicao), color var(--transicao);
+            border: 1px solid transparent;
+            transition: background var(--transicao), color var(--transicao), border-color var(--transicao);
         }
-        .item:hover { background: var(--coral-suave); color: var(--grafite); }
-        .item.ativo { background: var(--coral); color: var(--branco); }
-        .item .ico { font-size: 16px; width: 20px; text-align: center; }
-        .rodape-lateral { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--borda); }
-        .eu {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            font-size: 14px;
+        .item:hover { background: var(--vidro); color: var(--claro); }
+        .item.ativo {
+            background: var(--vidro-alto);
+            border-color: var(--fio);
+            color: var(--claro);
         }
-        .eu strong { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .sair { font-size: 13px; color: var(--cinza); padding: 8px 12px; }
-        .sair:hover { color: var(--coral); }
+        .item .ico { font-size: 15px; width: 18px; text-align: center; opacity: .9; }
 
-        /* ── Conteúdo ── */
-        .palco { padding: 40px 32px 80px; }
-        .tela { display: none; max-width: 680px; margin: 0 auto; }
-        .tela.show { display: block; animation: entra 320ms ease both; }
-        .tela.larga { max-width: 900px; }
-        @keyframes entra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        .rodape-lateral { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--fio); }
+        .eu { display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 14px; }
+        .eu strong { font-weight: 500; color: var(--claro); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .sair { font-size: 12px; letter-spacing: .06em; color: var(--fumaca); padding: 8px 12px; }
+        .sair:hover { color: var(--claro); }
 
-        .titulo-tela { margin-bottom: 4px; font-size: 30px; letter-spacing: -.01em; }
-        .sub-tela { color: var(--cinza); font-size: 15px; margin-bottom: 28px; }
+        /* ── Palco ── */
+        .palco { padding: 46px 32px 90px; }
+        .tela { display: none; max-width: 700px; margin: 0 auto; }
+        .tela.show { display: block; animation: entra 380ms cubic-bezier(.2,.7,.3,1) both; }
+        .tela.larga { max-width: 980px; }
+        @keyframes entra { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+        .titulo-tela {
+            font-size: 34px;
+            font-weight: 300;
+            letter-spacing: -.01em;
+            margin-bottom: 6px;
+        }
+        .sub-tela { color: var(--fumaca); font-size: 15px; margin-bottom: 32px; }
 
         /* ── Publicar ── */
         .publicar {
-            background: var(--branco);
-            border: 1px solid var(--borda);
+            background: var(--vidro);
+            border: 1px solid var(--fio);
             border-radius: var(--raio);
+            backdrop-filter: blur(14px);
             padding: 18px;
             margin-bottom: 26px;
-            box-shadow: var(--sombra);
         }
-        .publicar textarea { border: none; padding: 6px 0; resize: none; min-height: 46px; font-size: 16px; }
-        .publicar textarea:focus { box-shadow: none; }
-        .extras { display: none; margin-top: 12px; }
-        .publicar.aberto .extras { display: block; animation: entra 220ms ease both; }
+        .publicar textarea {
+            border: none;
+            background: none;
+            padding: 6px 0;
+            resize: none;
+            min-height: 44px;
+            font-size: 16px;
+        }
+        .publicar textarea:focus { background: none; }
+        .extras { display: none; margin-top: 14px; }
+        .publicar.aberto .extras { display: block; animation: entra 240ms ease both; }
         .tipos { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
         .chip {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
-            padding: 7px 14px;
+            letter-spacing: .04em;
+            padding: 8px 15px;
             border-radius: 999px;
-            border: 1px solid var(--borda);
-            color: var(--cinza);
-            background: var(--branco);
+            border: 1px solid var(--fio);
+            color: var(--neblina);
             transition: all var(--transicao);
         }
-        .chip:hover { border-color: var(--coral); color: var(--coral); }
-        .chip.on { background: var(--coral); border-color: var(--coral); color: var(--branco); }
-        .extras textarea, .extras input[type="url"] { border: 1px solid var(--borda); padding: 11px 13px; margin-bottom: 10px; font-size: 14px; }
-        .extras textarea { min-height: 90px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 13px; }
+        .chip:hover { border-color: var(--fio-forte); color: var(--claro); }
+        .chip.on { background: var(--leite); border-color: var(--leite); color: #0A0C14; }
+        .extras textarea, .extras input[type="url"] { margin-bottom: 10px; font-size: 14px; }
+        .extras textarea { min-height: 92px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 13px; }
         .barra-publicar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
         .anexo {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--cinza);
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 1px dashed var(--borda);
+            font-size: 12px;
+            letter-spacing: .04em;
+            color: var(--neblina);
+            padding: 9px 14px;
+            border-radius: 10px;
+            border: 1px dashed var(--fio-forte);
+            margin: 0;
+            text-transform: none;
         }
-        .anexo:hover { border-color: var(--coral); color: var(--coral); }
+        .anexo:hover { color: var(--claro); border-color: var(--leite); }
         .previa { position: relative; margin-top: 10px; display: none; }
         .previa.show { display: block; }
-        .previa img { width: 100%; border-radius: 10px; display: block; }
+        .previa img { width: 100%; border-radius: 12px; display: block; }
         .tira-previa {
             position: absolute; top: 8px; right: 8px;
-            background: rgba(27,27,27,.75); color: #fff;
+            background: rgba(5, 7, 14, .8);
+            border: 1px solid var(--fio);
+            color: var(--claro);
             width: 28px; height: 28px; border-radius: 50%;
             font-size: 15px; line-height: 1;
         }
 
         /* ── Post ── */
         .post {
-            background: var(--branco);
-            border: 1px solid var(--borda);
+            background: var(--vidro);
+            border: 1px solid var(--fio);
             border-radius: var(--raio);
-            padding: 20px;
+            backdrop-filter: blur(14px);
+            padding: 22px;
             margin-bottom: 16px;
-            box-shadow: var(--sombra);
-            animation: entra 400ms ease both;
+            animation: entra 420ms ease both;
         }
         .topo-post { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
         .quem { flex: 1; min-width: 0; }
-        .quem b { font-size: 15px; font-weight: 600; display: block; }
-        .quem span { font-size: 12.5px; color: var(--cinza-claro); }
+        .quem b { font-size: 15px; font-weight: 500; color: var(--claro); display: block; }
+        .quem span { font-size: 12px; color: var(--fumaca); }
         .selo {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
-            letter-spacing: .06em;
+            letter-spacing: .1em;
             text-transform: uppercase;
-            padding: 4px 9px;
-            border-radius: 6px;
-            background: var(--coral-suave);
-            color: var(--coral);
+            padding: 5px 10px;
+            border-radius: 7px;
+            border: 1px solid var(--fio);
+            color: var(--neblina);
         }
-        .selo.duvida { background: #FDF0DC; color: #9A6212; }
-        .selo.prompt { background: #E7EFF6; color: #2A5D86; }
+        .selo.prompt { border-color: rgba(150, 190, 255, .35); color: #AFCBFF; }
+        .selo.duvida { border-color: rgba(244, 208, 120, .35); color: #F0D496; }
         .corpo-post { font-size: 15.5px; white-space: pre-wrap; word-wrap: break-word; }
-        .corpo-post a { word-break: break-all; }
-        .foto-post { margin-top: 14px; border-radius: 10px; width: 100%; display: block; border: 1px solid var(--borda); }
+        .foto-post { margin-top: 14px; border-radius: 12px; width: 100%; display: block; border: 1px solid var(--fio); }
+
         .caixa-prompt {
             position: relative;
             margin-top: 14px;
-            background: #FAF6F2;
-            border: 1px solid var(--borda);
-            border-radius: 10px;
-            padding: 14px 14px 14px 16px;
+            background: rgba(0, 0, 0, .28);
+            border: 1px solid var(--fio);
+            border-radius: 12px;
+            padding: 14px;
         }
         .caixa-prompt pre {
             font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-            font-size: 13px;
-            line-height: 1.6;
+            font-size: 12.5px;
+            line-height: 1.65;
             white-space: pre-wrap;
             word-break: break-word;
-            color: #3C332C;
+            color: #CFD6E4;
             max-height: 260px;
             overflow: auto;
-            padding-top: 26px;
+            padding-top: 24px;
         }
-        .copiar {
-            position: absolute; top: 10px; right: 10px;
-            font-size: 12px; font-weight: 600;
-            padding: 5px 11px; border-radius: 7px;
-            background: var(--branco); border: 1px solid var(--borda); color: var(--cinza);
+        .ferramentas-prompt { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; }
+        .mini {
+            font-size: 11px;
+            letter-spacing: .04em;
+            padding: 5px 11px;
+            border-radius: 8px;
+            border: 1px solid var(--fio);
+            color: var(--neblina);
+            background: rgba(10, 14, 24, .6);
         }
-        .copiar:hover { color: var(--coral); border-color: var(--coral); }
+        .mini:hover { color: var(--claro); border-color: var(--fio-forte); }
+
         .acoes {
-            display: flex; align-items: center; gap: 6px;
-            margin-top: 14px; padding-top: 12px;
-            border-top: 1px solid var(--borda);
+            display: flex; align-items: center; gap: 4px;
+            margin-top: 16px; padding-top: 14px;
+            border-top: 1px solid var(--fio);
         }
         .acao {
-            display: flex; align-items: center; gap: 6px;
-            font-size: 13.5px; font-weight: 500; color: var(--cinza);
-            padding: 7px 11px; border-radius: 8px;
+            display: flex; align-items: center; gap: 7px;
+            font-size: 13px; color: var(--neblina);
+            padding: 8px 12px; border-radius: 9px;
             transition: background var(--transicao), color var(--transicao);
         }
-        .acao:hover { background: var(--creme); color: var(--grafite); }
-        .acao.curtido { color: var(--coral); }
-        .acao.curtido .coracao { animation: pop 320ms ease; }
+        .acao:hover { background: var(--vidro); color: var(--claro); }
+        .acao.curtido { color: #FF8FA3; }
+        .acao.curtido .coracao { animation: pop 340ms ease; }
         @keyframes pop { 0% { transform: scale(1); } 45% { transform: scale(1.35); } 100% { transform: scale(1); } }
-        .apagar { margin-left: auto; color: var(--cinza-claro); font-size: 13px; }
-        .apagar:hover { color: #B23A1B; }
+        .apagar { margin-left: auto; font-size: 12px; color: var(--fumaca); }
+        .apagar:hover { color: #FF9C86; background: none; }
 
         /* ── Comentários ── */
-        .comentarios { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--borda); display: none; }
+        .comentarios { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--fio); display: none; }
         .comentarios.show { display: block; }
         .coment { display: flex; gap: 10px; margin-bottom: 12px; }
         .coment .avatar { width: 30px; height: 30px; font-size: 11px; }
-        .balao { background: var(--creme); border-radius: 10px; padding: 9px 13px; flex: 1; }
-        .balao b { font-size: 13.5px; }
-        .balao time { font-size: 11.5px; color: var(--cinza-claro); margin-left: 6px; }
-        .balao p { font-size: 14px; margin-top: 2px; white-space: pre-wrap; word-wrap: break-word; }
-        .escrever { display: flex; gap: 10px; align-items: flex-start; }
-        .escrever input { font-size: 14px; padding: 9px 13px; }
-        .escrever .btn { padding: 9px 16px; font-size: 13px; }
+        .balao { background: rgba(255, 255, 255, .035); border: 1px solid var(--fio); border-radius: 12px; padding: 10px 14px; flex: 1; }
+        .balao b { font-size: 13.5px; font-weight: 500; color: var(--claro); }
+        .balao time { font-size: 11px; color: var(--fumaca); margin-left: 7px; }
+        .balao p { font-size: 14px; margin-top: 3px; white-space: pre-wrap; word-wrap: break-word; }
+        .escrever { display: flex; gap: 10px; }
+        .escrever input { font-size: 14px; padding: 10px 14px; }
+
+        /* ── Biblioteca de prompts ── */
+        .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+        .cartao-prompt {
+            background: var(--vidro);
+            border: 1px solid var(--fio);
+            border-radius: var(--raio);
+            backdrop-filter: blur(14px);
+            padding: 22px;
+            margin-bottom: 16px;
+        }
+        .cartao-prompt.destaque { border-color: rgba(244, 208, 120, .35); }
+        .topo-cartao { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+        .cartao-prompt h3 { font-size: 19px; flex: 1; }
+        .cartao-prompt .tema {
+            font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+            color: var(--neblina); border: 1px solid var(--fio); border-radius: 7px; padding: 5px 10px;
+            white-space: nowrap;
+        }
+        .cartao-prompt .conta { font-size: 14px; color: var(--neblina); margin-bottom: 4px; }
+        .cartao-prompt .credito { font-size: 12px; color: var(--fumaca); }
 
         /* ── Materiais, avisos, galeria ── */
         .material {
             display: flex; align-items: center; gap: 16px;
-            background: var(--branco); border: 1px solid var(--borda);
-            border-radius: var(--raio); padding: 18px 20px; margin-bottom: 12px;
-            box-shadow: var(--sombra);
+            background: var(--vidro); border: 1px solid var(--fio);
+            border-radius: var(--raio); padding: 20px; margin-bottom: 12px;
+            backdrop-filter: blur(14px);
             transition: transform var(--transicao), border-color var(--transicao);
         }
-        .material:hover { transform: translateY(-2px); border-color: var(--coral); }
-        .material .emoji { font-size: 26px; }
-        .material h3 { font-size: 17px; margin-bottom: 2px; }
-        .material p { font-size: 14px; color: var(--cinza); }
-        .material .seta { margin-left: auto; color: var(--coral); font-size: 20px; }
+        .material:hover { transform: translateY(-2px); border-color: var(--fio-forte); }
+        .material .emoji { font-size: 24px; }
+        .material h3 { font-size: 17px; margin-bottom: 3px; }
+        .material p { font-size: 13.5px; color: var(--fumaca); }
+        .material .seta { margin-left: auto; color: var(--neblina); font-size: 18px; }
 
         .aviso {
-            background: var(--branco); border: 1px solid var(--borda);
-            border-left: 3px solid var(--coral);
-            border-radius: var(--raio); padding: 20px; margin-bottom: 14px;
-            box-shadow: var(--sombra);
+            background: var(--vidro); border: 1px solid var(--fio);
+            border-left: 2px solid var(--fio-forte);
+            border-radius: var(--raio); padding: 22px; margin-bottom: 14px;
+            backdrop-filter: blur(14px);
         }
-        .aviso.fixado { background: #FFFDF7; border-left-color: #E0A21C; }
-        .aviso h3 { font-size: 18px; margin-bottom: 6px; }
-        .aviso .data { font-size: 12.5px; color: var(--cinza-claro); margin-bottom: 10px; display: block; }
-        .aviso .texto { font-size: 15px; color: var(--grafite); white-space: pre-wrap; }
-        .pin { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #A5730D; }
+        .aviso.fixado { border-left-color: #F0D496; }
+        .aviso h3 { font-size: 19px; margin-bottom: 4px; }
+        .aviso .data { font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--fumaca); display: block; margin-bottom: 12px; }
+        .aviso .texto { font-size: 15px; white-space: pre-wrap; }
+        .pin { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #F0D496; }
 
-        .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+        .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
         .vitrine {
-            background: var(--branco); border: 1px solid var(--borda);
-            border-radius: var(--raio); padding: 20px; text-align: center;
-            box-shadow: var(--sombra);
+            background: var(--vidro); border: 1px solid var(--fio);
+            border-radius: var(--raio); padding: 24px 20px; text-align: center;
+            backdrop-filter: blur(14px);
             transition: transform var(--transicao), border-color var(--transicao);
         }
-        .vitrine:hover { transform: translateY(-3px); border-color: var(--coral); }
-        .vitrine .avatar { width: 56px; height: 56px; font-size: 18px; margin: 0 auto 12px; }
-        .vitrine b { display: block; font-size: 15.5px; }
-        .vitrine .arroba { font-size: 13px; color: var(--cinza-claro); }
-        .vitrine .bio { font-size: 13.5px; color: var(--cinza); margin: 10px 0 14px; }
+        .vitrine:hover { transform: translateY(-3px); border-color: var(--fio-forte); }
+        .vitrine .avatar { width: 58px; height: 58px; font-size: 17px; margin: 0 auto 14px; }
+        .vitrine b { display: block; font-size: 15px; font-weight: 500; color: var(--claro); }
+        .vitrine .arroba { font-size: 12.5px; color: var(--fumaca); }
+        .vitrine .bio { font-size: 13px; color: var(--neblina); margin: 10px 0 16px; min-height: 20px; }
 
+        /* ── Caixas de formulário ── */
         .caixa {
-            background: var(--branco); border: 1px solid var(--borda);
-            border-radius: var(--raio); padding: 24px; box-shadow: var(--sombra);
+            background: var(--vidro); border: 1px solid var(--fio);
+            border-radius: var(--raio); padding: 26px;
+            backdrop-filter: blur(14px);
             margin-bottom: 20px;
         }
-        .caixa h3 { font-size: 18px; margin-bottom: 16px; }
-        .caixa .campo { margin-bottom: 14px; }
-        .linha-avatar { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-        .linha-avatar .avatar { width: 64px; height: 64px; font-size: 20px; }
+        .caixa h3 { font-size: 20px; margin-bottom: 18px; }
+        .caixa .campo { margin-bottom: 16px; }
+        .linha-avatar { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; }
+        .linha-avatar .avatar { width: 66px; height: 66px; font-size: 19px; }
+
+        /* ── Modal (fixar prompt na biblioteca) ── */
+        .veu-modal {
+            position: fixed; inset: 0; z-index: 40;
+            background: rgba(3, 4, 10, .72);
+            backdrop-filter: blur(6px);
+            display: none;
+            place-items: center;
+            padding: 20px;
+        }
+        .veu-modal.show { display: grid; }
+        .modal {
+            width: 100%; max-width: 480px;
+            background: var(--carvao);
+            border: 1px solid var(--fio);
+            border-radius: 20px;
+            padding: 28px;
+            animation: entra 260ms ease both;
+        }
+        .modal h3 { font-size: 22px; margin-bottom: 6px; }
+        .modal .aviso-modal { font-size: 13.5px; color: var(--fumaca); margin-bottom: 20px; }
+        .modal .campo { margin-bottom: 16px; }
+        .botoes-modal { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
 
         /* ── Mobile ── */
         .abre-menu { display: none; }
-        @media (max-width: 860px) {
+        .veu { display: none; }
+        @media (max-width: 900px) {
             .casca { grid-template-columns: 1fr; }
             .lateral {
-                position: fixed; inset: 0 auto 0 0; width: 260px; z-index: 30;
+                position: fixed; inset: 0 auto 0 0; width: 265px; z-index: 30;
                 transform: translateX(-100%); transition: transform var(--transicao);
-                box-shadow: 0 0 40px rgba(27,27,27,.15);
             }
             .lateral.aberta { transform: none; }
-            .veu { display: none; position: fixed; inset: 0; background: rgba(27,27,27,.35); z-index: 20; }
+            .veu { position: fixed; inset: 0; background: rgba(3, 4, 10, .6); z-index: 20; }
             .veu.show { display: block; }
             .abre-menu {
                 display: flex; align-items: center; gap: 10px;
                 position: sticky; top: 0; z-index: 10;
-                background: var(--creme); border-bottom: 1px solid var(--borda);
-                padding: 14px 18px; width: 100%; font-weight: 600;
+                background: rgba(8, 11, 19, .85);
+                backdrop-filter: blur(14px);
+                border-bottom: 1px solid var(--fio);
+                padding: 15px 18px; width: 100%;
+                font-size: 13px; letter-spacing: .1em; text-transform: uppercase;
             }
-            .palco { padding: 22px 16px 60px; }
-            .titulo-tela { font-size: 25px; }
+            .palco { padding: 26px 16px 70px; }
+            .titulo-tela { font-size: 27px; }
         }
     </style>
 </head>
@@ -290,14 +370,15 @@
 
     <div class="casca">
         <nav class="lateral" id="lateral">
-            <div class="logo"><small>lara.dam</small>Comunidade<br>Imersão</div>
+            <div class="marca"><small>lara.dam</small><b>Comunidade</b></div>
 
-            <button class="item ativo" data-tela="mural"><span class="ico">💬</span> Mural</button>
-            <button class="item" data-tela="materiais"><span class="ico">📚</span> Materiais</button>
-            <button class="item" data-tela="avisos"><span class="ico">📌</span> Avisos</button>
-            <button class="item" data-tela="galeria"><span class="ico">✨</span> Portfólios</button>
-            <button class="item" data-tela="perfil"><span class="ico">👤</span> Meu perfil</button>
-            <button class="item" data-tela="admin" id="itemAdmin" style="display:none"><span class="ico">⚙️</span> Admin</button>
+            <button class="item ativo" data-tela="mural"><span class="ico">◇</span> Mural</button>
+            <button class="item" data-tela="prompts"><span class="ico">⌘</span> Prompts</button>
+            <button class="item" data-tela="materiais"><span class="ico">▤</span> Materiais</button>
+            <button class="item" data-tela="avisos"><span class="ico">✦</span> Avisos</button>
+            <button class="item" data-tela="galeria"><span class="ico">◉</span> Portfólios</button>
+            <button class="item" data-tela="perfil"><span class="ico">☺</span> Meu perfil</button>
+            <button class="item" data-tela="admin" id="itemAdmin" style="display:none"><span class="ico">⚙</span> Admin</button>
 
             <div class="rodape-lateral">
                 <div class="eu">
@@ -333,7 +414,7 @@
                                 <button type="button" class="tira-previa" id="tiraPrevia" aria-label="Remover imagem">×</button>
                             </div>
                             <div class="barra-publicar">
-                                <label class="anexo" for="arquivo" style="margin:0">🖼️ Print ou imagem</label>
+                                <label class="anexo" for="arquivo">Print ou imagem</label>
                                 <input type="file" id="arquivo" accept="image/*" hidden>
                                 <button type="submit" class="btn btn-pequeno" id="btnPublicar">Publicar</button>
                             </div>
@@ -342,6 +423,14 @@
 
                     <div class="recado erro" id="recadoMural"></div>
                     <div id="feed"><p class="vazio">Carregando o mural...</p></div>
+                </section>
+
+                <!-- PROMPTS -->
+                <section class="tela" id="telaPrompts">
+                    <h1 class="titulo-tela">Biblioteca de prompts</h1>
+                    <p class="sub-tela">Os prompts que deram certo, separados por tema. Copie, adapte, use.</p>
+                    <div class="filtros" id="filtrosPrompts"></div>
+                    <div id="listaPrompts"><p class="vazio">Carregando...</p></div>
                 </section>
 
                 <!-- MATERIAIS -->
@@ -361,7 +450,7 @@
                 <!-- GALERIA -->
                 <section class="tela larga" id="telaGaleria">
                     <h1 class="titulo-tela">Portfólios da turma</h1>
-                    <p class="sub-tela">Os sites que saíram da imersão. Pra aparecer aqui, é só colocar o link do seu portfólio em "Meu perfil".</p>
+                    <p class="sub-tela">Os sites que saíram da imersão. Pra aparecer aqui, coloque o link do seu em "Meu perfil".</p>
                     <div class="grade" id="listaGaleria"><p class="vazio">Carregando...</p></div>
                 </section>
 
@@ -374,7 +463,7 @@
                         <div class="linha-avatar">
                             <div class="avatar" id="avatarPerfil">?</div>
                             <div>
-                                <label class="anexo" for="arquivoAvatar" style="margin:0; display:inline-block">Trocar foto</label>
+                                <label class="anexo" for="arquivoAvatar">Trocar foto</label>
                                 <input type="file" id="arquivoAvatar" accept="image/*" hidden>
                             </div>
                         </div>
@@ -415,7 +504,7 @@
                             <textarea id="avCorpo" rows="4" required></textarea>
                         </div>
                         <div class="campo">
-                            <label style="display:flex; gap:8px; align-items:center; cursor:pointer">
+                            <label style="display:flex; gap:9px; align-items:center; cursor:pointer; text-transform:none; letter-spacing:0; font-size:14px; color:var(--neblina)">
                                 <input type="checkbox" id="avFixado" style="width:auto">
                                 Fixar no topo
                             </label>
@@ -445,10 +534,57 @@
                         <button type="submit" class="btn">Adicionar material</button>
                         <div class="recado" id="recadoMaterial"></div>
                     </form>
+
+                    <form class="caixa" id="formPrompt">
+                        <h3>Adicionar um prompt na biblioteca</h3>
+                        <div class="campo">
+                            <label for="prTitulo">Título</label>
+                            <input type="text" id="prTitulo" placeholder="Portfólio em uma página" required>
+                        </div>
+                        <div class="campo">
+                            <label for="prTema">Tema</label>
+                            <select id="prTema"></select>
+                        </div>
+                        <div class="campo">
+                            <label for="prDesc">Pra que serve</label>
+                            <input type="text" id="prDesc" placeholder="Uma linha explicando o que ele faz">
+                        </div>
+                        <div class="campo">
+                            <label for="prTexto">O prompt</label>
+                            <textarea id="prTexto" rows="6" required style="font-family: ui-monospace, Menlo, monospace; font-size:13px"></textarea>
+                        </div>
+                        <button type="submit" class="btn">Adicionar prompt</button>
+                        <div class="recado" id="recadoPrompt"></div>
+                    </form>
                 </section>
 
             </div>
         </main>
+    </div>
+
+    <!-- Modal: fixar um prompt do mural na biblioteca -->
+    <div class="veu-modal" id="veuModal">
+        <form class="modal" id="formFixar">
+            <h3>Fixar na biblioteca</h3>
+            <p class="aviso-modal">Esse prompt vai pra biblioteca, com o crédito de quem publicou.</p>
+            <div class="campo">
+                <label for="fxTitulo">Título</label>
+                <input type="text" id="fxTitulo" required>
+            </div>
+            <div class="campo">
+                <label for="fxTema">Tema</label>
+                <select id="fxTema"></select>
+            </div>
+            <div class="campo">
+                <label for="fxDesc">Pra que serve</label>
+                <input type="text" id="fxDesc" placeholder="Uma linha explicando">
+            </div>
+            <div class="botoes-modal">
+                <button type="button" class="btn btn-fantasma btn-pequeno" id="fecharModal">Cancelar</button>
+                <button type="submit" class="btn btn-pequeno">Fixar</button>
+            </div>
+            <div class="recado" id="recadoFixar"></div>
+        </form>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -458,11 +594,15 @@
         'use strict';
         const { sb, esc, urlSegura, iniciais, quando } = window.C;
 
+        const TEMAS = ['Portfólio', 'Mídia kit', 'Copy e legenda', 'Design', 'Vídeo', 'Instagram', 'Proposta pra marca', 'Geral'];
+
         let usuario = null;
         let perfil = null;
         let souAdmin = false;
         let tipoEscolhido = 'resultado';
         let arquivoPost = null;
+        let temaFiltro = 'todos';
+        let promptParaFixar = null;
         const jaCarregou = {};
 
         /* ══ Entrada: precisa estar logada E estar na lista da turma ══ */
@@ -482,9 +622,16 @@
             souAdmin = !!adm;
             if (souAdmin) document.getElementById('itemAdmin').style.display = 'flex';
 
+            montarTemas();
             await carregarPerfil();
             carregarMural();
         })();
+
+        function montarTemas() {
+            const opcoes = TEMAS.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+            document.getElementById('prTema').innerHTML = opcoes;
+            document.getElementById('fxTema').innerHTML = opcoes;
+        }
 
         async function carregarPerfil() {
             const { data } = await sb.from('imersao_perfis').select('*').eq('usuario_id', usuario.id).maybeSingle();
@@ -516,6 +663,7 @@
         /* ══ Navegação ══ */
         const carregadores = {
             mural: carregarMural,
+            prompts: carregarPrompts,
             materiais: carregarMateriais,
             avisos: carregarAvisos,
             galeria: carregarGaleria,
@@ -663,6 +811,7 @@
             const avatar = p.autor_avatar
                 ? `<img src="${esc(p.autor_avatar)}" alt="">`
                 : esc(iniciais(p.autor_nome));
+            const nComents = p.comentarios.length;
 
             return `
             <article class="post" data-post="${p.id}">
@@ -681,16 +830,19 @@
                 ${p.imagem_url ? `<img class="foto-post" src="${esc(p.imagem_url)}" alt="Imagem publicada por ${esc(p.autor_nome)}" loading="lazy">` : ''}
                 ${p.prompt ? `
                     <div class="caixa-prompt">
-                        <button class="copiar" data-copiar="${p.id}">Copiar</button>
+                        <div class="ferramentas-prompt">
+                            ${souAdmin ? `<button class="mini" data-fixar="${p.id}">Fixar na biblioteca</button>` : ''}
+                            <button class="mini" data-copiar="${p.id}">Copiar</button>
+                        </div>
                         <pre id="prompt-${p.id}">${esc(p.prompt)}</pre>
                     </div>` : ''}
 
                 <footer class="acoes">
                     <button class="acao ${p.eu_curti ? 'curtido' : ''}" data-curtir="${p.id}">
-                        <span class="coracao">${p.eu_curti ? '❤️' : '🤍'}</span>
+                        <span class="coracao">${p.eu_curti ? '♥' : '♡'}</span>
                         <span data-contagem="${p.id}">${p.n_curtidas || 0}</span>
                     </button>
-                    <button class="acao" data-comentar="${p.id}">💬 ${p.comentarios.length ? p.comentarios.length + (p.comentarios.length > 1 ? ' comentários' : ' comentário') : 'Comentar'}</button>
+                    <button class="acao" data-comentar="${p.id}">${nComents ? nComents + (nComents > 1 ? ' comentários' : ' comentário') : 'Comentar'}</button>
                     ${(p.sou_autor || souAdmin) ? `<button class="acao apagar" data-apagar="${p.id}">Apagar</button>` : ''}
                 </footer>
 
@@ -698,7 +850,7 @@
                     ${p.comentarios.map(desenharComentario).join('')}
                     <form class="escrever" data-form-coment="${p.id}">
                         <input type="text" placeholder="Escreva um comentário" maxlength="2000" required>
-                        <button type="submit" class="btn">Enviar</button>
+                        <button type="submit" class="btn btn-pequeno">Enviar</button>
                     </form>
                 </div>
             </article>`;
@@ -722,16 +874,16 @@
             const comentar = ev.target.closest('[data-comentar]');
             const copiar = ev.target.closest('[data-copiar]');
             const apagar = ev.target.closest('[data-apagar]');
+            const fixar = ev.target.closest('[data-fixar]');
 
             if (curtir) {
                 const id = Number(curtir.dataset.curtir);
                 const estavaCurtido = curtir.classList.contains('curtido');
                 const contagem = curtir.querySelector(`[data-contagem="${id}"]`);
-                const agora = Math.max(0, Number(contagem.textContent) + (estavaCurtido ? -1 : 1));
 
                 curtir.classList.toggle('curtido');
-                curtir.querySelector('.coracao').textContent = estavaCurtido ? '🤍' : '❤️';
-                contagem.textContent = agora;
+                curtir.querySelector('.coracao').textContent = estavaCurtido ? '♡' : '♥';
+                contagem.textContent = Math.max(0, Number(contagem.textContent) + (estavaCurtido ? -1 : 1));
 
                 const { error } = estavaCurtido
                     ? await sb.from('imersao_curtidas').delete().eq('post_id', id).eq('usuario_id', usuario.id)
@@ -739,7 +891,7 @@
 
                 if (error) {
                     curtir.classList.toggle('curtido');
-                    curtir.querySelector('.coracao').textContent = estavaCurtido ? '❤️' : '🤍';
+                    curtir.querySelector('.coracao').textContent = estavaCurtido ? '♥' : '♡';
                     contagem.textContent = Number(contagem.textContent) + (estavaCurtido ? 1 : -1);
                 }
                 return;
@@ -759,6 +911,22 @@
                     copiar.textContent = 'Copiado';
                     setTimeout(() => { copiar.textContent = 'Copiar'; }, 1600);
                 } catch (e) { /* navegador sem permissão de área de transferência */ }
+                return;
+            }
+
+            if (fixar) {
+                const id = Number(fixar.dataset.fixar);
+                const post = document.querySelector(`[data-post="${id}"]`);
+                promptParaFixar = {
+                    post_id: id,
+                    prompt: document.getElementById('prompt-' + id).textContent,
+                    autor_nome: post.querySelector('.quem b').textContent
+                };
+                document.getElementById('fxTitulo').value = '';
+                document.getElementById('fxDesc').value = '';
+                recado('recadoFixar', '');
+                document.getElementById('veuModal').classList.add('show');
+                document.getElementById('fxTitulo').focus();
                 return;
             }
 
@@ -800,6 +968,127 @@
             form.parentElement.insertBefore(novo.firstElementChild, form);
         });
 
+        /* ══ Modal: fixar prompt na biblioteca ══ */
+        document.getElementById('fecharModal').addEventListener('click', () => {
+            document.getElementById('veuModal').classList.remove('show');
+            promptParaFixar = null;
+        });
+        document.getElementById('veuModal').addEventListener('click', (ev) => {
+            if (ev.target.id === 'veuModal') {
+                document.getElementById('veuModal').classList.remove('show');
+                promptParaFixar = null;
+            }
+        });
+
+        document.getElementById('formFixar').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            if (!promptParaFixar) return;
+
+            const { error } = await sb.from('imersao_prompts').insert({
+                titulo: document.getElementById('fxTitulo').value.trim(),
+                tema: document.getElementById('fxTema').value,
+                descricao: document.getElementById('fxDesc').value.trim() || null,
+                prompt: promptParaFixar.prompt,
+                autor_nome: promptParaFixar.autor_nome,
+                post_id: promptParaFixar.post_id
+            });
+
+            if (error) return recado('recadoFixar', 'Não consegui fixar agora.');
+
+            document.getElementById('veuModal').classList.remove('show');
+            promptParaFixar = null;
+            jaCarregou.prompts = false;
+            recado('recadoMural', 'Prompt fixado na biblioteca.', 'ok');
+        });
+
+        /* ══ Biblioteca de prompts ══ */
+        let prompts = [];
+
+        async function carregarPrompts() {
+            const alvo = document.getElementById('listaPrompts');
+            const { data, error } = await sb.from('imersao_prompts')
+                .select('*').eq('publicado', true)
+                .order('destaque', { ascending: false })
+                .order('created_at', { ascending: false });
+
+            if (error) { alvo.innerHTML = '<p class="vazio">Não consegui carregar agora.</p>'; return; }
+            prompts = data || [];
+
+            if (!prompts.length) {
+                document.getElementById('filtrosPrompts').innerHTML = '';
+                alvo.innerHTML = '<p class="vazio"><strong>A biblioteca está começando</strong>Os prompts que funcionarem no mural vão parar aqui, organizados por tema.</p>';
+                return;
+            }
+
+            const temas = [...new Set(prompts.map(p => p.tema))];
+            document.getElementById('filtrosPrompts').innerHTML = [
+                `<button class="chip ${temaFiltro === 'todos' ? 'on' : ''}" data-tema="todos">Todos</button>`,
+                ...temas.map(t => `<button class="chip ${temaFiltro === t ? 'on' : ''}" data-tema="${esc(t)}">${esc(t)}</button>`)
+            ].join('');
+
+            pintarPrompts();
+        }
+
+        function pintarPrompts() {
+            const alvo = document.getElementById('listaPrompts');
+            const lista = temaFiltro === 'todos' ? prompts : prompts.filter(p => p.tema === temaFiltro);
+
+            if (!lista.length) {
+                alvo.innerHTML = '<p class="vazio">Nenhum prompt nesse tema ainda.</p>';
+                return;
+            }
+
+            alvo.innerHTML = lista.map(p => `
+                <article class="cartao-prompt ${p.destaque ? 'destaque' : ''}">
+                    <div class="topo-cartao">
+                        <h3>${esc(p.titulo)}</h3>
+                        <span class="tema">${esc(p.tema)}</span>
+                    </div>
+                    ${p.descricao ? `<p class="conta">${esc(p.descricao)}</p>` : ''}
+                    ${p.autor_nome ? `<p class="credito">Compartilhado por ${esc(p.autor_nome)}</p>` : ''}
+                    <div class="caixa-prompt">
+                        <div class="ferramentas-prompt">
+                            ${souAdmin ? `<button class="mini" data-apagar-prompt="${p.id}">Remover</button>` : ''}
+                            <button class="mini" data-copiar-prompt="${p.id}">Copiar</button>
+                        </div>
+                        <pre id="pb-${p.id}">${esc(p.prompt)}</pre>
+                    </div>
+                </article>`).join('');
+        }
+
+        document.getElementById('filtrosPrompts').addEventListener('click', (ev) => {
+            const chip = ev.target.closest('[data-tema]');
+            if (!chip) return;
+            temaFiltro = chip.dataset.tema;
+            document.querySelectorAll('#filtrosPrompts .chip').forEach(c => c.classList.remove('on'));
+            chip.classList.add('on');
+            pintarPrompts();
+        });
+
+        document.getElementById('listaPrompts').addEventListener('click', async (ev) => {
+            const copiar = ev.target.closest('[data-copiar-prompt]');
+            const apagar = ev.target.closest('[data-apagar-prompt]');
+
+            if (copiar) {
+                const pre = document.getElementById('pb-' + copiar.dataset.copiarPrompt);
+                try {
+                    await navigator.clipboard.writeText(pre.textContent);
+                    copiar.textContent = 'Copiado';
+                    setTimeout(() => { copiar.textContent = 'Copiar'; }, 1600);
+                } catch (e) { /* sem permissão */ }
+                return;
+            }
+
+            if (apagar) {
+                if (!confirm('Remover esse prompt da biblioteca?')) return;
+                const id = Number(apagar.dataset.apagarPrompt);
+                const { error } = await sb.from('imersao_prompts').delete().eq('id', id);
+                if (error) return;
+                prompts = prompts.filter(p => p.id !== id);
+                pintarPrompts();
+            }
+        });
+
         /* ══ Materiais ══ */
         async function carregarMateriais() {
             const alvo = document.getElementById('listaMateriais');
@@ -813,7 +1102,7 @@
                 const url = urlSegura(m.url);
                 if (!url) return '';
                 return `
-                <a class="material" href="${esc(url)}" target="_blank" rel="noopener noreferrer">
+                <a class="material" href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="border-bottom:1px solid var(--fio)">
                     <span class="emoji">${esc(m.emoji)}</span>
                     <div>
                         <h3>${esc(m.titulo)}</h3>
@@ -837,7 +1126,7 @@
 
             alvo.innerHTML = data.map(a => `
                 <article class="aviso ${a.fixado ? 'fixado' : ''}">
-                    ${a.fixado ? '<span class="pin">📌 Fixado</span>' : ''}
+                    ${a.fixado ? '<span class="pin">Fixado</span>' : ''}
                     <h3>${esc(a.titulo)}</h3>
                     <span class="data">${esc(quando(a.created_at))}</span>
                     <div class="texto">${esc(a.corpo)}</div>
@@ -864,8 +1153,8 @@
                     <div class="avatar">${avatar}</div>
                     <b>${esc(p.nome)}</b>
                     ${p.instagram ? `<span class="arroba">${esc(p.instagram)}</span>` : ''}
-                    ${p.bio ? `<p class="bio">${esc(p.bio)}</p>` : '<p class="bio"></p>'}
-                    ${url ? `<a class="btn btn-pequeno" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Ver portfólio</a>` : ''}
+                    <p class="bio">${p.bio ? esc(p.bio) : ''}</p>
+                    ${url ? `<a class="btn btn-pequeno" href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="border:none">Ver portfólio</a>` : ''}
                 </article>`;
             }).join('');
         }
@@ -948,6 +1237,21 @@
             document.getElementById('mtEmoji').value = '📄';
             jaCarregou.materiais = false;
             recado('recadoMaterial', 'Material adicionado.', 'ok');
+        });
+
+        document.getElementById('formPrompt').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const { error } = await sb.from('imersao_prompts').insert({
+                titulo: document.getElementById('prTitulo').value.trim(),
+                tema: document.getElementById('prTema').value,
+                descricao: document.getElementById('prDesc').value.trim() || null,
+                prompt: document.getElementById('prTexto').value.trim()
+            });
+            if (error) return recado('recadoPrompt', 'Não consegui adicionar o prompt.');
+            document.getElementById('formPrompt').reset();
+            montarTemas();
+            jaCarregou.prompts = false;
+            recado('recadoPrompt', 'Prompt adicionado na biblioteca.', 'ok');
         });
     })();
     </script>
