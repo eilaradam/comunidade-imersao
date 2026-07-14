@@ -291,6 +291,28 @@
         .aviso .texto { font-size: 15px; white-space: pre-wrap; }
         .pin { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #F0D496; }
 
+        /* ── Publicar o próprio portfólio (fica no topo da galeria) ── */
+        .meu-portfolio {
+            background: var(--vidro);
+            border: 1px solid var(--fio);
+            border-radius: var(--raio);
+            backdrop-filter: blur(14px);
+            padding: 20px 22px;
+            margin-bottom: 26px;
+        }
+        .dizeres-portfolio { margin-bottom: 14px; }
+        .dizeres-portfolio b {
+            display: block;
+            font-family: 'Fraunces', serif;
+            font-weight: 400;
+            font-size: 18px;
+            color: var(--claro);
+            margin-bottom: 2px;
+        }
+        .dizeres-portfolio span { font-size: 13.5px; color: var(--fumaca); }
+        .linha-portfolio { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .linha-portfolio input { flex: 1; min-width: 220px; }
+
         .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
         .vitrine {
             background: var(--vidro); border: 1px solid var(--fio);
@@ -450,7 +472,21 @@
                 <!-- GALERIA -->
                 <section class="tela larga" id="telaGaleria">
                     <h1 class="titulo-tela">Portfólios da turma</h1>
-                    <p class="sub-tela">Os sites que saíram da imersão. Pra aparecer aqui, coloque o link do seu em "Meu perfil".</p>
+                    <p class="sub-tela">Os sites que saíram da imersão.</p>
+
+                    <form class="meu-portfolio" id="formPortfolio">
+                        <div class="dizeres-portfolio">
+                            <b id="tituloPortfolio">Publique o seu</b>
+                            <span id="subPortfolio">Cole o link do site que você colocou no ar e ele entra na galeria.</span>
+                        </div>
+                        <div class="linha-portfolio">
+                            <input type="url" id="meuPortfolio" placeholder="https://seusite.com">
+                            <button type="submit" class="btn btn-pequeno" id="btnPortfolio">Publicar</button>
+                            <button type="button" class="btn btn-fantasma btn-pequeno" id="btnTirarPortfolio" style="display:none">Tirar da galeria</button>
+                        </div>
+                        <div class="recado" id="recadoPortfolio"></div>
+                    </form>
+
                     <div class="grade" id="listaGaleria"><p class="vazio">Carregando...</p></div>
                 </section>
 
@@ -474,10 +510,6 @@
                         <div class="campo">
                             <label for="pfInsta">Instagram</label>
                             <input type="text" id="pfInsta" placeholder="@seuarroba">
-                        </div>
-                        <div class="campo">
-                            <label for="pfPortfolio">Link do seu portfólio</label>
-                            <input type="url" id="pfPortfolio" placeholder="https://seusite.com">
                         </div>
                         <div class="campo">
                             <label for="pfBio">Uma linha sobre você</label>
@@ -656,8 +688,22 @@
             });
             document.getElementById('pfNome').value = nome;
             document.getElementById('pfInsta').value = perfil?.instagram || '';
-            document.getElementById('pfPortfolio').value = perfil?.portfolio_url || '';
             document.getElementById('pfBio').value = perfil?.bio || '';
+            pintarMeuPortfolio();
+        }
+
+        /* A caixa "publique o seu" muda de cara depois que a aluna já publicou. */
+        function pintarMeuPortfolio() {
+            const link = perfil?.portfolio_url || '';
+            const jaTem = !!link;
+
+            document.getElementById('meuPortfolio').value = link;
+            document.getElementById('btnPortfolio').textContent = jaTem ? 'Atualizar' : 'Publicar';
+            document.getElementById('btnTirarPortfolio').style.display = jaTem ? 'inline-flex' : 'none';
+            document.getElementById('tituloPortfolio').textContent = jaTem ? 'Seu portfólio está na galeria' : 'Publique o seu';
+            document.getElementById('subPortfolio').textContent = jaTem
+                ? 'Trocou de link ou mudou o site? É só atualizar aqui.'
+                : 'Cole o link do site que você colocou no ar e ele entra na galeria.';
         }
 
         /* ══ Navegação ══ */
@@ -1190,7 +1236,6 @@
             const { error } = await sb.from('imersao_perfis').update({
                 nome,
                 instagram: insta || null,
-                portfolio_url: urlSegura(document.getElementById('pfPortfolio').value.trim()) || null,
                 bio: document.getElementById('pfBio').value.trim() || null
             }).eq('usuario_id', usuario.id);
             btn.disabled = false;
@@ -1199,11 +1244,45 @@
 
             perfil.nome = nome;
             perfil.instagram = insta || null;
-            perfil.portfolio_url = document.getElementById('pfPortfolio').value.trim() || null;
             perfil.bio = document.getElementById('pfBio').value.trim() || null;
             pintarPerfil();
             jaCarregou.galeria = false;
             recado('recadoPerfil', 'Perfil salvo.', 'ok');
+        });
+
+        /* ══ Publicar o próprio portfólio (na aba Portfólios) ══ */
+        document.getElementById('formPortfolio').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const btn = document.getElementById('btnPortfolio');
+            const link = urlSegura(document.getElementById('meuPortfolio').value.trim());
+
+            if (!link) return recado('recadoPortfolio', 'Cole um link que comece com https://');
+
+            btn.disabled = true;
+            const { error } = await sb.from('imersao_perfis')
+                .update({ portfolio_url: link }).eq('usuario_id', usuario.id);
+            btn.disabled = false;
+
+            if (error) return recado('recadoPortfolio', 'Não consegui publicar agora.');
+
+            perfil.portfolio_url = link;
+            pintarMeuPortfolio();
+            recado('recadoPortfolio', 'Pronto, seu portfólio está na galeria.', 'ok');
+            carregarGaleria();
+        });
+
+        document.getElementById('btnTirarPortfolio').addEventListener('click', async () => {
+            if (!confirm('Tirar seu portfólio da galeria?')) return;
+
+            const { error } = await sb.from('imersao_perfis')
+                .update({ portfolio_url: null }).eq('usuario_id', usuario.id);
+            if (error) return recado('recadoPortfolio', 'Não consegui tirar agora.');
+
+            perfil.portfolio_url = null;
+            document.getElementById('meuPortfolio').value = '';
+            pintarMeuPortfolio();
+            recado('recadoPortfolio', 'Seu portfólio saiu da galeria.', 'ok');
+            carregarGaleria();
         });
 
         /* ══ Admin ══ */
