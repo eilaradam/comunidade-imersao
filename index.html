@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="stylesheet" href="css/style.css?v=4">
     <style>
         body {
             min-height: 100vh;
@@ -22,14 +22,14 @@
             position: relative;
             flex: 1;
             min-height: calc(100vh - 28px);
-            border-radius: 32px;
+            border-radius: 34px;
             overflow: hidden;
             background:
-                radial-gradient(120% 90% at 72% 8%, #FBF7F2 0%, var(--areia-clara) 42%, var(--areia) 100%);
+                radial-gradient(120% 90% at 72% 8%, var(--areia-clara) 0%, var(--areia) 46%, var(--areia-escura) 100%);
             display: flex;
             flex-direction: column;
             padding: 24px clamp(20px, 3.6vw, 52px) 30px;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), var(--sombra-alta);
+            box-shadow: -10px -10px 26px var(--luz), 12px 12px 30px var(--sombra-cinza-forte);
         }
 
         .cena { position: absolute; inset: 0; pointer-events: none; }
@@ -40,7 +40,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(100deg, rgba(247, 242, 236, .92) 0%, rgba(247, 242, 236, .55) 34%, transparent 62%);
+            background: linear-gradient(100deg, rgba(228, 233, 240, .94) 0%, rgba(228, 233, 240, .58) 34%, transparent 62%);
             pointer-events: none;
         }
 
@@ -67,13 +67,11 @@
             letter-spacing: .16em;
             text-transform: uppercase;
             color: var(--tinta-media);
-            background: var(--vidro-forte);
-            border: 1px solid var(--fio);
-            backdrop-filter: blur(20px) saturate(120%);
-            -webkit-backdrop-filter: blur(20px) saturate(120%);
+            background: var(--nuvem);
+            border: none;
             border-radius: 999px;
             padding: 11px 20px;
-            box-shadow: var(--sombra);
+            box-shadow: var(--relevo-suave);
         }
         .pilula .traco { display: grid; gap: 3px; }
         .pilula .traco i { display: block; width: 13px; height: 1px; background: var(--tinta-media); }
@@ -134,18 +132,15 @@
         .linha-campo {
             display: flex;
             gap: 6px;
-            background: var(--vidro-forte);
-            border: 1px solid var(--fio);
-            backdrop-filter: blur(20px) saturate(120%);
-            -webkit-backdrop-filter: blur(20px) saturate(120%);
+            background: var(--areia);
+            border: none;
             border-radius: 999px;
-            padding: 7px 7px 7px 12px;
-            box-shadow: var(--sombra);
-            transition: border-color var(--transicao), box-shadow var(--transicao);
+            padding: 7px 7px 7px 14px;
+            box-shadow: var(--afundado);
+            transition: box-shadow var(--transicao);
         }
         .linha-campo:focus-within {
-            border-color: var(--champanhe);
-            box-shadow: 0 0 0 4px rgba(217, 185, 138, .22), var(--sombra);
+            box-shadow: var(--afundado-forte), 0 0 0 3px rgba(217, 185, 138, .3);
         }
         .linha-campo input {
             flex: 1;
@@ -177,12 +172,13 @@
             display: inline-block;
             font-size: 12.5px;
             color: var(--tinta-media);
-            background: var(--vidro-fraco);
-            border: 1px solid var(--fio);
+            background: var(--areia);
+            border: none;
             border-radius: 999px;
-            padding: 7px 15px;
+            padding: 8px 16px;
             margin-bottom: 15px;
             word-break: break-all;
+            box-shadow: var(--afundado);
         }
         .abaixo { display: flex; gap: 18px; margin-top: 16px; }
         .abaixo button {
@@ -197,7 +193,7 @@
             .folha { border-radius: 24px; padding: 18px 20px 26px; min-height: calc(100vh - 16px); }
             .assinatura { display: none; }
             .folha::after {
-                background: linear-gradient(to top, rgba(247, 242, 236, .96) 30%, rgba(247, 242, 236, .5) 55%, transparent 78%);
+                background: linear-gradient(to top, rgba(228, 233, 240, .96) 30%, rgba(228, 233, 240, .5) 55%, transparent 78%);
             }
             .heroi { max-width: none; justify-content: flex-end; padding-bottom: 12px; }
             .heroi h1 { font-size: clamp(32px, 8.6vw, 46px); }
@@ -275,8 +271,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/sb.js?v=3"></script>
-    <script src="js/cerebro.js?v=3"></script>
+    <script src="js/sb.js?v=4"></script>
+    <script src="js/cerebro.js?v=4"></script>
     <script>
     (function () {
         'use strict';

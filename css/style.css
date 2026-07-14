@@ -1,30 +1,47 @@
 /* ── Comunidade Imersão · vidro claro sobre areia (creme, pêssego e champanhe) ── */
 :root {
-    --areia: #EFE7DF;
-    --areia-clara: #F7F2EC;
-    --areia-escura: #E3D9CF;
-    --nuvem: #FFFFFF;
+    /* ── Neumorphism: a superfície é toda da mesma cor; o relevo vem só das sombras ── */
+    --areia: #E4E9F0;          /* base da plataforma */
+    --areia-clara: #EDF1F7;
+    --areia-escura: #DBE1EA;   /* fundo da página, um tom abaixo */
+    --nuvem: #E9EDF3;          /* cartões: quase igual à base, é o que dá o efeito emborrachado */
 
-    --vidro: rgba(255, 255, 255, .62);
-    --vidro-forte: rgba(255, 255, 255, .82);
-    --vidro-fraco: rgba(255, 255, 255, .40);
-    --fio: rgba(255, 255, 255, .9);
-    --fio-tinta: rgba(58, 50, 42, .14);
-    --fio-tinta-forte: rgba(58, 50, 42, .24);
+    /* As duas luzes do relevo: branca em cima/esquerda, azul-acinzentada embaixo/direita */
+    --luz: rgba(255, 255, 255, .95);
+    --sombra-cinza: rgba(163, 177, 198, .55);
+    --sombra-cinza-forte: rgba(163, 177, 198, .8);
 
-    --tinta: #241F1A;
-    --tinta-media: #574C42;
-    --tinta-fraca: #837568;
+    /* Compatibilidade: superfícies antigas de "vidro" agora são a própria base cinza */
+    --vidro: #E9EDF3;
+    --vidro-forte: #ECF0F6;
+    --vidro-fraco: #E4E9F0;
+    --fio: rgba(255, 255, 255, .65);
+    --fio-tinta: rgba(120, 132, 156, .22);
+    --fio-tinta-forte: rgba(120, 132, 156, .38);
 
+    --tinta: #2C313B;
+    --tinta-media: #59616F;
+    --tinta-fraca: #8A93A3;
+
+    /* Único respiro de cor, nos destaques */
     --pessego: #E3B195;
     --champanhe: #D9B98A;
     --champanhe-claro: #EFDCC0;
     --terracota: #C08457;
     --verde: #6E9078;
 
-    --raio: 20px;
-    --sombra: 0 2px 6px rgba(58, 50, 42, .04), 0 18px 40px rgba(58, 50, 42, .07);
-    --sombra-alta: 0 4px 10px rgba(58, 50, 42, .05), 0 30px 60px rgba(58, 50, 42, .10);
+    --raio: 22px;
+
+    /* ── Vocabulário de relevo do neumorphism ── */
+    --relevo: -6px -6px 14px var(--luz), 7px 7px 18px var(--sombra-cinza);
+    --relevo-suave: -3px -3px 8px var(--luz), 4px 4px 11px var(--sombra-cinza);
+    --relevo-forte: -8px -8px 20px var(--luz), 10px 10px 26px var(--sombra-cinza-forte);
+    --afundado: inset 3px 3px 7px var(--sombra-cinza), inset -3px -3px 7px var(--luz);
+    --afundado-forte: inset 5px 5px 11px var(--sombra-cinza-forte), inset -5px -5px 11px var(--luz);
+
+    /* Sombras antigas repontadas pro relevo, pra tudo herdar o novo visual */
+    --sombra: var(--relevo-suave);
+    --sombra-alta: var(--relevo);
     --transicao: 220ms cubic-bezier(.2, .7, .3, 1);
 }
 
@@ -55,19 +72,18 @@ input, textarea, select {
     font-family: inherit;
     font-size: 15px;
     color: var(--tinta);
-    background: var(--vidro-forte);
-    border: 1px solid var(--fio);
+    background: var(--areia);
+    border: none;
     border-radius: 14px;
-    padding: 13px 16px;
+    padding: 14px 18px;
     width: 100%;
-    box-shadow: inset 0 1px 2px rgba(255, 255, 255, .9), 0 1px 3px rgba(58, 50, 42, .04);
-    transition: border-color var(--transicao), box-shadow var(--transicao), background var(--transicao);
+    box-shadow: var(--afundado);
+    transition: box-shadow var(--transicao), background var(--transicao);
 }
 input:focus, textarea:focus, select:focus {
     outline: none;
-    background: var(--nuvem);
-    border-color: var(--champanhe);
-    box-shadow: 0 0 0 4px rgba(217, 185, 138, .22);
+    background: var(--areia);
+    box-shadow: var(--afundado-forte), 0 0 0 3px rgba(217, 185, 138, .28);
 }
 input::placeholder, textarea::placeholder { color: var(--tinta-fraca); }
 
@@ -87,39 +103,38 @@ label {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: linear-gradient(180deg, var(--champanhe-claro), var(--champanhe));
-    color: #3A322A;
+    background: linear-gradient(145deg, var(--champanhe-claro), var(--champanhe));
+    color: #6A5233;
     font-size: 12.5px;
     font-weight: 600;
     letter-spacing: .08em;
     text-transform: uppercase;
-    padding: 13px 24px;
+    padding: 14px 26px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, .7);
-    box-shadow: 0 2px 4px rgba(58, 50, 42, .06), 0 10px 24px rgba(201, 166, 107, .28);
+    border: none;
+    box-shadow: -5px -5px 12px var(--luz), 6px 6px 15px var(--sombra-cinza);
     transition: transform var(--transicao), box-shadow var(--transicao), filter var(--transicao);
 }
-.btn:hover { transform: translateY(-1px); filter: brightness(1.04); box-shadow: 0 4px 8px rgba(58, 50, 42, .07), 0 16px 34px rgba(201, 166, 107, .34); }
-.btn:active { transform: none; }
+.btn:hover { transform: translateY(-1px); filter: brightness(1.03); box-shadow: -6px -6px 15px var(--luz), 8px 8px 20px var(--sombra-cinza-forte); }
+.btn:active { transform: none; box-shadow: inset 3px 3px 7px rgba(150, 120, 70, .35), inset -3px -3px 7px rgba(255, 255, 255, .5); }
 .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 .btn-bloco { width: 100%; }
-.btn-pequeno { font-size: 11px; padding: 10px 18px; }
+.btn-pequeno { font-size: 11px; padding: 11px 20px; }
 .btn-fantasma {
-    background: var(--vidro-forte);
+    background: var(--nuvem);
     color: var(--tinta-media);
-    border: 1px solid var(--fio-tinta);
-    box-shadow: none;
+    border: none;
+    box-shadow: var(--relevo-suave);
 }
-.btn-fantasma:hover { background: var(--nuvem); color: var(--tinta); box-shadow: var(--sombra); }
+.btn-fantasma:hover { color: var(--tinta); box-shadow: var(--relevo); }
+.btn-fantasma:active { box-shadow: var(--afundado); }
 
 /* ── Superfície de vidro ── */
 .vidro {
-    background: var(--vidro);
-    border: 1px solid var(--fio);
+    background: var(--nuvem);
+    border: none;
     border-radius: var(--raio);
-    backdrop-filter: blur(24px) saturate(120%);
-    -webkit-backdrop-filter: blur(24px) saturate(120%);
-    box-shadow: var(--sombra);
+    box-shadow: var(--relevo);
 }
 
 /* ── Recados ── */
@@ -140,7 +155,7 @@ label {
     height: 42px;
     border-radius: 50%;
     background: linear-gradient(160deg, var(--champanhe-claro), var(--pessego));
-    border: 1px solid rgba(255, 255, 255, .9);
+    border: none;
     color: #6A5340;
     font-weight: 600;
     font-size: 13px;
@@ -149,7 +164,7 @@ label {
     justify-content: center;
     flex-shrink: 0;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(58, 50, 42, .08);
+    box-shadow: var(--relevo-suave);
 }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 

@@ -8,11 +8,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="stylesheet" href="css/style.css?v=4">
     <style>
         body {
             background:
-                radial-gradient(110% 80% at 78% 0%, #FBF7F2 0%, var(--areia-clara) 45%, var(--areia) 100%);
+                radial-gradient(110% 80% at 78% 0%, var(--areia-clara) 0%, var(--areia) 48%, var(--areia-escura) 100%);
             background-attachment: fixed;
             min-height: 100vh;
         }
@@ -24,7 +24,7 @@
             inset: 0;
             z-index: 0;
             pointer-events: none;
-            opacity: .32;
+            opacity: .4;
         }
         .cena canvas { width: 100%; height: 100%; display: block; }
 
@@ -39,12 +39,10 @@
         /* ── Menu lateral ── */
         .lateral {
             margin: 14px 0 14px 14px;
-            border: 1px solid var(--fio);
-            border-radius: 26px;
-            background: var(--vidro);
-            backdrop-filter: blur(26px) saturate(125%);
-            -webkit-backdrop-filter: blur(26px) saturate(125%);
-            box-shadow: var(--sombra);
+            border: none;
+            border-radius: 28px;
+            background: var(--nuvem);
+            box-shadow: var(--relevo);
             padding: 26px 16px;
             display: flex;
             flex-direction: column;
@@ -82,13 +80,14 @@
             border: 1px solid transparent;
             transition: background var(--transicao), color var(--transicao), border-color var(--transicao), box-shadow var(--transicao);
         }
-        .item:hover { background: var(--vidro-fraco); color: var(--tinta); }
+        .item:hover { color: var(--tinta); box-shadow: var(--relevo-suave); }
         .item.ativo {
-            background: var(--vidro-forte);
-            border-color: var(--fio);
+            background: var(--areia);
+            border-color: transparent;
             color: var(--tinta);
-            box-shadow: 0 2px 6px rgba(58, 50, 42, .06);
+            box-shadow: var(--afundado);
         }
+        .item.ativo:hover { box-shadow: var(--afundado); }
         .item .ico { font-size: 15px; width: 18px; text-align: center; color: var(--terracota); }
 
         .rodape-lateral { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--fio-tinta); }
@@ -109,12 +108,10 @@
 
         /* ── Vidro padrão dos blocos ── */
         .publicar, .post, .cartao-prompt, .material, .aviso, .vitrine, .caixa, .meu-portfolio {
-            background: var(--vidro);
-            border: 1px solid var(--fio);
+            background: var(--nuvem);
+            border: none;
             border-radius: var(--raio);
-            backdrop-filter: blur(24px) saturate(125%);
-            -webkit-backdrop-filter: blur(24px) saturate(125%);
-            box-shadow: var(--sombra);
+            box-shadow: var(--relevo);
         }
 
         /* ── Publicar ── */
@@ -138,17 +135,17 @@
             letter-spacing: .04em;
             padding: 9px 16px;
             border-radius: 999px;
-            border: 1px solid var(--fio-tinta);
-            background: var(--vidro-fraco);
+            border: none;
+            background: var(--nuvem);
             color: var(--tinta-media);
+            box-shadow: var(--relevo-suave);
             transition: all var(--transicao);
         }
-        .chip:hover { border-color: var(--champanhe); color: var(--tinta); }
+        .chip:hover { color: var(--tinta); box-shadow: var(--relevo); }
         .chip.on {
-            background: linear-gradient(180deg, var(--champanhe-claro), var(--champanhe));
-            border-color: rgba(255, 255, 255, .8);
-            color: #3A322A;
-            box-shadow: 0 6px 16px rgba(201, 166, 107, .28);
+            background: linear-gradient(145deg, var(--champanhe-claro), var(--champanhe));
+            color: #6A5233;
+            box-shadow: var(--afundado);
         }
         .extras textarea, .extras input[type="url"] { margin-bottom: 10px; font-size: 14px; }
         .extras textarea { min-height: 92px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 13px; }
@@ -203,10 +200,11 @@
         .caixa-prompt {
             position: relative;
             margin-top: 14px;
-            background: rgba(255, 255, 255, .5);
-            border: 1px solid var(--fio-tinta);
+            background: var(--areia);
+            border: none;
             border-radius: 14px;
-            padding: 14px;
+            padding: 16px;
+            box-shadow: var(--afundado);
         }
         .caixa-prompt pre {
             font-family: ui-monospace, 'SF Mono', Menlo, monospace;
@@ -214,7 +212,7 @@
             line-height: 1.65;
             white-space: pre-wrap;
             word-break: break-word;
-            color: #55493D;
+            color: var(--tinta-media);
             max-height: 260px;
             overflow: auto;
             padding-top: 26px;
@@ -226,11 +224,13 @@
             font-weight: 500;
             padding: 6px 12px;
             border-radius: 9px;
-            border: 1px solid var(--fio-tinta);
+            border: none;
             color: var(--tinta-media);
-            background: var(--vidro-forte);
+            background: var(--nuvem);
+            box-shadow: var(--relevo-suave);
         }
-        .mini:hover { color: var(--terracota); border-color: var(--champanhe); }
+        .mini:hover { color: var(--terracota); box-shadow: var(--relevo); }
+        .mini:active { box-shadow: var(--afundado); }
 
         .acoes {
             display: flex; align-items: center; gap: 4px;
@@ -243,7 +243,7 @@
             padding: 9px 13px; border-radius: 11px;
             transition: background var(--transicao), color var(--transicao);
         }
-        .acao:hover { background: var(--vidro-forte); color: var(--tinta); }
+        .acao:hover { color: var(--tinta); box-shadow: var(--relevo-suave); }
         .acao.curtido { color: var(--terracota); }
         .acao.curtido .coracao { animation: pop 340ms ease; }
         @keyframes pop { 0% { transform: scale(1); } 45% { transform: scale(1.35); } 100% { transform: scale(1); } }
@@ -255,7 +255,7 @@
         .comentarios.show { display: block; }
         .coment { display: flex; gap: 10px; margin-bottom: 12px; }
         .coment .avatar { width: 32px; height: 32px; font-size: 11px; }
-        .balao { background: rgba(255, 255, 255, .55); border: 1px solid var(--fio); border-radius: 14px; padding: 10px 15px; flex: 1; }
+        .balao { background: var(--areia); border: none; border-radius: 14px; padding: 11px 16px; flex: 1; box-shadow: var(--afundado); }
         .balao b { font-size: 13.5px; font-weight: 600; color: var(--tinta); }
         .balao time { font-size: 11px; color: var(--tinta-fraca); margin-left: 7px; }
         .balao p { font-size: 14px; margin-top: 3px; white-space: pre-wrap; word-wrap: break-word; }
@@ -282,7 +282,7 @@
             padding: 22px; margin-bottom: 12px;
             transition: transform var(--transicao), border-color var(--transicao), box-shadow var(--transicao);
         }
-        .material:hover { transform: translateY(-2px); border-color: var(--champanhe); box-shadow: var(--sombra-alta); }
+        .material:hover { transform: translateY(-2px); box-shadow: var(--relevo-forte); }
         .material .emoji { font-size: 24px; }
         .material h3 { font-size: 18px; margin-bottom: 3px; }
         .material p { font-size: 13.5px; color: var(--tinta-media); }
@@ -315,7 +315,7 @@
             padding: 26px 20px; text-align: center;
             transition: transform var(--transicao), border-color var(--transicao), box-shadow var(--transicao);
         }
-        .vitrine:hover { transform: translateY(-3px); border-color: var(--champanhe); box-shadow: var(--sombra-alta); }
+        .vitrine:hover { transform: translateY(-3px); box-shadow: var(--relevo-forte); }
         .vitrine .avatar { width: 60px; height: 60px; font-size: 18px; margin: 0 auto 14px; }
         .vitrine b { display: block; font-size: 15.5px; font-weight: 600; color: var(--tinta); }
         .vitrine .arroba { font-size: 12.5px; color: var(--tinta-fraca); }
@@ -331,7 +331,7 @@
         /* ── Modal ── */
         .veu-modal {
             position: fixed; inset: 0; z-index: 40;
-            background: rgba(226, 216, 205, .6);
+            background: rgba(200, 208, 224, .55);
             backdrop-filter: blur(10px);
             display: none;
             place-items: center;
@@ -340,12 +340,10 @@
         .veu-modal.show { display: grid; }
         .modal {
             width: 100%; max-width: 500px;
-            background: rgba(255, 255, 255, .82);
-            border: 1px solid var(--fio);
-            border-radius: 26px;
-            backdrop-filter: blur(30px) saturate(130%);
-            -webkit-backdrop-filter: blur(30px) saturate(130%);
-            box-shadow: var(--sombra-alta);
+            background: var(--nuvem);
+            border: none;
+            border-radius: 28px;
+            box-shadow: var(--relevo-forte);
             padding: 30px;
             animation: entra 260ms ease both;
         }
@@ -366,14 +364,13 @@
                 transition: transform var(--transicao);
             }
             .lateral.aberta { transform: none; }
-            .veu { position: fixed; inset: 0; background: rgba(226, 216, 205, .55); backdrop-filter: blur(6px); z-index: 20; }
+            .veu { position: fixed; inset: 0; background: rgba(200, 208, 224, .5); backdrop-filter: blur(6px); z-index: 20; }
             .veu.show { display: block; }
             .abre-menu {
                 display: flex; align-items: center; gap: 10px;
                 position: sticky; top: 0; z-index: 10;
-                background: var(--vidro-forte);
-                backdrop-filter: blur(20px);
-                border-bottom: 1px solid var(--fio);
+                background: var(--nuvem);
+                box-shadow: var(--relevo-suave);
                 padding: 16px 18px; width: 100%;
                 font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
                 color: var(--tinta-media);
@@ -618,8 +615,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/sb.js?v=3"></script>
-    <script src="js/cerebro.js?v=3"></script>
+    <script src="js/sb.js?v=4"></script>
+    <script src="js/cerebro.js?v=4"></script>
     <script>
     (function () {
         'use strict';
