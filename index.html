@@ -7,201 +7,347 @@
     <title>Entrar · Comunidade Imersão</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
         body {
+            background: #0E0D0C;
             min-height: 100vh;
-            display: grid;
-            place-items: center;
-            padding: 24px;
-            background:
-                radial-gradient(1100px 520px at 15% -10%, #FBE7DA 0%, transparent 60%),
-                radial-gradient(900px 480px at 100% 100%, #F7E6EA 0%, transparent 55%),
-                var(--creme-fundo);
+            padding: 14px;
+            display: flex;
         }
 
-        .entrada {
-            width: 100%;
-            max-width: 940px;
-            display: grid;
-            grid-template-columns: 1fr 420px;
-            gap: 64px;
+        /* ── A folha branca flutuante ── */
+        .folha {
+            flex: 1;
+            background: var(--creme);
+            border-radius: 34px;
+            padding: 22px 22px 40px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, .45);
+        }
+        .folha::before {
+            content: '';
+            position: absolute;
+            inset: -20% 40% 55% -10%;
+            background: radial-gradient(closest-side, #F7E2D3, transparent 70%);
+            opacity: .8;
+            pointer-events: none;
+        }
+
+        /* ── Barra flutuante ── */
+        .barra {
+            position: relative;
+            z-index: 2;
+            align-self: center;
+            display: flex;
             align-items: center;
-            animation: sobe 600ms cubic-bezier(.2, .7, .3, 1) both;
+            gap: 26px;
+            background: rgba(255, 255, 255, .78);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--borda);
+            border-radius: 999px;
+            padding: 9px 10px 9px 20px;
+            box-shadow: 0 6px 20px rgba(27, 27, 27, .06);
         }
-
-        @keyframes sobe {
-            from { opacity: 0; transform: translateY(14px); }
-            to { opacity: 1; transform: none; }
-        }
-
-        .marca {
-            font-size: 12px;
+        .barra .nome {
+            font-family: 'Fraunces', serif;
             font-weight: 600;
-            letter-spacing: .16em;
-            text-transform: uppercase;
-            color: var(--coral);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .barra .nome i {
+            width: 20px; height: 20px;
+            border-radius: 6px;
+            background: var(--coral);
+            display: inline-block;
+        }
+        .barra .links { display: flex; gap: 22px; font-size: 14px; color: var(--cinza); }
+        .barra .links a { color: inherit; }
+        .barra .links a:hover { color: var(--coral); text-decoration: none; }
+        .barra .chip-turma {
+            font-size: 13px; font-weight: 500;
+            background: var(--grafite); color: var(--branco);
+            padding: 8px 16px; border-radius: 999px;
+        }
+
+        /* ── Palco: texto à esquerda, cérebro à direita ── */
+        .palco {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 40px;
+            max-width: 1240px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 30px 40px 0;
+        }
+
+        .estrelas {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--cinza);
             margin-bottom: 22px;
         }
+        .estrelas b { color: var(--coral); letter-spacing: 2px; font-size: 15px; }
 
-        .apresenta h1 {
-            font-size: clamp(38px, 5vw, 56px);
-            letter-spacing: -.02em;
-            margin-bottom: 18px;
+        .lado-texto h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: clamp(34px, 4.4vw, 60px);
+            line-height: 1.04;
+            letter-spacing: -.03em;
+            margin-bottom: 20px;
         }
-        .apresenta h1 em { font-style: italic; color: var(--coral); }
-
-        .apresenta p {
-            font-size: 17px;
+        .lado-texto h1 em {
+            font-family: 'Fraunces', serif;
+            font-style: italic;
+            font-weight: 600;
+            color: var(--coral);
+        }
+        .lado-texto .conversa {
+            font-size: 16px;
             color: var(--cinza);
-            max-width: 42ch;
+            max-width: 44ch;
+            margin-bottom: 28px;
         }
+        .lado-texto .conversa strong { color: var(--grafite); font-weight: 600; }
 
-        .lista-boas {
-            list-style: none;
-            margin-top: 30px;
-            display: grid;
-            gap: 12px;
-        }
-        .lista-boas li {
+        /* ── Formulário ── */
+        .forma { max-width: 400px; }
+        .etapa { display: none; }
+        .etapa.ativa { display: block; animation: aparece 340ms cubic-bezier(.2,.7,.3,1) both; }
+        @keyframes aparece { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+        .linha-campo {
             display: flex;
-            gap: 10px;
-            align-items: baseline;
-            font-size: 15px;
-            color: var(--grafite);
-        }
-        .lista-boas span { color: var(--coral); font-weight: 600; }
-
-        .cartao {
+            gap: 8px;
             background: var(--branco);
             border: 1px solid var(--borda);
-            border-radius: 20px;
-            padding: 32px;
-            box-shadow: var(--sombra);
+            border-radius: 999px;
+            padding: 6px 6px 6px 8px;
+            box-shadow: 0 8px 24px rgba(27, 27, 27, .05);
+            transition: border-color var(--transicao), box-shadow var(--transicao);
         }
-
-        .cartao h2 { font-size: 24px; margin-bottom: 6px; }
-        .cartao .sub { font-size: 14px; color: var(--cinza); margin-bottom: 24px; }
-
-        .campo { margin-bottom: 16px; }
-
-        .voltar {
+        .linha-campo:focus-within {
+            border-color: var(--coral);
+            box-shadow: 0 0 0 4px var(--coral-suave);
+        }
+        .linha-campo input {
+            border: none;
             background: none;
-            font-size: 13px;
-            color: var(--cinza);
-            margin-top: 16px;
-            display: block;
-            width: 100%;
-            text-align: center;
+            border-radius: 999px;
+            padding: 11px 14px;
+            font-size: 15px;
         }
-        .voltar:hover { color: var(--coral); }
-
-        .esqueci {
-            font-size: 13px;
-            color: var(--cinza);
-            display: block;
-            text-align: center;
-            margin-top: 14px;
+        .linha-campo input:focus { box-shadow: none; }
+        .linha-campo .btn { flex-shrink: 0; padding: 11px 20px; font-size: 14px; }
+        .linha-campo .btn .seta {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .22);
+            display: grid; place-items: center;
+            font-size: 12px;
         }
 
-        .etapa { display: none; }
-        .etapa.ativa { display: block; animation: sobe 320ms ease both; }
-
-        .email-eco {
-            font-size: 13px;
-            color: var(--cinza);
-            background: var(--creme);
-            border: 1px solid var(--borda);
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-bottom: 20px;
+        .etapa h2 { font-family: 'Outfit', sans-serif; font-size: 21px; font-weight: 600; margin-bottom: 4px; }
+        .etapa .dizeres { font-size: 14px; color: var(--cinza); margin-bottom: 16px; }
+        .quem-e {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 13px; color: var(--cinza);
+            background: var(--branco); border: 1px solid var(--borda);
+            border-radius: 999px; padding: 6px 14px;
+            margin-bottom: 16px;
             word-break: break-all;
         }
+        .abaixo { display: flex; gap: 16px; align-items: center; margin-top: 14px; }
+        .abaixo button {
+            font-size: 13px; color: var(--cinza);
+        }
+        .abaixo button:hover { color: var(--coral); }
+        .par { display: flex; flex-direction: column; gap: 10px; }
 
-        .dica-senha { font-size: 12px; color: var(--cinza-claro); margin-top: 6px; }
+        /* ── Painel do cérebro ── */
+        .lado-cerebro {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            max-height: 62vh;
+            justify-self: center;
+            width: 100%;
+            border-radius: 28px;
+            background:
+                radial-gradient(60% 55% at 50% 45%, #2A1D17 0%, #14100E 60%, #0D0B0A 100%);
+            overflow: hidden;
+            cursor: crosshair;
+            box-shadow: inset 0 0 80px rgba(212, 87, 42, .12), 0 24px 60px rgba(27, 27, 27, .18);
+        }
+        .lado-cerebro canvas { width: 100%; height: 100%; display: block; }
+        .dica-mouse {
+            position: absolute;
+            left: 50%; bottom: 16px;
+            transform: translateX(-50%);
+            font-size: 11.5px;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: rgba(255, 236, 224, .38);
+            pointer-events: none;
+            transition: opacity var(--transicao);
+        }
+        .lado-cerebro.mexeu .dica-mouse { opacity: 0; }
+        .so-toque { display: none; }
+        @media (hover: none) {
+            .so-mouse { display: none; }
+            .so-toque { display: inline; }
+        }
 
-        @media (max-width: 860px) {
-            .entrada { grid-template-columns: 1fr; gap: 36px; max-width: 460px; }
-            .apresenta p { max-width: none; }
-            .lista-boas { display: none; }
+        /* ── Rodapé ── */
+        .rodape {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding-top: 26px;
+        }
+        .rodape p {
+            font-size: 12px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--cinza-claro);
+            margin-bottom: 14px;
+        }
+        .selos {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--cinza);
+        }
+        .selos span { display: flex; align-items: center; gap: 7px; }
+
+        @media (max-width: 940px) {
+            body { padding: 8px; }
+            .folha { border-radius: 24px; padding: 16px 16px 30px; }
+            .barra .links { display: none; }
+            .palco {
+                grid-template-columns: 1fr;
+                padding: 26px 6px 0;
+                gap: 28px;
+            }
+            .lado-cerebro { order: -1; max-height: 40vh; aspect-ratio: 4 / 3; }
+            .lado-texto .conversa { margin-bottom: 22px; }
+            .forma { max-width: none; }
+            .selos { gap: 20px; font-size: 13px; }
         }
     </style>
 </head>
 <body>
-    <main class="entrada">
-        <section class="apresenta">
-            <p class="marca">lara.dam</p>
-            <h1>A comunidade da <em>Imersão</em></h1>
-            <p>O lugar onde a turma continua junta depois da aula: mostra o que construiu, troca prompt que funcionou e tira dúvida com quem está fazendo a mesma coisa.</p>
-            <ul class="lista-boas">
-                <li><span>01</span> Mural pra postar seus resultados e prompts</li>
-                <li><span>02</span> Apostilas e materiais da imersão</li>
-                <li><span>03</span> Galeria com os portfólios da turma</li>
-            </ul>
-        </section>
+    <div class="folha">
+        <nav class="barra">
+            <span class="nome"><i></i> Comunidade</span>
+            <span class="links">
+                <a href="#" data-ir="mural">Mural</a>
+                <a href="#" data-ir="materiais">Materiais</a>
+                <a href="#" data-ir="galeria">Portfólios</a>
+            </span>
+            <span class="chip-turma">Turma 1</span>
+        </nav>
 
-        <section class="cartao">
-            <!-- Etapa 1: e-mail -->
-            <div class="etapa ativa" id="etapaEmail">
-                <h2>Entrar</h2>
-                <p class="sub">Use o mesmo e-mail que você usou pra comprar a Imersão.</p>
-                <form id="formEmail" novalidate>
-                    <div class="campo">
-                        <label for="email">Seu e-mail</label>
-                        <input type="email" id="email" autocomplete="email" placeholder="voce@email.com" required>
-                    </div>
-                    <button type="submit" class="btn btn-bloco" id="btnEmail">Continuar</button>
-                </form>
-                <div class="recado erro" id="recadoEmail"></div>
-            </div>
+        <main class="palco">
+            <section class="lado-texto">
+                <p class="estrelas"><b>★★★★★</b> Feito pelas alunas da Imersão Portfolio</p>
 
-            <!-- Etapa 2: senha (quem já tem conta) -->
-            <div class="etapa" id="etapaSenha">
-                <h2 id="oiVolta">Que bom te ver de novo</h2>
-                <p class="sub">Digite sua senha pra entrar.</p>
-                <div class="email-eco" id="ecoSenha"></div>
-                <form id="formSenha" novalidate>
-                    <div class="campo">
-                        <label for="senha">Senha</label>
-                        <input type="password" id="senha" autocomplete="current-password" placeholder="••••••" required>
-                    </div>
-                    <button type="submit" class="btn btn-bloco" id="btnSenha">Entrar</button>
-                </form>
-                <div class="recado erro" id="recadoSenha"></div>
-                <a href="#" class="esqueci" id="linkEsqueci">Esqueci minha senha</a>
-                <button class="voltar" data-voltar>Usar outro e-mail</button>
-            </div>
+                <h1>Construa junto,<br>vá mais <em>longe</em></h1>
+                <p class="conversa"><strong>Você não terminou na aula.</strong> Aqui a turma mostra o que construiu, troca o prompt que funcionou e tira dúvida com quem está fazendo a mesma coisa que você.</p>
 
-            <!-- Etapa 3: criar senha (primeiro acesso) -->
-            <div class="etapa" id="etapaCriar">
-                <h2 id="oiNova">Boas-vindas</h2>
-                <p class="sub">Esse é seu primeiro acesso. Crie uma senha pra entrar na comunidade.</p>
-                <div class="email-eco" id="ecoCriar"></div>
-                <form id="formCriar" novalidate>
-                    <div class="campo">
-                        <label for="senhaNova">Crie sua senha</label>
-                        <input type="password" id="senhaNova" autocomplete="new-password" placeholder="pelo menos 6 caracteres" required>
-                        <p class="dica-senha">Mínimo de 6 caracteres.</p>
+                <div class="forma">
+                    <!-- Etapa 1: e-mail -->
+                    <div class="etapa ativa" id="etapaEmail">
+                        <form id="formEmail" novalidate>
+                            <div class="linha-campo">
+                                <input type="email" id="email" autocomplete="email" placeholder="Seu e-mail da compra" required>
+                                <button type="submit" class="btn" id="btnEmail">Entrar <span class="seta">→</span></button>
+                            </div>
+                        </form>
+                        <div class="recado erro" id="recadoEmail"></div>
                     </div>
-                    <div class="campo">
-                        <label for="senhaConf">Repita a senha</label>
-                        <input type="password" id="senhaConf" autocomplete="new-password" placeholder="••••••" required>
+
+                    <!-- Etapa 2: senha -->
+                    <div class="etapa" id="etapaSenha">
+                        <h2 id="oiVolta">Que bom te ver de novo</h2>
+                        <p class="dizeres">Digite sua senha pra entrar.</p>
+                        <p class="quem-e" id="ecoSenha"></p>
+                        <form id="formSenha" novalidate>
+                            <div class="linha-campo">
+                                <input type="password" id="senha" autocomplete="current-password" placeholder="Sua senha" required>
+                                <button type="submit" class="btn" id="btnSenha">Entrar <span class="seta">→</span></button>
+                            </div>
+                        </form>
+                        <div class="recado erro" id="recadoSenha"></div>
+                        <div class="abaixo">
+                            <button id="linkEsqueci">Esqueci minha senha</button>
+                            <button data-voltar>Usar outro e-mail</button>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-bloco" id="btnCriar">Criar meu acesso</button>
-                </form>
-                <div class="recado erro" id="recadoCriar"></div>
-                <button class="voltar" data-voltar>Usar outro e-mail</button>
+
+                    <!-- Etapa 3: criar senha -->
+                    <div class="etapa" id="etapaCriar">
+                        <h2 id="oiNova">Boas-vindas</h2>
+                        <p class="dizeres">Primeiro acesso. Crie uma senha de pelo menos 6 caracteres.</p>
+                        <p class="quem-e" id="ecoCriar"></p>
+                        <form id="formCriar" novalidate>
+                            <div class="par">
+                                <div class="linha-campo">
+                                    <input type="password" id="senhaNova" autocomplete="new-password" placeholder="Crie sua senha" required>
+                                </div>
+                                <div class="linha-campo">
+                                    <input type="password" id="senhaConf" autocomplete="new-password" placeholder="Repita a senha" required>
+                                    <button type="submit" class="btn" id="btnCriar">Criar <span class="seta">→</span></button>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="recado erro" id="recadoCriar"></div>
+                        <div class="abaixo">
+                            <button data-voltar>Usar outro e-mail</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="lado-cerebro" id="palcoCerebro">
+                <canvas id="cerebro"></canvas>
+                <p class="dica-mouse"><span class="so-mouse">passe o cursor</span><span class="so-toque">arraste com o dedo</span></p>
+            </section>
+        </main>
+
+        <footer class="rodape">
+            <p>O que você encontra aqui dentro</p>
+            <div class="selos">
+                <span>💬 Mural da turma</span>
+                <span>📚 Materiais</span>
+                <span>📌 Avisos</span>
+                <span>✨ Portfólios</span>
             </div>
-        </section>
-    </main>
+        </footer>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/sb.js"></script>
+    <script src="js/cerebro.js"></script>
     <script>
     (function () {
         'use strict';
-        const { sb, esc } = window.C;
+        const { sb } = window.C;
 
         const etapas = {
             email: document.getElementById('etapaEmail'),
@@ -223,7 +369,7 @@
 
         function carregando(btn, ligado, textoOriginal) {
             btn.disabled = ligado;
-            btn.textContent = ligado ? 'Um instante...' : textoOriginal;
+            btn.innerHTML = ligado ? 'Um instante...' : textoOriginal;
         }
 
         /* Já logada? vai direto pra comunidade. */
@@ -236,11 +382,12 @@
         document.getElementById('formEmail').addEventListener('submit', async (ev) => {
             ev.preventDefault();
             const btn = document.getElementById('btnEmail');
+            const original = btn.innerHTML;
             const email = document.getElementById('email').value.trim().toLowerCase();
             if (!email || !email.includes('@')) return recado('recadoEmail', 'Digite um e-mail válido.');
 
             recado('recadoEmail', '');
-            carregando(btn, true, 'Continuar');
+            carregando(btn, true, original);
             try {
                 const { data, error } = await sb.functions.invoke('imersao-conta', {
                     body: { action: 'status', email }
@@ -269,7 +416,7 @@
             } catch (e) {
                 recado('recadoEmail', 'Não consegui verificar agora. Tente de novo em instantes.');
             } finally {
-                carregando(btn, false, 'Continuar');
+                carregando(btn, false, original);
             }
         });
 
@@ -277,14 +424,15 @@
         document.getElementById('formSenha').addEventListener('submit', async (ev) => {
             ev.preventDefault();
             const btn = document.getElementById('btnSenha');
+            const original = btn.innerHTML;
             const senha = document.getElementById('senha').value;
             recado('recadoSenha', '');
-            carregando(btn, true, 'Entrar');
+            carregando(btn, true, original);
             const { error } = await sb.auth.signInWithPassword({ email: emailAtual, password: senha });
-            carregando(btn, false, 'Entrar');
+            carregando(btn, false, original);
             if (error) {
                 recado('recadoSenha', error.message === 'Invalid login credentials'
-                    ? 'Senha incorreta. Tente de novo ou use "esqueci minha senha".'
+                    ? 'Senha incorreta. Tente de novo ou peça uma senha nova.'
                     : 'Não consegui entrar agora. Tente de novo.');
                 return;
             }
@@ -295,6 +443,7 @@
         document.getElementById('formCriar').addEventListener('submit', async (ev) => {
             ev.preventDefault();
             const btn = document.getElementById('btnCriar');
+            const original = btn.innerHTML;
             const senha = document.getElementById('senhaNova').value;
             const conf = document.getElementById('senhaConf').value;
 
@@ -302,7 +451,7 @@
             if (senha !== conf) return recado('recadoCriar', 'As duas senhas não são iguais.');
 
             recado('recadoCriar', '');
-            carregando(btn, true, 'Criar meu acesso');
+            carregando(btn, true, original);
             try {
                 const { data, error } = await sb.functions.invoke('imersao-conta', {
                     body: { action: 'criar', email: emailAtual, senha }
@@ -315,7 +464,7 @@
                 window.location.href = 'app.html';
             } catch (e) {
                 recado('recadoCriar', 'Não consegui criar seu acesso agora. Tente de novo em instantes.');
-                carregando(btn, false, 'Criar meu acesso');
+                carregando(btn, false, original);
             }
         });
 
@@ -325,7 +474,7 @@
             if (!emailAtual) return;
             recado('recadoSenha', '');
             const { error } = await sb.auth.resetPasswordForEmail(emailAtual, {
-                redirectTo: window.location.origin + '/nova-senha.html'
+                redirectTo: window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'nova-senha.html'
             });
             recado('recadoSenha', error
                 ? 'Não consegui enviar o e-mail agora. Tente de novo em instantes.'
@@ -339,6 +488,12 @@
             document.getElementById('formSenha').reset();
             document.getElementById('formCriar').reset();
             mostrar('email');
+            document.getElementById('email').focus();
+        }));
+
+        /* Os links da barra só chamam a atenção pro campo de e-mail. */
+        document.querySelectorAll('[data-ir]').forEach(a => a.addEventListener('click', (ev) => {
+            ev.preventDefault();
             document.getElementById('email').focus();
         }));
     })();
