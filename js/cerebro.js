@@ -21,16 +21,19 @@
     let alvoY = 0, alvoX = 0;
     let tempo = 0;
 
-    /* Vidro: branco quase puro, com um respiro frio (azulado) e outro quente,
-       do jeito que o vidro devolve a luz do ambiente. */
+    /* Sobre a areia clara, a rede é dourada: champanhe nas pontas, terracota no miolo.
+       Um branco puro sumiria no fundo, então a luz aqui é tinta, não brilho. */
     function corDoVidro(t) {
         const onda = Math.sin(t * Math.PI * 2);
         return [
-            250,
-            Math.round(251 + onda * 3),
-            Math.round(255 - onda * 8)
+            Math.round(178 + onda * 14),
+            Math.round(140 + onda * 10),
+            Math.round(96 + onda * 8)
         ];
     }
+
+    /* No fundo da plataforma a logo é só atmosfera: não muda o cursor nem se deixa arrastar. */
+    const passivo = palco.hasAttribute('data-passivo');
 
     let raioLogo = 0;
     let puxando = false;
@@ -171,32 +174,32 @@
         ligacoes = montarLigacoes(pontos, lado * 0.075);
     }
 
-    /* ── 4. A luz que atravessa a logo: um brilho leitoso, de vidro ── */
+    /* ── 4. A luz que atravessa a logo: um sopro quente de pêssego e champanhe ── */
     function feixe() {
         const raio = Math.max(L, A);
         const g = ctx.createLinearGradient(
             centroX - raio * 0.55, centroY + raio * 0.30,
             centroX + raio * 0.55, centroY - raio * 0.30
         );
-        g.addColorStop(0.00, 'rgba(255, 255, 255, 0)');
-        g.addColorStop(0.30, 'rgba(226, 238, 255, .10)');
-        g.addColorStop(0.50, 'rgba(255, 255, 255, .16)');
-        g.addColorStop(0.70, 'rgba(226, 238, 255, .10)');
-        g.addColorStop(1.00, 'rgba(255, 255, 255, 0)');
+        g.addColorStop(0.00, 'rgba(227, 177, 149, 0)');
+        g.addColorStop(0.30, 'rgba(227, 177, 149, .16)');
+        g.addColorStop(0.50, 'rgba(239, 220, 192, .22)');
+        g.addColorStop(0.70, 'rgba(217, 185, 138, .16)');
+        g.addColorStop(1.00, 'rgba(217, 185, 138, 0)');
 
         ctx.save();
-        ctx.filter = 'blur(46px)';
+        ctx.filter = 'blur(52px)';
         ctx.fillStyle = g;
         ctx.translate(centroX, centroY);
         ctx.rotate(-0.24 + Math.sin(tempo * 0.0004) * 0.05);
-        ctx.fillRect(-raio, -A * 0.16, raio * 2, A * 0.32);
+        ctx.fillRect(-raio, -A * 0.18, raio * 2, A * 0.36);
         ctx.restore();
 
-        /* Brilho no miolo, de onde a luz sai. */
-        const halo = ctx.createRadialGradient(centroX, centroY, 0, centroX, centroY, Math.min(L, A) * 0.42);
-        halo.addColorStop(0, 'rgba(232, 242, 255, .10)');
-        halo.addColorStop(0.5, 'rgba(190, 210, 240, .04)');
-        halo.addColorStop(1, 'rgba(10, 12, 20, 0)');
+        /* Um respiro de luz no miolo, de onde a estrutura nasce. */
+        const halo = ctx.createRadialGradient(centroX, centroY, 0, centroX, centroY, Math.min(L, A) * 0.46);
+        halo.addColorStop(0, 'rgba(255, 252, 246, .5)');
+        halo.addColorStop(0.55, 'rgba(247, 242, 236, .18)');
+        halo.addColorStop(1, 'rgba(239, 231, 223, 0)');
         ctx.fillStyle = halo;
         ctx.fillRect(0, 0, L, A);
     }
@@ -214,13 +217,12 @@
         const cx = Math.cos(giroX), sx = Math.sin(giroX);
 
         ctx.clearRect(0, 0, L, A);
-        ctx.globalCompositeOperation = 'lighter';
         feixe();
 
         /* Perto do cursor a malha é puxada; segurando o botão, o puxão é bem mais forte
            e alcança mais longe (é aí que você agarra a logo e leva pra onde quiser). */
         const alcance = puxando ? 300 : 150;
-        const puxao = puxando ? 0.34 : 0.11;
+        const puxao = puxando ? 0.34 : (passivo ? 0.05 : 0.11);
 
         for (const p of pontos) {
             let x = p.x * cy + p.z * sy;
@@ -275,33 +277,32 @@
             if (alfa <= 0.01) continue;
 
             const [r, v, az] = corDoVidro((p.matiz + q.matiz) / 2 + tempo * 0.00004);
-            ctx.strokeStyle = `rgba(${r}, ${v}, ${az}, ${alfa * 0.62})`;
-            ctx.lineWidth = 0.5 + 0.5 * frente;
+            ctx.strokeStyle = `rgba(${r}, ${v}, ${az}, ${alfa * 0.42})`;
+            ctx.lineWidth = 0.5 + 0.55 * frente;
             ctx.beginPath();
             ctx.moveTo(p.px, p.py);
             ctx.lineTo(q.px, q.py);
             ctx.stroke();
         }
 
-        /* Pontos: um halo leitoso e um miolo branco. Quem está atrás fica esfumaçado,
-           como se o vidro estivesse embaçando o que passa por dentro dele. */
+        /* Pontos: um halo de champanhe e um miolo mais fechado. Quem está atrás
+           quase se dissolve na areia, como se o vidro embaçasse o fundo. */
         for (const p of pontos) {
             const f = (p.perto - 0.92) * 6;
             const claro = Math.max(0.1, Math.min(1, f)) * p.brilho;
             const [r, v, az] = corDoVidro(p.matiz + tempo * 0.00004);
 
-            ctx.fillStyle = `rgba(${r}, ${v}, ${az}, ${0.11 * claro})`;
+            ctx.fillStyle = `rgba(${r}, ${v}, ${az}, ${0.10 * claro})`;
             ctx.beginPath();
             ctx.arc(p.px, p.py, 7 * p.perto * (0.5 + claro * 0.6), 0, Math.PI * 2);
             ctx.fill();
 
-            ctx.fillStyle = `rgba(255, 255, 255, ${0.26 + 0.66 * claro})`;
+            ctx.fillStyle = `rgba(${Math.round(r * 0.62)}, ${Math.round(v * 0.60)}, ${Math.round(az * 0.62)}, ${0.20 + 0.62 * claro})`;
             ctx.beginPath();
-            ctx.arc(p.px, p.py, (0.85 + 0.85 * claro) * p.perto, 0, Math.PI * 2);
+            ctx.arc(p.px, p.py, (0.85 + 0.9 * claro) * p.perto, 0, Math.PI * 2);
             ctx.fill();
         }
 
-        ctx.globalCompositeOperation = 'source-over';
         requestAnimationFrame(quadro);
     }
 
@@ -327,12 +328,16 @@
         alvoY = ((x - centroX) / L) * 0.9;
         alvoX = -((y - centroY) / A) * 0.5;
 
+        if (passivo) return;
+
         /* Sobre a logo, o cursor vira a mãozinha: é o convite pra pegar e puxar. */
         const dentro = Math.hypot(x - centroX, y - centroY) < raioLogo * 1.25;
         document.body.classList.toggle('na-logo', dentro);
     });
 
     window.addEventListener('pointerdown', (ev) => {
+        if (passivo) return;
+
         const caixa = palco.getBoundingClientRect();
         const x = ev.clientX - caixa.left;
         const y = ev.clientY - caixa.top;

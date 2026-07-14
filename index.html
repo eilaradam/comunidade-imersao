@@ -8,65 +8,47 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        :root {
-            --noite: #05070E;
-            --fumo: #0B0F1A;
-            --leite: #ECE7DE;
-            --claro: #FFFFFF;
-            --neblina: rgba(236, 231, 222, .58);
-            --fio: rgba(236, 231, 222, .14);
-            --vidro: rgba(255, 255, 255, .05);
-            --transicao: 200ms cubic-bezier(.2, .7, .3, 1);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
-            font-family: 'Outfit', system-ui, sans-serif;
-            background: #000;
-            color: var(--leite);
             min-height: 100vh;
-            padding: 12px;
-            -webkit-font-smoothing: antialiased;
+            padding: 14px;
+            display: flex;
+            background: var(--areia-escura);
         }
 
-        button, input { font-family: inherit; }
-        button { cursor: pointer; border: none; background: none; color: inherit; }
-        :focus-visible { outline: 2px solid rgba(150, 200, 255, .8); outline-offset: 3px; border-radius: 4px; }
-
-        /* ── A cena ── */
+        /* ── A folha de vidro que segura a cena ── */
         .folha {
             position: relative;
-            min-height: calc(100vh - 24px);
-            border-radius: 26px;
+            flex: 1;
+            min-height: calc(100vh - 28px);
+            border-radius: 32px;
             overflow: hidden;
             background:
-                radial-gradient(120% 90% at 50% 0%, #101827 0%, var(--noite) 55%, #03040A 100%);
+                radial-gradient(120% 90% at 72% 8%, #FBF7F2 0%, var(--areia-clara) 42%, var(--areia) 100%);
             display: flex;
             flex-direction: column;
-            padding: 22px clamp(20px, 3.4vw, 48px) 26px;
+            padding: 24px clamp(20px, 3.6vw, 52px) 30px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), var(--sombra-alta);
         }
 
         .cena { position: absolute; inset: 0; pointer-events: none; }
         .cena canvas { width: 100%; height: 100%; display: block; }
 
-        /* Dentro da logo o cursor avisa que dá pra pegar e puxar. */
-        body.na-logo { cursor: grab; }
-        body.puxando, body.puxando * { cursor: grabbing; }
-
-        /* Vinheta pra tipografia sempre ler bem por cima da luz. */
+        /* Um véu de luz do lado do texto, pra tipografia nunca disputar com a rede. */
         .folha::after {
             content: '';
             position: absolute;
             inset: 0;
-            background:
-                linear-gradient(to top, rgba(3, 4, 10, .92) 0%, rgba(3, 4, 10, .35) 38%, transparent 62%),
-                linear-gradient(to right, rgba(3, 4, 10, .78) 0%, transparent 45%);
+            background: linear-gradient(100deg, rgba(247, 242, 236, .92) 0%, rgba(247, 242, 236, .55) 34%, transparent 62%);
             pointer-events: none;
         }
 
         .barra, .heroi { position: relative; z-index: 2; }
+
+        /* Dentro da logo o cursor avisa que dá pra pegar e puxar. */
+        body.na-logo { cursor: grab; }
+        body.puxando, body.puxando * { cursor: grabbing; }
 
         /* ── Barra de cima ── */
         .barra {
@@ -75,54 +57,43 @@
             align-items: center;
             gap: 16px;
         }
-        .barra .assinatura { text-align: center; }
-        .pilula { justify-self: start; }
         .pilula {
+            justify-self: start;
             display: inline-flex;
             align-items: center;
-            gap: 9px;
-            font-size: 11.5px;
-            font-weight: 500;
-            letter-spacing: .14em;
+            gap: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .16em;
             text-transform: uppercase;
-            color: var(--leite);
-            background: var(--vidro);
+            color: var(--tinta-media);
+            background: var(--vidro-forte);
             border: 1px solid var(--fio);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(20px) saturate(120%);
+            -webkit-backdrop-filter: blur(20px) saturate(120%);
             border-radius: 999px;
-            padding: 10px 18px;
+            padding: 11px 20px;
+            box-shadow: var(--sombra);
         }
         .pilula .traco { display: grid; gap: 3px; }
-        .pilula .traco i { display: block; width: 13px; height: 1px; background: var(--leite); }
+        .pilula .traco i { display: block; width: 13px; height: 1px; background: var(--tinta-media); }
 
         .assinatura {
+            text-align: center;
             font-family: 'Fraunces', serif;
             font-size: 17px;
-            letter-spacing: .18em;
+            letter-spacing: .2em;
             text-transform: uppercase;
-            color: var(--claro);
+            color: var(--tinta);
         }
 
-        .btn-claro {
-            background: var(--leite);
-            color: #0A0C14;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: .1em;
-            text-transform: uppercase;
-            padding: 11px 22px;
-            border-radius: 999px;
-            transition: transform var(--transicao), background var(--transicao);
-        }
-        .btn-claro:hover { background: var(--claro); transform: translateY(-1px); }
-
-        /* ── Herói: fica no meio da altura, encostado na esquerda ── */
+        /* ── Herói: no meio da altura, encostado na esquerda ── */
         .heroi {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            max-width: 620px;
+            max-width: 640px;
             padding-bottom: 40px;
         }
         .sobrancelha {
@@ -130,34 +101,32 @@
             align-items: center;
             gap: 9px;
             font-size: 11px;
-            font-weight: 500;
+            font-weight: 600;
             letter-spacing: .18em;
             text-transform: uppercase;
-            color: var(--neblina);
-            margin-bottom: 18px;
+            color: var(--terracota);
+            margin-bottom: 20px;
         }
-        .sobrancelha::before { content: '›'; color: var(--claro); font-size: 14px; }
+        .sobrancelha::before { content: '›'; font-size: 14px; }
 
         .heroi h1 {
-            font-family: 'Fraunces', serif;
             font-weight: 300;
-            font-size: clamp(34px, 4.6vw, 62px);
-            line-height: 1.06;
-            letter-spacing: -.015em;
-            color: var(--claro);
-            margin-bottom: 26px;
+            font-size: clamp(36px, 4.8vw, 64px);
+            line-height: 1.05;
+            letter-spacing: -.02em;
+            margin-bottom: 28px;
         }
         .heroi h1 em {
             font-style: italic;
             font-weight: 400;
-            background: linear-gradient(100deg, #FFFFFF, #DCE8F7 45%, #FFFFFF 75%, #C9D8EC);
+            background: linear-gradient(100deg, var(--terracota), var(--champanhe) 55%, var(--pessego));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
 
         /* ── Formulário ── */
-        .forma { max-width: 470px; }
+        .forma { max-width: 480px; }
         .etapa { display: none; }
         .etapa.ativa { display: block; animation: sobe 380ms cubic-bezier(.2,.7,.3,1) both; }
         @keyframes sobe { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
@@ -165,16 +134,18 @@
         .linha-campo {
             display: flex;
             gap: 6px;
-            background: rgba(255, 255, 255, .06);
+            background: var(--vidro-forte);
             border: 1px solid var(--fio);
-            backdrop-filter: blur(14px);
+            backdrop-filter: blur(20px) saturate(120%);
+            -webkit-backdrop-filter: blur(20px) saturate(120%);
             border-radius: 999px;
-            padding: 6px 6px 6px 10px;
-            transition: border-color var(--transicao), background var(--transicao);
+            padding: 7px 7px 7px 12px;
+            box-shadow: var(--sombra);
+            transition: border-color var(--transicao), box-shadow var(--transicao);
         }
         .linha-campo:focus-within {
-            border-color: rgba(180, 220, 255, .55);
-            background: rgba(255, 255, 255, .09);
+            border-color: var(--champanhe);
+            box-shadow: 0 0 0 4px rgba(217, 185, 138, .22), var(--sombra);
         }
         .linha-campo input {
             flex: 1;
@@ -182,70 +153,54 @@
             background: none;
             border: none;
             outline: none;
-            color: var(--claro);
-            font-size: 15px;
+            box-shadow: none;
             padding: 12px 14px;
         }
-        .linha-campo input::placeholder { color: rgba(236, 231, 222, .42); }
-        .linha-campo .btn-claro { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        .linha-campo .btn-claro .seta {
+        .linha-campo input:focus { background: none; box-shadow: none; }
+        .linha-campo .btn { flex-shrink: 0; }
+        .linha-campo .btn .seta {
             width: 20px; height: 20px;
             border-radius: 50%;
-            background: rgba(10, 12, 20, .12);
+            background: rgba(255, 255, 255, .55);
             display: grid; place-items: center;
             font-size: 11px;
         }
         .par { display: flex; flex-direction: column; gap: 10px; }
 
         .etapa h2 {
-            font-family: 'Fraunces', serif;
             font-weight: 400;
-            font-size: 24px;
-            color: var(--claro);
-            margin-bottom: 4px;
+            font-size: 25px;
+            margin-bottom: 5px;
         }
-        .etapa .dizeres { font-size: 14px; color: var(--neblina); margin-bottom: 16px; }
+        .etapa .dizeres { font-size: 14px; color: var(--tinta-media); margin-bottom: 16px; max-width: 44ch; }
         .quem-e {
             display: inline-block;
-            font-size: 12px;
-            letter-spacing: .04em;
-            color: var(--neblina);
+            font-size: 12.5px;
+            color: var(--tinta-media);
+            background: var(--vidro-fraco);
             border: 1px solid var(--fio);
             border-radius: 999px;
-            padding: 6px 14px;
-            margin-bottom: 14px;
+            padding: 7px 15px;
+            margin-bottom: 15px;
             word-break: break-all;
         }
-        .abaixo { display: flex; gap: 18px; margin-top: 14px; }
+        .abaixo { display: flex; gap: 18px; margin-top: 16px; }
         .abaixo button {
-            font-size: 12px;
-            letter-spacing: .06em;
-            color: var(--neblina);
+            font-size: 12.5px;
+            color: var(--tinta-media);
             border-bottom: 1px solid transparent;
         }
-        .abaixo button:hover { color: var(--claro); border-bottom-color: var(--fio); }
-
-        .recado {
-            font-size: 13.5px;
-            margin-top: 14px;
-            padding: 11px 15px;
-            border-radius: 12px;
-            display: none;
-        }
-        .recado.show { display: block; }
-        .recado.erro { background: rgba(255, 120, 100, .1); border: 1px solid rgba(255, 140, 120, .3); color: #FFC4B8; }
-        .recado.ok { background: rgba(110, 230, 190, .1); border: 1px solid rgba(110, 230, 190, .3); color: #A7EFD6; }
+        .abaixo button:hover { color: var(--terracota); border-bottom-color: var(--champanhe); }
 
         @media (max-width: 980px) {
             body { padding: 8px; }
-            .folha { border-radius: 20px; padding: 16px 18px 24px; min-height: calc(100vh - 16px); }
+            .folha { border-radius: 24px; padding: 18px 20px 26px; min-height: calc(100vh - 16px); }
             .assinatura { display: none; }
-            .heroi { max-width: none; justify-content: flex-end; padding-bottom: 10px; }
-            .heroi h1 { font-size: clamp(30px, 8.4vw, 44px); }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            * { animation: none !important; transition: none !important; }
+            .folha::after {
+                background: linear-gradient(to top, rgba(247, 242, 236, .96) 30%, rgba(247, 242, 236, .5) 55%, transparent 78%);
+            }
+            .heroi { max-width: none; justify-content: flex-end; padding-bottom: 12px; }
+            .heroi h1 { font-size: clamp(32px, 8.6vw, 46px); }
         }
     </style>
 </head>
@@ -269,7 +224,7 @@
                     <form id="formEmail" novalidate>
                         <div class="linha-campo">
                             <input type="email" id="email" autocomplete="email" placeholder="Seu e-mail da compra" required>
-                            <button type="submit" class="btn-claro" id="btnEmail">Entrar <span class="seta">→</span></button>
+                            <button type="submit" class="btn" id="btnEmail">Entrar <span class="seta">→</span></button>
                         </div>
                     </form>
                     <div class="recado erro" id="recadoEmail"></div>
@@ -283,7 +238,7 @@
                     <form id="formSenha" novalidate>
                         <div class="linha-campo">
                             <input type="password" id="senha" autocomplete="current-password" placeholder="Sua senha" required>
-                            <button type="submit" class="btn-claro" id="btnSenha">Entrar <span class="seta">→</span></button>
+                            <button type="submit" class="btn" id="btnSenha">Entrar <span class="seta">→</span></button>
                         </div>
                     </form>
                     <div class="recado erro" id="recadoSenha"></div>
@@ -305,7 +260,7 @@
                             </div>
                             <div class="linha-campo">
                                 <input type="password" id="senhaConf" autocomplete="new-password" placeholder="Repita a senha" required>
-                                <button type="submit" class="btn-claro" id="btnCriar">Criar <span class="seta">→</span></button>
+                                <button type="submit" class="btn" id="btnCriar">Criar <span class="seta">→</span></button>
                             </div>
                         </div>
                     </form>

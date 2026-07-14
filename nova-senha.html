@@ -15,26 +15,27 @@
             display: grid;
             place-items: center;
             padding: 24px;
-            background:
-                radial-gradient(120% 90% at 50% 0%, #101827 0%, var(--noite) 55%, #03040A 100%);
+            background: radial-gradient(110% 80% at 70% 0%, #FBF7F2 0%, var(--areia-clara) 45%, var(--areia) 100%);
         }
         .cartao {
             width: 100%;
-            max-width: 430px;
+            max-width: 440px;
             background: var(--vidro);
             border: 1px solid var(--fio);
-            backdrop-filter: blur(16px);
-            border-radius: 22px;
-            padding: 34px;
+            backdrop-filter: blur(26px) saturate(125%);
+            -webkit-backdrop-filter: blur(26px) saturate(125%);
+            border-radius: 28px;
+            padding: 36px;
+            box-shadow: var(--sombra-alta);
         }
         .marca {
-            font-size: 11px; font-weight: 600; letter-spacing: .18em;
-            text-transform: uppercase; color: var(--fumaca); margin-bottom: 16px;
+            font-size: 11px; font-weight: 600; letter-spacing: .2em;
+            text-transform: uppercase; color: var(--terracota); margin-bottom: 16px;
         }
-        h1 { font-size: 27px; margin-bottom: 8px; }
-        .sub { font-size: 14px; color: var(--neblina); margin-bottom: 26px; }
+        h1 { font-size: 28px; margin-bottom: 8px; }
+        .sub { font-size: 14px; color: var(--tinta-media); margin-bottom: 26px; }
         .campo { margin-bottom: 16px; }
-        .dica { font-size: 12px; color: var(--fumaca); margin-top: 7px; text-transform: none; letter-spacing: 0; }
+        .dica { font-size: 12px; color: var(--tinta-fraca); margin-top: 7px; text-transform: none; letter-spacing: 0; font-weight: 400; }
     </style>
 </head>
 <body>
