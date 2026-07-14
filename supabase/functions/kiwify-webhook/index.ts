@@ -60,19 +60,25 @@ Deno.serve(async (req) => {
   const corpo = await req.text();
   const url = new URL(req.url);
 
-  const token = Deno.env.get('KIWIFY_TOKEN') || '';
-  const assinatura = url.searchParams.get('signature') || req.headers.get('x-kiwify-signature');
+  // Duas trancas possíveis. Basta uma delas passar.
+  //  1. A chave secreta que vai na própria URL do webhook (?k=...).
+  //  2. A assinatura HMAC da Kiwify, se um dia o token dela for configurado.
+  const chaveUrl = (Deno.env.get('KIWIFY_CHAVE_URL') || '').trim();
+  const token = (Deno.env.get('KIWIFY_TOKEN') || '').trim();
 
-  // Sem token configurado a função ainda funciona (útil pra ligar e testar),
-  // mas o certo é configurar: aí ninguém consegue forjar uma compra.
-  if (token) {
-    const ok = await assinaturaConfere(corpo, assinatura, token);
-    if (!ok) {
+  const assinatura = url.searchParams.get('signature') || req.headers.get('x-kiwify-signature');
+  const chaveRecebida = (url.searchParams.get('k') || '').trim();
+
+  if (chaveUrl || token) {
+    const passouPelaChave = !!chaveUrl && chaveRecebida === chaveUrl;
+    const passouPelaAssinatura = !!token && await assinaturaConfere(corpo, assinatura, token);
+
+    if (!passouPelaChave && !passouPelaAssinatura) {
       await admin.from('kiwify_eventos').insert({
-        resultado: 'RECUSADO: assinatura invalida',
+        resultado: 'RECUSADO: chave ou assinatura invalida',
         payload: { corpo: corpo.slice(0, 2000) },
       });
-      return new Response('assinatura invalida', { status: 401 });
+      return new Response('nao autorizado', { status: 401 });
     }
   }
 
