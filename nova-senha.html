@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Nova senha · Comunidade Imersão</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: radial-gradient(1000px 500px at 20% 0%, #FBE7DA 0%, transparent 60%), var(--creme-fundo);
+        }
+        .cartao {
+            width: 100%;
+            max-width: 420px;
+            background: var(--branco);
+            border: 1px solid var(--borda);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: var(--sombra);
+        }
+        .marca {
+            font-size: 12px; font-weight: 600; letter-spacing: .16em;
+            text-transform: uppercase; color: var(--coral); margin-bottom: 14px;
+        }
+        h1 { font-size: 26px; margin-bottom: 6px; }
+        .sub { font-size: 14px; color: var(--cinza); margin-bottom: 24px; }
+        .campo { margin-bottom: 16px; }
+        .dica { font-size: 12px; color: var(--cinza-claro); margin-top: 6px; }
+    </style>
+</head>
+<body>
+    <main class="cartao">
+        <p class="marca">lara.dam</p>
+        <h1>Criar uma senha nova</h1>
+        <p class="sub" id="sub">Escolha a senha que você vai usar pra entrar na comunidade.</p>
+
+        <form id="formNova">
+            <div class="campo">
+                <label for="senha1">Nova senha</label>
+                <input type="password" id="senha1" autocomplete="new-password" placeholder="pelo menos 6 caracteres" required>
+                <p class="dica">Mínimo de 6 caracteres.</p>
+            </div>
+            <div class="campo">
+                <label for="senha2">Repita a senha</label>
+                <input type="password" id="senha2" autocomplete="new-password" placeholder="••••••" required>
+            </div>
+            <button type="submit" class="btn btn-bloco" id="btnSalvar">Salvar e entrar</button>
+        </form>
+
+        <div class="recado" id="recado"></div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/sb.js"></script>
+    <script>
+    (function () {
+        'use strict';
+        const { sb } = window.C;
+
+        const form = document.getElementById('formNova');
+        const btn = document.getElementById('btnSalvar');
+
+        function recado(texto, tipo) {
+            const el = document.getElementById('recado');
+            el.textContent = texto;
+            el.className = 'recado ' + (tipo || 'erro') + (texto ? ' show' : '');
+        }
+
+        /* O link do e-mail traz a sessão de recuperação na URL. */
+        (async function () {
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) {
+                await new Promise(r => setTimeout(r, 1200));
+                const { data: { session: outra } } = await sb.auth.getSession();
+                if (!outra) {
+                    document.getElementById('sub').textContent = 'Esse link expirou ou já foi usado. Volte e peça um novo em "esqueci minha senha".';
+                    form.style.display = 'none';
+                }
+            }
+        })();
+
+        form.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const s1 = document.getElementById('senha1').value;
+            const s2 = document.getElementById('senha2').value;
+
+            if (s1.length < 6) return recado('A senha precisa ter pelo menos 6 caracteres.');
+            if (s1 !== s2) return recado('As duas senhas não são iguais.');
+
+            recado('');
+            btn.disabled = true;
+            btn.textContent = 'Salvando...';
+
+            const { error } = await sb.auth.updateUser({ password: s1 });
+
+            if (error) {
+                btn.disabled = false;
+                btn.textContent = 'Salvar e entrar';
+                recado('Não consegui salvar agora. Peça um link novo em "esqueci minha senha".');
+                return;
+            }
+            window.location.href = 'app.html';
+        });
+    })();
+    </script>
+</body>
+</html>

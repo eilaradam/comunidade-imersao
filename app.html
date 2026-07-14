@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Comunidade Imersão</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .casca { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+
+        /* ── Menu lateral ── */
+        .lateral {
+            background: var(--creme);
+            border-right: 1px solid var(--borda);
+            padding: 28px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+        .logo {
+            font-family: 'Fraunces', serif;
+            font-size: 19px;
+            font-weight: 600;
+            padding: 0 12px 22px;
+            line-height: 1.25;
+        }
+        .logo small {
+            display: block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: var(--coral);
+            margin-bottom: 4px;
+        }
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 11px 12px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--cinza);
+            width: 100%;
+            text-align: left;
+            transition: background var(--transicao), color var(--transicao);
+        }
+        .item:hover { background: var(--coral-suave); color: var(--grafite); }
+        .item.ativo { background: var(--coral); color: var(--branco); }
+        .item .ico { font-size: 16px; width: 20px; text-align: center; }
+        .rodape-lateral { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--borda); }
+        .eu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        .eu strong { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .sair { font-size: 13px; color: var(--cinza); padding: 8px 12px; }
+        .sair:hover { color: var(--coral); }
+
+        /* ── Conteúdo ── */
+        .palco { padding: 40px 32px 80px; }
+        .tela { display: none; max-width: 680px; margin: 0 auto; }
+        .tela.show { display: block; animation: entra 320ms ease both; }
+        .tela.larga { max-width: 900px; }
+        @keyframes entra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+        .titulo-tela { margin-bottom: 4px; font-size: 30px; letter-spacing: -.01em; }
+        .sub-tela { color: var(--cinza); font-size: 15px; margin-bottom: 28px; }
+
+        /* ── Publicar ── */
+        .publicar {
+            background: var(--branco);
+            border: 1px solid var(--borda);
+            border-radius: var(--raio);
+            padding: 18px;
+            margin-bottom: 26px;
+            box-shadow: var(--sombra);
+        }
+        .publicar textarea { border: none; padding: 6px 0; resize: none; min-height: 46px; font-size: 16px; }
+        .publicar textarea:focus { box-shadow: none; }
+        .extras { display: none; margin-top: 12px; }
+        .publicar.aberto .extras { display: block; animation: entra 220ms ease both; }
+        .tipos { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .chip {
+            font-size: 13px;
+            font-weight: 500;
+            padding: 7px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--borda);
+            color: var(--cinza);
+            background: var(--branco);
+            transition: all var(--transicao);
+        }
+        .chip:hover { border-color: var(--coral); color: var(--coral); }
+        .chip.on { background: var(--coral); border-color: var(--coral); color: var(--branco); }
+        .extras textarea, .extras input[type="url"] { border: 1px solid var(--borda); padding: 11px 13px; margin-bottom: 10px; font-size: 14px; }
+        .extras textarea { min-height: 90px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 13px; }
+        .barra-publicar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+        .anexo {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--cinza);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px dashed var(--borda);
+        }
+        .anexo:hover { border-color: var(--coral); color: var(--coral); }
+        .previa { position: relative; margin-top: 10px; display: none; }
+        .previa.show { display: block; }
+        .previa img { width: 100%; border-radius: 10px; display: block; }
+        .tira-previa {
+            position: absolute; top: 8px; right: 8px;
+            background: rgba(27,27,27,.75); color: #fff;
+            width: 28px; height: 28px; border-radius: 50%;
+            font-size: 15px; line-height: 1;
+        }
+
+        /* ── Post ── */
+        .post {
+            background: var(--branco);
+            border: 1px solid var(--borda);
+            border-radius: var(--raio);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--sombra);
+            animation: entra 400ms ease both;
+        }
+        .topo-post { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .quem { flex: 1; min-width: 0; }
+        .quem b { font-size: 15px; font-weight: 600; display: block; }
+        .quem span { font-size: 12.5px; color: var(--cinza-claro); }
+        .selo {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            padding: 4px 9px;
+            border-radius: 6px;
+            background: var(--coral-suave);
+            color: var(--coral);
+        }
+        .selo.duvida { background: #FDF0DC; color: #9A6212; }
+        .selo.prompt { background: #E7EFF6; color: #2A5D86; }
+        .corpo-post { font-size: 15.5px; white-space: pre-wrap; word-wrap: break-word; }
+        .corpo-post a { word-break: break-all; }
+        .foto-post { margin-top: 14px; border-radius: 10px; width: 100%; display: block; border: 1px solid var(--borda); }
+        .caixa-prompt {
+            position: relative;
+            margin-top: 14px;
+            background: #FAF6F2;
+            border: 1px solid var(--borda);
+            border-radius: 10px;
+            padding: 14px 14px 14px 16px;
+        }
+        .caixa-prompt pre {
+            font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #3C332C;
+            max-height: 260px;
+            overflow: auto;
+            padding-top: 26px;
+        }
+        .copiar {
+            position: absolute; top: 10px; right: 10px;
+            font-size: 12px; font-weight: 600;
+            padding: 5px 11px; border-radius: 7px;
+            background: var(--branco); border: 1px solid var(--borda); color: var(--cinza);
+        }
+        .copiar:hover { color: var(--coral); border-color: var(--coral); }
+        .acoes {
+            display: flex; align-items: center; gap: 6px;
+            margin-top: 14px; padding-top: 12px;
+            border-top: 1px solid var(--borda);
+        }
+        .acao {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 13.5px; font-weight: 500; color: var(--cinza);
+            padding: 7px 11px; border-radius: 8px;
+            transition: background var(--transicao), color var(--transicao);
+        }
+        .acao:hover { background: var(--creme); color: var(--grafite); }
+        .acao.curtido { color: var(--coral); }
+        .acao.curtido .coracao { animation: pop 320ms ease; }
+        @keyframes pop { 0% { transform: scale(1); } 45% { transform: scale(1.35); } 100% { transform: scale(1); } }
+        .apagar { margin-left: auto; color: var(--cinza-claro); font-size: 13px; }
+        .apagar:hover { color: #B23A1B; }
+
+        /* ── Comentários ── */
+        .comentarios { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--borda); display: none; }
+        .comentarios.show { display: block; }
+        .coment { display: flex; gap: 10px; margin-bottom: 12px; }
+        .coment .avatar { width: 30px; height: 30px; font-size: 11px; }
+        .balao { background: var(--creme); border-radius: 10px; padding: 9px 13px; flex: 1; }
+        .balao b { font-size: 13.5px; }
+        .balao time { font-size: 11.5px; color: var(--cinza-claro); margin-left: 6px; }
+        .balao p { font-size: 14px; margin-top: 2px; white-space: pre-wrap; word-wrap: break-word; }
+        .escrever { display: flex; gap: 10px; align-items: flex-start; }
+        .escrever input { font-size: 14px; padding: 9px 13px; }
+        .escrever .btn { padding: 9px 16px; font-size: 13px; }
+
+        /* ── Materiais, avisos, galeria ── */
+        .material {
+            display: flex; align-items: center; gap: 16px;
+            background: var(--branco); border: 1px solid var(--borda);
+            border-radius: var(--raio); padding: 18px 20px; margin-bottom: 12px;
+            box-shadow: var(--sombra);
+            transition: transform var(--transicao), border-color var(--transicao);
+        }
+        .material:hover { transform: translateY(-2px); border-color: var(--coral); }
+        .material .emoji { font-size: 26px; }
+        .material h3 { font-size: 17px; margin-bottom: 2px; }
+        .material p { font-size: 14px; color: var(--cinza); }
+        .material .seta { margin-left: auto; color: var(--coral); font-size: 20px; }
+
+        .aviso {
+            background: var(--branco); border: 1px solid var(--borda);
+            border-left: 3px solid var(--coral);
+            border-radius: var(--raio); padding: 20px; margin-bottom: 14px;
+            box-shadow: var(--sombra);
+        }
+        .aviso.fixado { background: #FFFDF7; border-left-color: #E0A21C; }
+        .aviso h3 { font-size: 18px; margin-bottom: 6px; }
+        .aviso .data { font-size: 12.5px; color: var(--cinza-claro); margin-bottom: 10px; display: block; }
+        .aviso .texto { font-size: 15px; color: var(--grafite); white-space: pre-wrap; }
+        .pin { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #A5730D; }
+
+        .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+        .vitrine {
+            background: var(--branco); border: 1px solid var(--borda);
+            border-radius: var(--raio); padding: 20px; text-align: center;
+            box-shadow: var(--sombra);
+            transition: transform var(--transicao), border-color var(--transicao);
+        }
+        .vitrine:hover { transform: translateY(-3px); border-color: var(--coral); }
+        .vitrine .avatar { width: 56px; height: 56px; font-size: 18px; margin: 0 auto 12px; }
+        .vitrine b { display: block; font-size: 15.5px; }
+        .vitrine .arroba { font-size: 13px; color: var(--cinza-claro); }
+        .vitrine .bio { font-size: 13.5px; color: var(--cinza); margin: 10px 0 14px; }
+
+        .caixa {
+            background: var(--branco); border: 1px solid var(--borda);
+            border-radius: var(--raio); padding: 24px; box-shadow: var(--sombra);
+            margin-bottom: 20px;
+        }
+        .caixa h3 { font-size: 18px; margin-bottom: 16px; }
+        .caixa .campo { margin-bottom: 14px; }
+        .linha-avatar { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+        .linha-avatar .avatar { width: 64px; height: 64px; font-size: 20px; }
+
+        /* ── Mobile ── */
+        .abre-menu { display: none; }
+        @media (max-width: 860px) {
+            .casca { grid-template-columns: 1fr; }
+            .lateral {
+                position: fixed; inset: 0 auto 0 0; width: 260px; z-index: 30;
+                transform: translateX(-100%); transition: transform var(--transicao);
+                box-shadow: 0 0 40px rgba(27,27,27,.15);
+            }
+            .lateral.aberta { transform: none; }
+            .veu { display: none; position: fixed; inset: 0; background: rgba(27,27,27,.35); z-index: 20; }
+            .veu.show { display: block; }
+            .abre-menu {
+                display: flex; align-items: center; gap: 10px;
+                position: sticky; top: 0; z-index: 10;
+                background: var(--creme); border-bottom: 1px solid var(--borda);
+                padding: 14px 18px; width: 100%; font-weight: 600;
+            }
+            .palco { padding: 22px 16px 60px; }
+            .titulo-tela { font-size: 25px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="veu" id="veu"></div>
+
+    <div class="casca">
+        <nav class="lateral" id="lateral">
+            <div class="logo"><small>lara.dam</small>Comunidade<br>Imersão</div>
+
+            <button class="item ativo" data-tela="mural"><span class="ico">💬</span> Mural</button>
+            <button class="item" data-tela="materiais"><span class="ico">📚</span> Materiais</button>
+            <button class="item" data-tela="avisos"><span class="ico">📌</span> Avisos</button>
+            <button class="item" data-tela="galeria"><span class="ico">✨</span> Portfólios</button>
+            <button class="item" data-tela="perfil"><span class="ico">👤</span> Meu perfil</button>
+            <button class="item" data-tela="admin" id="itemAdmin" style="display:none"><span class="ico">⚙️</span> Admin</button>
+
+            <div class="rodape-lateral">
+                <div class="eu">
+                    <div class="avatar" id="meuAvatar">?</div>
+                    <strong id="meuNome">...</strong>
+                </div>
+                <button class="sair" id="btnSair">Sair da comunidade</button>
+            </div>
+        </nav>
+
+        <main>
+            <button class="abre-menu" id="abreMenu">☰ <span>Comunidade Imersão</span></button>
+            <div class="palco">
+
+                <!-- MURAL -->
+                <section class="tela show" id="telaMural">
+                    <h1 class="titulo-tela">Mural da turma</h1>
+                    <p class="sub-tela">Mostre o que você construiu, compartilhe o prompt que funcionou, peça ajuda.</p>
+
+                    <form class="publicar" id="publicar">
+                        <textarea id="txtPost" placeholder="O que você quer mostrar pra turma hoje?" rows="1"></textarea>
+
+                        <div class="extras">
+                            <div class="tipos" id="tipos">
+                                <button type="button" class="chip on" data-tipo="resultado">Resultado</button>
+                                <button type="button" class="chip" data-tipo="prompt">Prompt</button>
+                                <button type="button" class="chip" data-tipo="duvida">Dúvida</button>
+                            </div>
+                            <textarea id="txtPrompt" placeholder="Cole aqui o prompt que você usou (opcional)"></textarea>
+                            <input type="url" id="txtLink" placeholder="Link do seu site ou referência (opcional)">
+                            <div class="previa" id="previa">
+                                <img id="imgPrevia" alt="Prévia da imagem escolhida">
+                                <button type="button" class="tira-previa" id="tiraPrevia" aria-label="Remover imagem">×</button>
+                            </div>
+                            <div class="barra-publicar">
+                                <label class="anexo" for="arquivo" style="margin:0">🖼️ Print ou imagem</label>
+                                <input type="file" id="arquivo" accept="image/*" hidden>
+                                <button type="submit" class="btn btn-pequeno" id="btnPublicar">Publicar</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="recado erro" id="recadoMural"></div>
+                    <div id="feed"><p class="vazio">Carregando o mural...</p></div>
+                </section>
+
+                <!-- MATERIAIS -->
+                <section class="tela" id="telaMateriais">
+                    <h1 class="titulo-tela">Materiais</h1>
+                    <p class="sub-tela">Tudo que você precisa pra seguir construindo depois da aula.</p>
+                    <div id="listaMateriais"><p class="vazio">Carregando...</p></div>
+                </section>
+
+                <!-- AVISOS -->
+                <section class="tela" id="telaAvisos">
+                    <h1 class="titulo-tela">Avisos</h1>
+                    <p class="sub-tela">Recados da Lara pra turma.</p>
+                    <div id="listaAvisos"><p class="vazio">Carregando...</p></div>
+                </section>
+
+                <!-- GALERIA -->
+                <section class="tela larga" id="telaGaleria">
+                    <h1 class="titulo-tela">Portfólios da turma</h1>
+                    <p class="sub-tela">Os sites que saíram da imersão. Pra aparecer aqui, é só colocar o link do seu portfólio em "Meu perfil".</p>
+                    <div class="grade" id="listaGaleria"><p class="vazio">Carregando...</p></div>
+                </section>
+
+                <!-- PERFIL -->
+                <section class="tela" id="telaPerfil">
+                    <h1 class="titulo-tela">Meu perfil</h1>
+                    <p class="sub-tela">É assim que a turma te vê no mural e na galeria.</p>
+
+                    <form class="caixa" id="formPerfil">
+                        <div class="linha-avatar">
+                            <div class="avatar" id="avatarPerfil">?</div>
+                            <div>
+                                <label class="anexo" for="arquivoAvatar" style="margin:0; display:inline-block">Trocar foto</label>
+                                <input type="file" id="arquivoAvatar" accept="image/*" hidden>
+                            </div>
+                        </div>
+                        <div class="campo">
+                            <label for="pfNome">Nome</label>
+                            <input type="text" id="pfNome" required>
+                        </div>
+                        <div class="campo">
+                            <label for="pfInsta">Instagram</label>
+                            <input type="text" id="pfInsta" placeholder="@seuarroba">
+                        </div>
+                        <div class="campo">
+                            <label for="pfPortfolio">Link do seu portfólio</label>
+                            <input type="url" id="pfPortfolio" placeholder="https://seusite.com">
+                        </div>
+                        <div class="campo">
+                            <label for="pfBio">Uma linha sobre você</label>
+                            <input type="text" id="pfBio" placeholder="UGC de beleza e lifestyle">
+                        </div>
+                        <button type="submit" class="btn" id="btnPerfil">Salvar perfil</button>
+                        <div class="recado" id="recadoPerfil"></div>
+                    </form>
+                </section>
+
+                <!-- ADMIN -->
+                <section class="tela" id="telaAdmin">
+                    <h1 class="titulo-tela">Admin</h1>
+                    <p class="sub-tela">Só você vê essa aba.</p>
+
+                    <form class="caixa" id="formAviso">
+                        <h3>Publicar um aviso</h3>
+                        <div class="campo">
+                            <label for="avTitulo">Título</label>
+                            <input type="text" id="avTitulo" required>
+                        </div>
+                        <div class="campo">
+                            <label for="avCorpo">Recado</label>
+                            <textarea id="avCorpo" rows="4" required></textarea>
+                        </div>
+                        <div class="campo">
+                            <label style="display:flex; gap:8px; align-items:center; cursor:pointer">
+                                <input type="checkbox" id="avFixado" style="width:auto">
+                                Fixar no topo
+                            </label>
+                        </div>
+                        <button type="submit" class="btn">Publicar aviso</button>
+                        <div class="recado" id="recadoAviso"></div>
+                    </form>
+
+                    <form class="caixa" id="formMaterial">
+                        <h3>Adicionar um material</h3>
+                        <div class="campo">
+                            <label for="mtTitulo">Título</label>
+                            <input type="text" id="mtTitulo" required>
+                        </div>
+                        <div class="campo">
+                            <label for="mtDesc">Descrição</label>
+                            <input type="text" id="mtDesc">
+                        </div>
+                        <div class="campo">
+                            <label for="mtUrl">Link</label>
+                            <input type="url" id="mtUrl" placeholder="https://..." required>
+                        </div>
+                        <div class="campo">
+                            <label for="mtEmoji">Emoji</label>
+                            <input type="text" id="mtEmoji" value="📄" maxlength="4">
+                        </div>
+                        <button type="submit" class="btn">Adicionar material</button>
+                        <div class="recado" id="recadoMaterial"></div>
+                    </form>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/sb.js"></script>
+    <script>
+    (function () {
+        'use strict';
+        const { sb, esc, urlSegura, iniciais, quando } = window.C;
+
+        let usuario = null;
+        let perfil = null;
+        let souAdmin = false;
+        let tipoEscolhido = 'resultado';
+        let arquivoPost = null;
+        const jaCarregou = {};
+
+        /* ══ Entrada: precisa estar logada E estar na lista da turma ══ */
+        (async function abrir() {
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) return window.location.replace('index.html');
+            usuario = session.user;
+
+            const { data: podeEntrar } = await sb.rpc('is_aluna_imersao');
+            if (!podeEntrar) {
+                await sb.auth.signOut();
+                alert('Esse acesso não está liberado. Fale com a Lara.');
+                return window.location.replace('index.html');
+            }
+
+            const { data: adm } = await sb.rpc('is_admin');
+            souAdmin = !!adm;
+            if (souAdmin) document.getElementById('itemAdmin').style.display = 'flex';
+
+            await carregarPerfil();
+            carregarMural();
+        })();
+
+        async function carregarPerfil() {
+            const { data } = await sb.from('imersao_perfis').select('*').eq('usuario_id', usuario.id).maybeSingle();
+            if (data) {
+                perfil = data;
+            } else {
+                const nome = usuario.user_metadata?.nome || (usuario.email || '').split('@')[0];
+                const { data: novo } = await sb.from('imersao_perfis')
+                    .insert({ usuario_id: usuario.id, nome }).select().maybeSingle();
+                perfil = novo || { usuario_id: usuario.id, nome };
+            }
+            pintarPerfil();
+        }
+
+        function pintarPerfil() {
+            const nome = perfil?.nome || 'Aluna';
+            document.getElementById('meuNome').textContent = nome.split(' ')[0];
+            [document.getElementById('meuAvatar'), document.getElementById('avatarPerfil')].forEach(el => {
+                el.innerHTML = perfil?.avatar_url
+                    ? `<img src="${esc(perfil.avatar_url)}" alt="">`
+                    : esc(iniciais(nome));
+            });
+            document.getElementById('pfNome').value = nome;
+            document.getElementById('pfInsta').value = perfil?.instagram || '';
+            document.getElementById('pfPortfolio').value = perfil?.portfolio_url || '';
+            document.getElementById('pfBio').value = perfil?.bio || '';
+        }
+
+        /* ══ Navegação ══ */
+        const carregadores = {
+            mural: carregarMural,
+            materiais: carregarMateriais,
+            avisos: carregarAvisos,
+            galeria: carregarGaleria,
+            perfil: () => {},
+            admin: () => {}
+        };
+
+        document.querySelectorAll('.item[data-tela]').forEach(botao => {
+            botao.addEventListener('click', () => {
+                const alvo = botao.dataset.tela;
+                document.querySelectorAll('.item').forEach(i => i.classList.remove('ativo'));
+                botao.classList.add('ativo');
+                document.querySelectorAll('.tela').forEach(t => t.classList.remove('show'));
+                document.getElementById('tela' + alvo[0].toUpperCase() + alvo.slice(1)).classList.add('show');
+                fecharMenu();
+                if (!jaCarregou[alvo] || alvo === 'mural') { carregadores[alvo](); jaCarregou[alvo] = true; }
+            });
+        });
+
+        const lateral = document.getElementById('lateral');
+        const veu = document.getElementById('veu');
+        function fecharMenu() { lateral.classList.remove('aberta'); veu.classList.remove('show'); }
+        document.getElementById('abreMenu').addEventListener('click', () => {
+            lateral.classList.add('aberta'); veu.classList.add('show');
+        });
+        veu.addEventListener('click', fecharMenu);
+
+        document.getElementById('btnSair').addEventListener('click', async () => {
+            await sb.auth.signOut();
+            window.location.replace('index.html');
+        });
+
+        function recado(id, texto, tipo) {
+            const el = document.getElementById(id);
+            el.textContent = texto;
+            el.className = 'recado ' + (tipo || 'erro') + (texto ? ' show' : '');
+            if (texto && tipo === 'ok') setTimeout(() => { el.className = 'recado'; }, 3500);
+        }
+
+        /* ══ Publicar ══ */
+        const caixaPublicar = document.getElementById('publicar');
+        const txtPost = document.getElementById('txtPost');
+
+        txtPost.addEventListener('focus', () => caixaPublicar.classList.add('aberto'));
+        txtPost.addEventListener('input', () => {
+            txtPost.style.height = 'auto';
+            txtPost.style.height = txtPost.scrollHeight + 'px';
+        });
+
+        document.getElementById('tipos').addEventListener('click', (ev) => {
+            const chip = ev.target.closest('.chip');
+            if (!chip) return;
+            document.querySelectorAll('#tipos .chip').forEach(c => c.classList.remove('on'));
+            chip.classList.add('on');
+            tipoEscolhido = chip.dataset.tipo;
+        });
+
+        document.getElementById('arquivo').addEventListener('change', (ev) => {
+            const f = ev.target.files[0];
+            if (!f) return;
+            if (f.size > 5 * 1024 * 1024) {
+                recado('recadoMural', 'A imagem precisa ter menos de 5 MB.');
+                ev.target.value = '';
+                return;
+            }
+            arquivoPost = f;
+            document.getElementById('imgPrevia').src = URL.createObjectURL(f);
+            document.getElementById('previa').classList.add('show');
+        });
+
+        document.getElementById('tiraPrevia').addEventListener('click', () => {
+            arquivoPost = null;
+            document.getElementById('arquivo').value = '';
+            document.getElementById('previa').classList.remove('show');
+        });
+
+        async function subirImagem(arquivo) {
+            const ext = (arquivo.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const caminho = `${usuario.id}/${Date.now()}.${ext}`;
+            const { error } = await sb.storage.from('imersao').upload(caminho, arquivo, { upsert: false });
+            if (error) throw error;
+            return sb.storage.from('imersao').getPublicUrl(caminho).data.publicUrl;
+        }
+
+        caixaPublicar.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const btn = document.getElementById('btnPublicar');
+            const texto = txtPost.value.trim();
+            const prompt = document.getElementById('txtPrompt').value.trim();
+            const link = document.getElementById('txtLink').value.trim();
+
+            if (!texto) return recado('recadoMural', 'Escreva alguma coisa antes de publicar.');
+
+            recado('recadoMural', '');
+            btn.disabled = true;
+            btn.textContent = 'Publicando...';
+            try {
+                let imagem_url = null;
+                if (arquivoPost) imagem_url = await subirImagem(arquivoPost);
+
+                const { error } = await sb.from('imersao_posts').insert({
+                    autor_id: usuario.id,
+                    tipo: tipoEscolhido,
+                    texto,
+                    prompt: prompt || null,
+                    link: urlSegura(link) || null,
+                    imagem_url
+                });
+                if (error) throw error;
+
+                caixaPublicar.reset();
+                caixaPublicar.classList.remove('aberto');
+                txtPost.style.height = 'auto';
+                arquivoPost = null;
+                document.getElementById('previa').classList.remove('show');
+                await carregarMural();
+            } catch (e) {
+                recado('recadoMural', 'Não consegui publicar agora. Tente de novo em instantes.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Publicar';
+            }
+        });
+
+        /* ══ Feed ══ */
+        async function carregarMural() {
+            const feed = document.getElementById('feed');
+            const { data, error } = await sb.rpc('imersao_feed', { p_limit: 40, p_offset: 0 });
+            if (error) {
+                feed.innerHTML = '<p class="vazio">Não consegui carregar o mural agora.</p>';
+                return;
+            }
+            const posts = data || [];
+            if (!posts.length) {
+                feed.innerHTML = '<p class="vazio"><strong>O mural está esperando por você</strong>Seja a primeira a mostrar o que construiu na imersão.</p>';
+                return;
+            }
+            feed.innerHTML = posts.map(desenharPost).join('');
+        }
+
+        const rotulo = { resultado: 'Resultado', prompt: 'Prompt', duvida: 'Dúvida' };
+
+        function desenharPost(p) {
+            const link = urlSegura(p.link);
+            const avatar = p.autor_avatar
+                ? `<img src="${esc(p.autor_avatar)}" alt="">`
+                : esc(iniciais(p.autor_nome));
+
+            return `
+            <article class="post" data-post="${p.id}">
+                <header class="topo-post">
+                    <div class="avatar">${avatar}</div>
+                    <div class="quem">
+                        <b>${esc(p.autor_nome)}</b>
+                        <span>${esc(quando(p.created_at))}${p.autor_instagram ? ' · ' + esc(p.autor_instagram) : ''}</span>
+                    </div>
+                    <span class="selo ${esc(p.tipo)}">${esc(rotulo[p.tipo] || p.tipo)}</span>
+                </header>
+
+                <div class="corpo-post">${esc(p.texto)}</div>
+
+                ${link ? `<p style="margin-top:10px"><a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(link)}</a></p>` : ''}
+                ${p.imagem_url ? `<img class="foto-post" src="${esc(p.imagem_url)}" alt="Imagem publicada por ${esc(p.autor_nome)}" loading="lazy">` : ''}
+                ${p.prompt ? `
+                    <div class="caixa-prompt">
+                        <button class="copiar" data-copiar="${p.id}">Copiar</button>
+                        <pre id="prompt-${p.id}">${esc(p.prompt)}</pre>
+                    </div>` : ''}
+
+                <footer class="acoes">
+                    <button class="acao ${p.eu_curti ? 'curtido' : ''}" data-curtir="${p.id}">
+                        <span class="coracao">${p.eu_curti ? '❤️' : '🤍'}</span>
+                        <span data-contagem="${p.id}">${p.n_curtidas || 0}</span>
+                    </button>
+                    <button class="acao" data-comentar="${p.id}">💬 ${p.comentarios.length ? p.comentarios.length + (p.comentarios.length > 1 ? ' comentários' : ' comentário') : 'Comentar'}</button>
+                    ${(p.sou_autor || souAdmin) ? `<button class="acao apagar" data-apagar="${p.id}">Apagar</button>` : ''}
+                </footer>
+
+                <div class="comentarios" id="coments-${p.id}">
+                    ${p.comentarios.map(desenharComentario).join('')}
+                    <form class="escrever" data-form-coment="${p.id}">
+                        <input type="text" placeholder="Escreva um comentário" maxlength="2000" required>
+                        <button type="submit" class="btn">Enviar</button>
+                    </form>
+                </div>
+            </article>`;
+        }
+
+        function desenharComentario(c) {
+            const avatar = c.autor_avatar ? `<img src="${esc(c.autor_avatar)}" alt="">` : esc(iniciais(c.autor_nome));
+            return `
+            <div class="coment">
+                <div class="avatar">${avatar}</div>
+                <div class="balao">
+                    <b>${esc(c.autor_nome)}</b><time>${esc(quando(c.created_at))}</time>
+                    <p>${esc(c.texto)}</p>
+                </div>
+            </div>`;
+        }
+
+        /* Cliques dentro do feed (delegação). */
+        document.getElementById('feed').addEventListener('click', async (ev) => {
+            const curtir = ev.target.closest('[data-curtir]');
+            const comentar = ev.target.closest('[data-comentar]');
+            const copiar = ev.target.closest('[data-copiar]');
+            const apagar = ev.target.closest('[data-apagar]');
+
+            if (curtir) {
+                const id = Number(curtir.dataset.curtir);
+                const estavaCurtido = curtir.classList.contains('curtido');
+                const contagem = curtir.querySelector(`[data-contagem="${id}"]`);
+                const agora = Math.max(0, Number(contagem.textContent) + (estavaCurtido ? -1 : 1));
+
+                curtir.classList.toggle('curtido');
+                curtir.querySelector('.coracao').textContent = estavaCurtido ? '🤍' : '❤️';
+                contagem.textContent = agora;
+
+                const { error } = estavaCurtido
+                    ? await sb.from('imersao_curtidas').delete().eq('post_id', id).eq('usuario_id', usuario.id)
+                    : await sb.from('imersao_curtidas').insert({ post_id: id, usuario_id: usuario.id });
+
+                if (error) {
+                    curtir.classList.toggle('curtido');
+                    curtir.querySelector('.coracao').textContent = estavaCurtido ? '❤️' : '🤍';
+                    contagem.textContent = Number(contagem.textContent) + (estavaCurtido ? 1 : -1);
+                }
+                return;
+            }
+
+            if (comentar) {
+                const caixa = document.getElementById('coments-' + comentar.dataset.comentar);
+                caixa.classList.toggle('show');
+                if (caixa.classList.contains('show')) caixa.querySelector('input').focus();
+                return;
+            }
+
+            if (copiar) {
+                const pre = document.getElementById('prompt-' + copiar.dataset.copiar);
+                try {
+                    await navigator.clipboard.writeText(pre.textContent);
+                    copiar.textContent = 'Copiado';
+                    setTimeout(() => { copiar.textContent = 'Copiar'; }, 1600);
+                } catch (e) { /* navegador sem permissão de área de transferência */ }
+                return;
+            }
+
+            if (apagar) {
+                if (!confirm('Apagar essa publicação?')) return;
+                const id = Number(apagar.dataset.apagar);
+                const { error } = await sb.from('imersao_posts').delete().eq('id', id);
+                if (error) return recado('recadoMural', 'Não consegui apagar agora.');
+                document.querySelector(`[data-post="${id}"]`)?.remove();
+            }
+        });
+
+        document.getElementById('feed').addEventListener('submit', async (ev) => {
+            const form = ev.target.closest('[data-form-coment]');
+            if (!form) return;
+            ev.preventDefault();
+
+            const id = Number(form.dataset.formComent);
+            const campo = form.querySelector('input');
+            const texto = campo.value.trim();
+            if (!texto) return;
+
+            const btn = form.querySelector('button');
+            btn.disabled = true;
+            const { error } = await sb.from('imersao_comentarios').insert({
+                post_id: id, autor_id: usuario.id, texto
+            });
+            btn.disabled = false;
+            if (error) return recado('recadoMural', 'Não consegui comentar agora.');
+
+            campo.value = '';
+            const novo = document.createElement('div');
+            novo.innerHTML = desenharComentario({
+                texto,
+                created_at: new Date().toISOString(),
+                autor_nome: perfil?.nome || 'Você',
+                autor_avatar: perfil?.avatar_url
+            });
+            form.parentElement.insertBefore(novo.firstElementChild, form);
+        });
+
+        /* ══ Materiais ══ */
+        async function carregarMateriais() {
+            const alvo = document.getElementById('listaMateriais');
+            const { data, error } = await sb.from('imersao_materiais')
+                .select('*').eq('publicado', true).order('ordem', { ascending: true });
+
+            if (error) { alvo.innerHTML = '<p class="vazio">Não consegui carregar agora.</p>'; return; }
+            if (!data.length) { alvo.innerHTML = '<p class="vazio"><strong>Ainda não tem material aqui</strong>A Lara vai postar em breve.</p>'; return; }
+
+            alvo.innerHTML = data.map(m => {
+                const url = urlSegura(m.url);
+                if (!url) return '';
+                return `
+                <a class="material" href="${esc(url)}" target="_blank" rel="noopener noreferrer">
+                    <span class="emoji">${esc(m.emoji)}</span>
+                    <div>
+                        <h3>${esc(m.titulo)}</h3>
+                        ${m.descricao ? `<p>${esc(m.descricao)}</p>` : ''}
+                    </div>
+                    <span class="seta">→</span>
+                </a>`;
+            }).join('');
+        }
+
+        /* ══ Avisos ══ */
+        async function carregarAvisos() {
+            const alvo = document.getElementById('listaAvisos');
+            const { data, error } = await sb.from('imersao_avisos')
+                .select('*').eq('publicado', true)
+                .order('fixado', { ascending: false })
+                .order('created_at', { ascending: false });
+
+            if (error) { alvo.innerHTML = '<p class="vazio">Não consegui carregar agora.</p>'; return; }
+            if (!data.length) { alvo.innerHTML = '<p class="vazio"><strong>Nenhum aviso por enquanto</strong>Quando a Lara postar um recado, ele aparece aqui.</p>'; return; }
+
+            alvo.innerHTML = data.map(a => `
+                <article class="aviso ${a.fixado ? 'fixado' : ''}">
+                    ${a.fixado ? '<span class="pin">📌 Fixado</span>' : ''}
+                    <h3>${esc(a.titulo)}</h3>
+                    <span class="data">${esc(quando(a.created_at))}</span>
+                    <div class="texto">${esc(a.corpo)}</div>
+                </article>`).join('');
+        }
+
+        /* ══ Galeria ══ */
+        async function carregarGaleria() {
+            const alvo = document.getElementById('listaGaleria');
+            const { data, error } = await sb.rpc('imersao_galeria');
+
+            if (error) { alvo.innerHTML = '<p class="vazio">Não consegui carregar agora.</p>'; return; }
+            const perfis = data || [];
+            if (!perfis.length) {
+                alvo.innerHTML = '<p class="vazio"><strong>Nenhum portfólio publicado ainda</strong>Coloque o link do seu em "Meu perfil" e seja a primeira da galeria.</p>';
+                return;
+            }
+
+            alvo.innerHTML = perfis.map(p => {
+                const url = urlSegura(p.portfolio_url);
+                const avatar = p.avatar_url ? `<img src="${esc(p.avatar_url)}" alt="">` : esc(iniciais(p.nome));
+                return `
+                <article class="vitrine">
+                    <div class="avatar">${avatar}</div>
+                    <b>${esc(p.nome)}</b>
+                    ${p.instagram ? `<span class="arroba">${esc(p.instagram)}</span>` : ''}
+                    ${p.bio ? `<p class="bio">${esc(p.bio)}</p>` : '<p class="bio"></p>'}
+                    ${url ? `<a class="btn btn-pequeno" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Ver portfólio</a>` : ''}
+                </article>`;
+            }).join('');
+        }
+
+        /* ══ Perfil ══ */
+        document.getElementById('arquivoAvatar').addEventListener('change', async (ev) => {
+            const f = ev.target.files[0];
+            if (!f) return;
+            if (f.size > 5 * 1024 * 1024) return recado('recadoPerfil', 'A imagem precisa ter menos de 5 MB.');
+            try {
+                const url = await subirImagem(f);
+                const { error } = await sb.from('imersao_perfis')
+                    .update({ avatar_url: url }).eq('usuario_id', usuario.id);
+                if (error) throw error;
+                perfil.avatar_url = url;
+                pintarPerfil();
+                recado('recadoPerfil', 'Foto atualizada.', 'ok');
+            } catch (e) {
+                recado('recadoPerfil', 'Não consegui subir a foto agora.');
+            }
+        });
+
+        document.getElementById('formPerfil').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const btn = document.getElementById('btnPerfil');
+            const nome = document.getElementById('pfNome').value.trim();
+            if (!nome) return recado('recadoPerfil', 'Coloque seu nome.');
+
+            let insta = document.getElementById('pfInsta').value.trim();
+            if (insta && !insta.startsWith('@')) insta = '@' + insta.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/$/, '');
+
+            btn.disabled = true;
+            const { error } = await sb.from('imersao_perfis').update({
+                nome,
+                instagram: insta || null,
+                portfolio_url: urlSegura(document.getElementById('pfPortfolio').value.trim()) || null,
+                bio: document.getElementById('pfBio').value.trim() || null
+            }).eq('usuario_id', usuario.id);
+            btn.disabled = false;
+
+            if (error) return recado('recadoPerfil', 'Não consegui salvar agora.');
+
+            perfil.nome = nome;
+            perfil.instagram = insta || null;
+            perfil.portfolio_url = document.getElementById('pfPortfolio').value.trim() || null;
+            perfil.bio = document.getElementById('pfBio').value.trim() || null;
+            pintarPerfil();
+            jaCarregou.galeria = false;
+            recado('recadoPerfil', 'Perfil salvo.', 'ok');
+        });
+
+        /* ══ Admin ══ */
+        document.getElementById('formAviso').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const { error } = await sb.from('imersao_avisos').insert({
+                titulo: document.getElementById('avTitulo').value.trim(),
+                corpo: document.getElementById('avCorpo').value.trim(),
+                fixado: document.getElementById('avFixado').checked
+            });
+            if (error) return recado('recadoAviso', 'Não consegui publicar o aviso.');
+            document.getElementById('formAviso').reset();
+            jaCarregou.avisos = false;
+            recado('recadoAviso', 'Aviso publicado.', 'ok');
+        });
+
+        document.getElementById('formMaterial').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const url = urlSegura(document.getElementById('mtUrl').value.trim());
+            if (!url) return recado('recadoMaterial', 'Coloque um link que comece com https://');
+
+            const { error } = await sb.from('imersao_materiais').insert({
+                titulo: document.getElementById('mtTitulo').value.trim(),
+                descricao: document.getElementById('mtDesc').value.trim() || null,
+                url,
+                emoji: document.getElementById('mtEmoji').value.trim() || '📄',
+                ordem: 99
+            });
+            if (error) return recado('recadoMaterial', 'Não consegui adicionar o material.');
+            document.getElementById('formMaterial').reset();
+            document.getElementById('mtEmoji').value = '📄';
+            jaCarregou.materiais = false;
+            recado('recadoMaterial', 'Material adicionado.', 'ok');
+        });
+    })();
+    </script>
+</body>
+</html>

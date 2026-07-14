@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Entrar · Comunidade Imersão</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background:
+                radial-gradient(1100px 520px at 15% -10%, #FBE7DA 0%, transparent 60%),
+                radial-gradient(900px 480px at 100% 100%, #F7E6EA 0%, transparent 55%),
+                var(--creme-fundo);
+        }
+
+        .entrada {
+            width: 100%;
+            max-width: 940px;
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 64px;
+            align-items: center;
+            animation: sobe 600ms cubic-bezier(.2, .7, .3, 1) both;
+        }
+
+        @keyframes sobe {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        .marca {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: var(--coral);
+            margin-bottom: 22px;
+        }
+
+        .apresenta h1 {
+            font-size: clamp(38px, 5vw, 56px);
+            letter-spacing: -.02em;
+            margin-bottom: 18px;
+        }
+        .apresenta h1 em { font-style: italic; color: var(--coral); }
+
+        .apresenta p {
+            font-size: 17px;
+            color: var(--cinza);
+            max-width: 42ch;
+        }
+
+        .lista-boas {
+            list-style: none;
+            margin-top: 30px;
+            display: grid;
+            gap: 12px;
+        }
+        .lista-boas li {
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+            font-size: 15px;
+            color: var(--grafite);
+        }
+        .lista-boas span { color: var(--coral); font-weight: 600; }
+
+        .cartao {
+            background: var(--branco);
+            border: 1px solid var(--borda);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: var(--sombra);
+        }
+
+        .cartao h2 { font-size: 24px; margin-bottom: 6px; }
+        .cartao .sub { font-size: 14px; color: var(--cinza); margin-bottom: 24px; }
+
+        .campo { margin-bottom: 16px; }
+
+        .voltar {
+            background: none;
+            font-size: 13px;
+            color: var(--cinza);
+            margin-top: 16px;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+        .voltar:hover { color: var(--coral); }
+
+        .esqueci {
+            font-size: 13px;
+            color: var(--cinza);
+            display: block;
+            text-align: center;
+            margin-top: 14px;
+        }
+
+        .etapa { display: none; }
+        .etapa.ativa { display: block; animation: sobe 320ms ease both; }
+
+        .email-eco {
+            font-size: 13px;
+            color: var(--cinza);
+            background: var(--creme);
+            border: 1px solid var(--borda);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+
+        .dica-senha { font-size: 12px; color: var(--cinza-claro); margin-top: 6px; }
+
+        @media (max-width: 860px) {
+            .entrada { grid-template-columns: 1fr; gap: 36px; max-width: 460px; }
+            .apresenta p { max-width: none; }
+            .lista-boas { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <main class="entrada">
+        <section class="apresenta">
+            <p class="marca">lara.dam</p>
+            <h1>A comunidade da <em>Imersão</em></h1>
+            <p>O lugar onde a turma continua junta depois da aula: mostra o que construiu, troca prompt que funcionou e tira dúvida com quem está fazendo a mesma coisa.</p>
+            <ul class="lista-boas">
+                <li><span>01</span> Mural pra postar seus resultados e prompts</li>
+                <li><span>02</span> Apostilas e materiais da imersão</li>
+                <li><span>03</span> Galeria com os portfólios da turma</li>
+            </ul>
+        </section>
+
+        <section class="cartao">
+            <!-- Etapa 1: e-mail -->
+            <div class="etapa ativa" id="etapaEmail">
+                <h2>Entrar</h2>
+                <p class="sub">Use o mesmo e-mail que você usou pra comprar a Imersão.</p>
+                <form id="formEmail" novalidate>
+                    <div class="campo">
+                        <label for="email">Seu e-mail</label>
+                        <input type="email" id="email" autocomplete="email" placeholder="voce@email.com" required>
+                    </div>
+                    <button type="submit" class="btn btn-bloco" id="btnEmail">Continuar</button>
+                </form>
+                <div class="recado erro" id="recadoEmail"></div>
+            </div>
+
+            <!-- Etapa 2: senha (quem já tem conta) -->
+            <div class="etapa" id="etapaSenha">
+                <h2 id="oiVolta">Que bom te ver de novo</h2>
+                <p class="sub">Digite sua senha pra entrar.</p>
+                <div class="email-eco" id="ecoSenha"></div>
+                <form id="formSenha" novalidate>
+                    <div class="campo">
+                        <label for="senha">Senha</label>
+                        <input type="password" id="senha" autocomplete="current-password" placeholder="••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-bloco" id="btnSenha">Entrar</button>
+                </form>
+                <div class="recado erro" id="recadoSenha"></div>
+                <a href="#" class="esqueci" id="linkEsqueci">Esqueci minha senha</a>
+                <button class="voltar" data-voltar>Usar outro e-mail</button>
+            </div>
+
+            <!-- Etapa 3: criar senha (primeiro acesso) -->
+            <div class="etapa" id="etapaCriar">
+                <h2 id="oiNova">Boas-vindas</h2>
+                <p class="sub">Esse é seu primeiro acesso. Crie uma senha pra entrar na comunidade.</p>
+                <div class="email-eco" id="ecoCriar"></div>
+                <form id="formCriar" novalidate>
+                    <div class="campo">
+                        <label for="senhaNova">Crie sua senha</label>
+                        <input type="password" id="senhaNova" autocomplete="new-password" placeholder="pelo menos 6 caracteres" required>
+                        <p class="dica-senha">Mínimo de 6 caracteres.</p>
+                    </div>
+                    <div class="campo">
+                        <label for="senhaConf">Repita a senha</label>
+                        <input type="password" id="senhaConf" autocomplete="new-password" placeholder="••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-bloco" id="btnCriar">Criar meu acesso</button>
+                </form>
+                <div class="recado erro" id="recadoCriar"></div>
+                <button class="voltar" data-voltar>Usar outro e-mail</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/sb.js"></script>
+    <script>
+    (function () {
+        'use strict';
+        const { sb, esc } = window.C;
+
+        const etapas = {
+            email: document.getElementById('etapaEmail'),
+            senha: document.getElementById('etapaSenha'),
+            criar: document.getElementById('etapaCriar')
+        };
+        let emailAtual = '';
+
+        function mostrar(nome) {
+            Object.values(etapas).forEach(e => e.classList.remove('ativa'));
+            etapas[nome].classList.add('ativa');
+        }
+
+        function recado(id, texto, tipo) {
+            const el = document.getElementById(id);
+            el.textContent = texto;
+            el.className = 'recado ' + (tipo || 'erro') + (texto ? ' show' : '');
+        }
+
+        function carregando(btn, ligado, textoOriginal) {
+            btn.disabled = ligado;
+            btn.textContent = ligado ? 'Um instante...' : textoOriginal;
+        }
+
+        /* Já logada? vai direto pra comunidade. */
+        (async function () {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session) window.location.replace('app.html');
+        })();
+
+        /* Etapa 1: o e-mail está na lista da turma? */
+        document.getElementById('formEmail').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const btn = document.getElementById('btnEmail');
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            if (!email || !email.includes('@')) return recado('recadoEmail', 'Digite um e-mail válido.');
+
+            recado('recadoEmail', '');
+            carregando(btn, true, 'Continuar');
+            try {
+                const { data, error } = await sb.functions.invoke('imersao-conta', {
+                    body: { action: 'status', email }
+                });
+                if (error) throw error;
+
+                if (!data.na_lista) {
+                    recado('recadoEmail', data.mensagem || 'Esse e-mail não está na lista da turma.');
+                    return;
+                }
+
+                emailAtual = email;
+                const primeiroNome = (data.nome || '').split(' ')[0];
+
+                if (data.tem_conta) {
+                    document.getElementById('ecoSenha').textContent = email;
+                    if (primeiroNome) document.getElementById('oiVolta').textContent = `Oi de novo, ${primeiroNome}`;
+                    mostrar('senha');
+                    document.getElementById('senha').focus();
+                } else {
+                    document.getElementById('ecoCriar').textContent = email;
+                    if (primeiroNome) document.getElementById('oiNova').textContent = `Boas-vindas, ${primeiroNome}`;
+                    mostrar('criar');
+                    document.getElementById('senhaNova').focus();
+                }
+            } catch (e) {
+                recado('recadoEmail', 'Não consegui verificar agora. Tente de novo em instantes.');
+            } finally {
+                carregando(btn, false, 'Continuar');
+            }
+        });
+
+        /* Etapa 2: entrar com senha. */
+        document.getElementById('formSenha').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const btn = document.getElementById('btnSenha');
+            const senha = document.getElementById('senha').value;
+            recado('recadoSenha', '');
+            carregando(btn, true, 'Entrar');
+            const { error } = await sb.auth.signInWithPassword({ email: emailAtual, password: senha });
+            carregando(btn, false, 'Entrar');
+            if (error) {
+                recado('recadoSenha', error.message === 'Invalid login credentials'
+                    ? 'Senha incorreta. Tente de novo ou use "esqueci minha senha".'
+                    : 'Não consegui entrar agora. Tente de novo.');
+                return;
+            }
+            window.location.href = 'app.html';
+        });
+
+        /* Etapa 3: criar a conta (a função no servidor confere a lista de novo). */
+        document.getElementById('formCriar').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const btn = document.getElementById('btnCriar');
+            const senha = document.getElementById('senhaNova').value;
+            const conf = document.getElementById('senhaConf').value;
+
+            if (senha.length < 6) return recado('recadoCriar', 'A senha precisa ter pelo menos 6 caracteres.');
+            if (senha !== conf) return recado('recadoCriar', 'As duas senhas não são iguais.');
+
+            recado('recadoCriar', '');
+            carregando(btn, true, 'Criar meu acesso');
+            try {
+                const { data, error } = await sb.functions.invoke('imersao-conta', {
+                    body: { action: 'criar', email: emailAtual, senha }
+                });
+                if (error || data?.error) throw new Error(data?.error || 'erro');
+
+                const { error: erroLogin } = await sb.auth.signInWithPassword({ email: emailAtual, password: senha });
+                if (erroLogin) throw erroLogin;
+
+                window.location.href = 'app.html';
+            } catch (e) {
+                recado('recadoCriar', 'Não consegui criar seu acesso agora. Tente de novo em instantes.');
+                carregando(btn, false, 'Criar meu acesso');
+            }
+        });
+
+        /* Esqueci a senha. */
+        document.getElementById('linkEsqueci').addEventListener('click', async (ev) => {
+            ev.preventDefault();
+            if (!emailAtual) return;
+            recado('recadoSenha', '');
+            const { error } = await sb.auth.resetPasswordForEmail(emailAtual, {
+                redirectTo: window.location.origin + '/nova-senha.html'
+            });
+            recado('recadoSenha', error
+                ? 'Não consegui enviar o e-mail agora. Tente de novo em instantes.'
+                : 'Pronto. Te mandei um link por e-mail pra criar uma senha nova (confira a aba promoções).',
+                error ? 'erro' : 'ok');
+        });
+
+        document.querySelectorAll('[data-voltar]').forEach(b => b.addEventListener('click', () => {
+            emailAtual = '';
+            ['recadoEmail', 'recadoSenha', 'recadoCriar'].forEach(r => recado(r, ''));
+            document.getElementById('formSenha').reset();
+            document.getElementById('formCriar').reset();
+            mostrar('email');
+            document.getElementById('email').focus();
+        }));
+    })();
+    </script>
+</body>
+</html>
