@@ -51,6 +51,48 @@
         .cena { position: absolute; inset: 0; pointer-events: none; }
         .cena canvas { width: 100%; height: 100%; display: block; }
 
+        /* ── O cursor dentro da logo: some a setinha, entra um anel de vidro ── */
+        body.na-logo, body.na-logo * { cursor: none; }
+
+        .seguidor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 9;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            will-change: transform;
+        }
+        .seguidor i {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 44px;
+            height: 44px;
+            margin: -22px 0 0 -22px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, .55);
+            background: rgba(255, 255, 255, .07);
+            backdrop-filter: blur(3px);
+            box-shadow: 0 0 22px rgba(220, 235, 255, .28), inset 0 0 12px rgba(255, 255, 255, .18);
+            opacity: 0;
+            transform: scale(.4);
+            transition: opacity 220ms ease, transform 260ms cubic-bezier(.2, .7, .3, 1);
+        }
+        .seguidor i::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            margin: -2px 0 0 -2px;
+            border-radius: 50%;
+            background: #fff;
+        }
+        .seguidor.aceso i { opacity: 1; transform: scale(1); }
+
         /* Vinheta pra tipografia sempre ler bem por cima da luz. */
         .folha::after {
             content: '';
@@ -146,7 +188,7 @@
         .heroi h1 em {
             font-style: italic;
             font-weight: 400;
-            background: linear-gradient(100deg, #FFB273, #F08A46 34%, #E08FA8 62%, #86B4FF);
+            background: linear-gradient(100deg, #FFFFFF, #DCE8F7 45%, #FFFFFF 75%, #C9D8EC);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -247,7 +289,7 @@
 </head>
 <body>
     <div class="folha">
-        <div class="cena" id="palcoBolhas"><canvas id="bolhas"></canvas></div>
+        <div class="cena" id="palcoCerebro"><canvas id="cerebro"></canvas></div>
 
         <nav class="barra">
             <span class="pilula"><span class="traco"><i></i><i></i></span> Comunidade</span>
@@ -315,9 +357,11 @@
 
     </div>
 
+    <div class="seguidor" id="seguidor" aria-hidden="true"><i></i></div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/sb.js"></script>
-    <script src="js/bolhas.js"></script>
+    <script src="js/cerebro.js"></script>
     <script>
     (function () {
         'use strict';
