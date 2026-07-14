@@ -7,337 +7,421 @@
     <title>Entrar · Comunidade Imersão</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            background: #0E0D0C;
-            min-height: 100vh;
-            padding: 14px;
-            display: flex;
+        :root {
+            --noite: #05070E;
+            --fumo: #0B0F1A;
+            --leite: #ECE7DE;
+            --claro: #FFFFFF;
+            --neblina: rgba(236, 231, 222, .58);
+            --fio: rgba(236, 231, 222, .14);
+            --vidro: rgba(255, 255, 255, .05);
+            --transicao: 200ms cubic-bezier(.2, .7, .3, 1);
         }
 
-        /* ── A folha branca flutuante ── */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Outfit', system-ui, sans-serif;
+            background: #000;
+            color: var(--leite);
+            min-height: 100vh;
+            padding: 12px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button, input { font-family: inherit; }
+        button { cursor: pointer; border: none; background: none; color: inherit; }
+        :focus-visible { outline: 2px solid rgba(150, 200, 255, .8); outline-offset: 3px; border-radius: 4px; }
+
+        /* ── A cena ── */
         .folha {
-            flex: 1;
-            background: var(--creme);
-            border-radius: 34px;
-            padding: 22px 22px 40px;
             position: relative;
+            min-height: calc(100vh - 24px);
+            border-radius: 26px;
             overflow: hidden;
+            background:
+                radial-gradient(120% 90% at 50% 0%, #101827 0%, var(--noite) 55%, #03040A 100%);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, .45);
+            padding: 22px clamp(20px, 3.4vw, 48px) 26px;
         }
-        .folha::before {
+
+        .cena { position: absolute; inset: 0; pointer-events: none; }
+        .cena canvas { width: 100%; height: 100%; display: block; }
+
+        /* Vinheta pra tipografia sempre ler bem por cima da luz. */
+        .folha::after {
             content: '';
             position: absolute;
-            inset: -20% 40% 55% -10%;
-            background: radial-gradient(closest-side, #F7E2D3, transparent 70%);
-            opacity: .8;
+            inset: 0;
+            background:
+                linear-gradient(to top, rgba(3, 4, 10, .92) 0%, rgba(3, 4, 10, .35) 38%, transparent 62%),
+                linear-gradient(to right, rgba(3, 4, 10, .78) 0%, transparent 45%);
             pointer-events: none;
         }
 
-        /* ── Barra flutuante ── */
+        .barra, .heroi, .rodape { position: relative; z-index: 2; }
+
+        /* ── Barra de cima ── */
         .barra {
-            position: relative;
-            z-index: 2;
-            align-self: center;
             display: flex;
             align-items: center;
-            gap: 26px;
-            background: rgba(255, 255, 255, .78);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--borda);
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .pilula {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 11.5px;
+            font-weight: 500;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--leite);
+            background: var(--vidro);
+            border: 1px solid var(--fio);
+            backdrop-filter: blur(12px);
             border-radius: 999px;
-            padding: 9px 10px 9px 20px;
-            box-shadow: 0 6px 20px rgba(27, 27, 27, .06);
+            padding: 10px 18px;
         }
-        .barra .nome {
+        .pilula .traco { display: grid; gap: 3px; }
+        .pilula .traco i { display: block; width: 13px; height: 1px; background: var(--leite); }
+
+        .assinatura {
             font-family: 'Fraunces', serif;
-            font-weight: 600;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .barra .nome i {
-            width: 20px; height: 20px;
-            border-radius: 6px;
-            background: var(--coral);
-            display: inline-block;
-        }
-        .barra .links { display: flex; gap: 22px; font-size: 14px; color: var(--cinza); }
-        .barra .links a { color: inherit; }
-        .barra .links a:hover { color: var(--coral); text-decoration: none; }
-        .barra .chip-turma {
-            font-size: 13px; font-weight: 500;
-            background: var(--grafite); color: var(--branco);
-            padding: 8px 16px; border-radius: 999px;
+            font-size: 17px;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--claro);
         }
 
-        /* ── Palco: texto à esquerda, cérebro à direita ── */
-        .palco {
-            position: relative;
-            z-index: 1;
-            flex: 1;
+        .canto-direito { display: flex; align-items: center; gap: 22px; }
+        .canto-direito .fino {
+            font-size: 12px;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--neblina);
+        }
+        .canto-direito .fino:hover { color: var(--claro); }
+        .btn-claro {
+            background: var(--leite);
+            color: #0A0C14;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            padding: 11px 22px;
+            border-radius: 999px;
+            transition: transform var(--transicao), background var(--transicao);
+        }
+        .btn-claro:hover { background: var(--claro); transform: translateY(-1px); }
+
+        /* ── Cartões flutuantes ── */
+        .flutua-turma {
+            position: absolute;
+            top: 84px;
+            right: clamp(20px, 3.4vw, 48px);
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            background: rgba(10, 14, 24, .55);
+            border: 1px solid var(--fio);
+            backdrop-filter: blur(16px);
+            border-radius: 22px;
+            padding: 18px 26px;
+        }
+        .flutua-turma .numero {
+            font-family: 'Fraunces', serif;
+            font-size: 40px;
+            font-weight: 400;
+            line-height: 1;
+            color: var(--claro);
+        }
+        .flutua-turma .rotulo {
+            font-size: 11px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--neblina);
+            max-width: 84px;
+            line-height: 1.4;
+        }
+
+        .flutua-nota {
+            position: absolute;
+            right: clamp(20px, 3.4vw, 48px);
+            bottom: 118px;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            max-width: 330px;
+        }
+        .medalha {
+            width: 62px; height: 62px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            border: 1px solid var(--fio);
+            background: rgba(10, 14, 24, .5);
+            backdrop-filter: blur(14px);
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            align-items: center;
-            gap: 40px;
-            max-width: 1240px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 30px 40px 0;
+            place-items: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--claro);
+        }
+        .flutua-nota p {
+            font-size: 12.5px;
+            line-height: 1.55;
+            color: var(--neblina);
         }
 
-        .estrelas {
+        /* ── Herói ── */
+        .heroi {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding-bottom: 18px;
+            max-width: 640px;
+        }
+        .sobrancelha {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 13px;
-            color: var(--cinza);
-            margin-bottom: 22px;
+            gap: 9px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--neblina);
+            margin-bottom: 18px;
         }
-        .estrelas b { color: var(--coral); letter-spacing: 2px; font-size: 15px; }
+        .sobrancelha::before { content: '›'; color: var(--claro); font-size: 14px; }
 
-        .lado-texto h1 {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600;
-            font-size: clamp(34px, 4.4vw, 60px);
-            line-height: 1.04;
-            letter-spacing: -.03em;
-            margin-bottom: 20px;
-        }
-        .lado-texto h1 em {
+        .heroi h1 {
             font-family: 'Fraunces', serif;
+            font-weight: 300;
+            font-size: clamp(34px, 4.6vw, 62px);
+            line-height: 1.06;
+            letter-spacing: -.015em;
+            color: var(--claro);
+            margin-bottom: 26px;
+        }
+        .heroi h1 em {
             font-style: italic;
-            font-weight: 600;
-            color: var(--coral);
+            font-weight: 400;
+            background: linear-gradient(100deg, #8FC7FF, #6FE3C4 40%, #F3D48A 72%, #E9A0C8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
-        .lado-texto .conversa {
-            font-size: 16px;
-            color: var(--cinza);
-            max-width: 44ch;
-            margin-bottom: 28px;
-        }
-        .lado-texto .conversa strong { color: var(--grafite); font-weight: 600; }
 
         /* ── Formulário ── */
-        .forma { max-width: 400px; }
+        .forma { max-width: 470px; }
         .etapa { display: none; }
-        .etapa.ativa { display: block; animation: aparece 340ms cubic-bezier(.2,.7,.3,1) both; }
-        @keyframes aparece { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+        .etapa.ativa { display: block; animation: sobe 380ms cubic-bezier(.2,.7,.3,1) both; }
+        @keyframes sobe { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
         .linha-campo {
             display: flex;
-            gap: 8px;
-            background: var(--branco);
-            border: 1px solid var(--borda);
+            gap: 6px;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid var(--fio);
+            backdrop-filter: blur(14px);
             border-radius: 999px;
-            padding: 6px 6px 6px 8px;
-            box-shadow: 0 8px 24px rgba(27, 27, 27, .05);
-            transition: border-color var(--transicao), box-shadow var(--transicao);
+            padding: 6px 6px 6px 10px;
+            transition: border-color var(--transicao), background var(--transicao);
         }
         .linha-campo:focus-within {
-            border-color: var(--coral);
-            box-shadow: 0 0 0 4px var(--coral-suave);
+            border-color: rgba(180, 220, 255, .55);
+            background: rgba(255, 255, 255, .09);
         }
         .linha-campo input {
-            border: none;
+            flex: 1;
+            min-width: 0;
             background: none;
-            border-radius: 999px;
-            padding: 11px 14px;
+            border: none;
+            outline: none;
+            color: var(--claro);
             font-size: 15px;
+            padding: 12px 14px;
         }
-        .linha-campo input:focus { box-shadow: none; }
-        .linha-campo .btn { flex-shrink: 0; padding: 11px 20px; font-size: 14px; }
-        .linha-campo .btn .seta {
-            width: 22px; height: 22px;
+        .linha-campo input::placeholder { color: rgba(236, 231, 222, .42); }
+        .linha-campo .btn-claro { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .linha-campo .btn-claro .seta {
+            width: 20px; height: 20px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, .22);
+            background: rgba(10, 12, 20, .12);
             display: grid; place-items: center;
-            font-size: 12px;
+            font-size: 11px;
         }
-
-        .etapa h2 { font-family: 'Outfit', sans-serif; font-size: 21px; font-weight: 600; margin-bottom: 4px; }
-        .etapa .dizeres { font-size: 14px; color: var(--cinza); margin-bottom: 16px; }
-        .quem-e {
-            display: inline-flex; align-items: center; gap: 8px;
-            font-size: 13px; color: var(--cinza);
-            background: var(--branco); border: 1px solid var(--borda);
-            border-radius: 999px; padding: 6px 14px;
-            margin-bottom: 16px;
-            word-break: break-all;
-        }
-        .abaixo { display: flex; gap: 16px; align-items: center; margin-top: 14px; }
-        .abaixo button {
-            font-size: 13px; color: var(--cinza);
-        }
-        .abaixo button:hover { color: var(--coral); }
         .par { display: flex; flex-direction: column; gap: 10px; }
 
-        /* ── Painel do cérebro ── */
-        .lado-cerebro {
-            position: relative;
-            aspect-ratio: 1 / 1;
-            max-height: 62vh;
-            justify-self: center;
-            width: 100%;
-            border-radius: 28px;
-            background:
-                radial-gradient(60% 55% at 50% 45%, #2A1D17 0%, #14100E 60%, #0D0B0A 100%);
-            overflow: hidden;
-            cursor: crosshair;
-            box-shadow: inset 0 0 80px rgba(212, 87, 42, .12), 0 24px 60px rgba(27, 27, 27, .18);
+        .etapa h2 {
+            font-family: 'Fraunces', serif;
+            font-weight: 400;
+            font-size: 24px;
+            color: var(--claro);
+            margin-bottom: 4px;
         }
-        .lado-cerebro canvas { width: 100%; height: 100%; display: block; }
-        .dica-mouse {
-            position: absolute;
-            left: 50%; bottom: 16px;
-            transform: translateX(-50%);
-            font-size: 11.5px;
-            letter-spacing: .1em;
-            text-transform: uppercase;
-            color: rgba(255, 236, 224, .38);
-            pointer-events: none;
-            transition: opacity var(--transicao);
+        .etapa .dizeres { font-size: 14px; color: var(--neblina); margin-bottom: 16px; }
+        .quem-e {
+            display: inline-block;
+            font-size: 12px;
+            letter-spacing: .04em;
+            color: var(--neblina);
+            border: 1px solid var(--fio);
+            border-radius: 999px;
+            padding: 6px 14px;
+            margin-bottom: 14px;
+            word-break: break-all;
         }
-        .lado-cerebro.mexeu .dica-mouse { opacity: 0; }
-        .so-toque { display: none; }
-        @media (hover: none) {
-            .so-mouse { display: none; }
-            .so-toque { display: inline; }
+        .abaixo { display: flex; gap: 18px; margin-top: 14px; }
+        .abaixo button {
+            font-size: 12px;
+            letter-spacing: .06em;
+            color: var(--neblina);
+            border-bottom: 1px solid transparent;
         }
+        .abaixo button:hover { color: var(--claro); border-bottom-color: var(--fio); }
+
+        .recado {
+            font-size: 13.5px;
+            margin-top: 14px;
+            padding: 11px 15px;
+            border-radius: 12px;
+            display: none;
+        }
+        .recado.show { display: block; }
+        .recado.erro { background: rgba(255, 120, 100, .1); border: 1px solid rgba(255, 140, 120, .3); color: #FFC4B8; }
+        .recado.ok { background: rgba(110, 230, 190, .1); border: 1px solid rgba(110, 230, 190, .3); color: #A7EFD6; }
 
         /* ── Rodapé ── */
         .rodape {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            padding-top: 26px;
-        }
-        .rodape p {
-            font-size: 12px;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-            color: var(--cinza-claro);
-            margin-bottom: 14px;
-        }
-        .selos {
             display: flex;
-            justify-content: center;
-            gap: 40px;
-            flex-wrap: wrap;
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--cinza);
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(236, 231, 222, .08);
+            font-size: 11px;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--neblina);
         }
-        .selos span { display: flex; align-items: center; gap: 7px; }
+        .rodape .dentro { display: flex; gap: 26px; flex-wrap: wrap; }
 
-        @media (max-width: 940px) {
+        @media (max-width: 980px) {
             body { padding: 8px; }
-            .folha { border-radius: 24px; padding: 16px 16px 30px; }
-            .barra .links { display: none; }
-            .palco {
-                grid-template-columns: 1fr;
-                padding: 26px 6px 0;
-                gap: 28px;
-            }
-            .lado-cerebro { order: -1; max-height: 40vh; aspect-ratio: 4 / 3; }
-            .lado-texto .conversa { margin-bottom: 22px; }
-            .forma { max-width: none; }
-            .selos { gap: 20px; font-size: 13px; }
+            .folha { border-radius: 20px; padding: 16px 18px 20px; min-height: calc(100vh - 16px); }
+            .assinatura { display: none; }
+            .canto-direito .fino { display: none; }
+            .flutua-turma { top: auto; bottom: auto; right: 18px; top: 72px; padding: 12px 18px; gap: 12px; }
+            .flutua-turma .numero { font-size: 28px; }
+            .flutua-nota { display: none; }
+            .heroi { max-width: none; justify-content: flex-end; padding-top: 180px; }
+            .heroi h1 { font-size: clamp(30px, 8.4vw, 44px); }
+            .rodape { flex-direction: column; align-items: flex-start; gap: 10px; font-size: 10px; }
+            .rodape .dentro { gap: 14px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
         }
     </style>
 </head>
 <body>
     <div class="folha">
+        <div class="cena" id="palcoCerebro"><canvas id="cerebro"></canvas></div>
+
         <nav class="barra">
-            <span class="nome"><i></i> Comunidade</span>
-            <span class="links">
-                <a href="#" data-ir="mural">Mural</a>
-                <a href="#" data-ir="materiais">Materiais</a>
-                <a href="#" data-ir="galeria">Portfólios</a>
+            <span class="pilula"><span class="traco"><i></i><i></i></span> Comunidade</span>
+            <span class="assinatura">Imersão</span>
+            <span class="canto-direito">
+                <a class="fino" href="#" data-ir>Mural</a>
+                <a class="fino" href="#" data-ir>Materiais</a>
+                <button class="btn-claro" data-ir>Entrar</button>
             </span>
-            <span class="chip-turma">Turma 1</span>
         </nav>
 
-        <main class="palco">
-            <section class="lado-texto">
-                <p class="estrelas"><b>★★★★★</b> Feito pelas alunas da Imersão Portfolio</p>
+        <aside class="flutua-turma">
+            <span class="numero">44</span>
+            <span class="rotulo">alunas na turma</span>
+        </aside>
 
-                <h1>Construa junto,<br>vá mais <em>longe</em></h1>
-                <p class="conversa"><strong>Você não terminou na aula.</strong> Aqui a turma mostra o que construiu, troca o prompt que funcionou e tira dúvida com quem está fazendo a mesma coisa que você.</p>
+        <aside class="flutua-nota">
+            <span class="medalha">2 dias</span>
+            <p>De imersão construindo portfólio com o Claude. Aqui é onde a turma continua, mostra o que fez e troca o que funcionou.</p>
+        </aside>
 
-                <div class="forma">
-                    <!-- Etapa 1: e-mail -->
-                    <div class="etapa ativa" id="etapaEmail">
-                        <form id="formEmail" novalidate>
-                            <div class="linha-campo">
-                                <input type="email" id="email" autocomplete="email" placeholder="Seu e-mail da compra" required>
-                                <button type="submit" class="btn" id="btnEmail">Entrar <span class="seta">→</span></button>
-                            </div>
-                        </form>
-                        <div class="recado erro" id="recadoEmail"></div>
-                    </div>
+        <main class="heroi">
+            <p class="sobrancelha">Comunidade da Imersão Portfólio</p>
+            <h1>Construa junto,<br>vá mais <em>longe</em></h1>
 
-                    <!-- Etapa 2: senha -->
-                    <div class="etapa" id="etapaSenha">
-                        <h2 id="oiVolta">Que bom te ver de novo</h2>
-                        <p class="dizeres">Digite sua senha pra entrar.</p>
-                        <p class="quem-e" id="ecoSenha"></p>
-                        <form id="formSenha" novalidate>
-                            <div class="linha-campo">
-                                <input type="password" id="senha" autocomplete="current-password" placeholder="Sua senha" required>
-                                <button type="submit" class="btn" id="btnSenha">Entrar <span class="seta">→</span></button>
-                            </div>
-                        </form>
-                        <div class="recado erro" id="recadoSenha"></div>
-                        <div class="abaixo">
-                            <button id="linkEsqueci">Esqueci minha senha</button>
-                            <button data-voltar>Usar outro e-mail</button>
+            <div class="forma">
+                <!-- Etapa 1: e-mail -->
+                <div class="etapa ativa" id="etapaEmail">
+                    <form id="formEmail" novalidate>
+                        <div class="linha-campo">
+                            <input type="email" id="email" autocomplete="email" placeholder="Seu e-mail da compra" required>
+                            <button type="submit" class="btn-claro" id="btnEmail">Entrar <span class="seta">→</span></button>
                         </div>
-                    </div>
+                    </form>
+                    <div class="recado erro" id="recadoEmail"></div>
+                </div>
 
-                    <!-- Etapa 3: criar senha -->
-                    <div class="etapa" id="etapaCriar">
-                        <h2 id="oiNova">Boas-vindas</h2>
-                        <p class="dizeres">Primeiro acesso. Crie uma senha de pelo menos 6 caracteres.</p>
-                        <p class="quem-e" id="ecoCriar"></p>
-                        <form id="formCriar" novalidate>
-                            <div class="par">
-                                <div class="linha-campo">
-                                    <input type="password" id="senhaNova" autocomplete="new-password" placeholder="Crie sua senha" required>
-                                </div>
-                                <div class="linha-campo">
-                                    <input type="password" id="senhaConf" autocomplete="new-password" placeholder="Repita a senha" required>
-                                    <button type="submit" class="btn" id="btnCriar">Criar <span class="seta">→</span></button>
-                                </div>
-                            </div>
-                        </form>
-                        <div class="recado erro" id="recadoCriar"></div>
-                        <div class="abaixo">
-                            <button data-voltar>Usar outro e-mail</button>
+                <!-- Etapa 2: senha -->
+                <div class="etapa" id="etapaSenha">
+                    <h2 id="oiVolta">Que bom te ver de novo</h2>
+                    <p class="dizeres">Digite sua senha pra entrar.</p>
+                    <p class="quem-e" id="ecoSenha"></p>
+                    <form id="formSenha" novalidate>
+                        <div class="linha-campo">
+                            <input type="password" id="senha" autocomplete="current-password" placeholder="Sua senha" required>
+                            <button type="submit" class="btn-claro" id="btnSenha">Entrar <span class="seta">→</span></button>
                         </div>
+                    </form>
+                    <div class="recado erro" id="recadoSenha"></div>
+                    <div class="abaixo">
+                        <button id="linkEsqueci">Esqueci minha senha</button>
+                        <button data-voltar>Usar outro e-mail</button>
                     </div>
                 </div>
-            </section>
 
-            <section class="lado-cerebro" id="palcoCerebro">
-                <canvas id="cerebro"></canvas>
-                <p class="dica-mouse"><span class="so-mouse">passe o cursor</span><span class="so-toque">arraste com o dedo</span></p>
-            </section>
+                <!-- Etapa 3: criar senha -->
+                <div class="etapa" id="etapaCriar">
+                    <h2 id="oiNova">Boas-vindas</h2>
+                    <p class="dizeres">Primeiro acesso. Crie uma senha de pelo menos 6 caracteres.</p>
+                    <p class="quem-e" id="ecoCriar"></p>
+                    <form id="formCriar" novalidate>
+                        <div class="par">
+                            <div class="linha-campo">
+                                <input type="password" id="senhaNova" autocomplete="new-password" placeholder="Crie sua senha" required>
+                            </div>
+                            <div class="linha-campo">
+                                <input type="password" id="senhaConf" autocomplete="new-password" placeholder="Repita a senha" required>
+                                <button type="submit" class="btn-claro" id="btnCriar">Criar <span class="seta">→</span></button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="recado erro" id="recadoCriar"></div>
+                    <div class="abaixo">
+                        <button data-voltar>Usar outro e-mail</button>
+                    </div>
+                </div>
+            </div>
         </main>
 
         <footer class="rodape">
-            <p>O que você encontra aqui dentro</p>
-            <div class="selos">
-                <span>💬 Mural da turma</span>
-                <span>📚 Materiais</span>
-                <span>📌 Avisos</span>
-                <span>✨ Portfólios</span>
-            </div>
+            <span class="dentro">
+                <span>Mural</span>
+                <span>Materiais</span>
+                <span>Avisos</span>
+                <span>Portfólios</span>
+            </span>
+            <span>Acesso exclusivo das alunas</span>
         </footer>
     </div>
 
@@ -367,9 +451,9 @@
             el.className = 'recado ' + (tipo || 'erro') + (texto ? ' show' : '');
         }
 
-        function carregando(btn, ligado, textoOriginal) {
+        function carregando(btn, ligado, original) {
             btn.disabled = ligado;
-            btn.innerHTML = ligado ? 'Um instante...' : textoOriginal;
+            btn.innerHTML = ligado ? 'Um instante...' : original;
         }
 
         /* Já logada? vai direto pra comunidade. */
@@ -491,7 +575,7 @@
             document.getElementById('email').focus();
         }));
 
-        /* Os links da barra só chamam a atenção pro campo de e-mail. */
+        /* Os atalhos de cima só levam pro campo de e-mail. */
         document.querySelectorAll('[data-ir]').forEach(a => a.addEventListener('click', (ev) => {
             ev.preventDefault();
             document.getElementById('email').focus();

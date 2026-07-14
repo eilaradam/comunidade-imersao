@@ -1,6 +1,6 @@
-/* ── A logo do Claude feita de pontos interligados ──
-   A silhueta é desenhada num canvas escondido, virada em nuvem de pontos,
-   ligada como uma rede e girada em 3D. O cursor empurra os pontos por perto. */
+/* ── A logo do Claude feita de pontos interligados, atravessada por luz prismática ──
+   A silhueta vira nuvem de pontos, os pontos são ligados como uma rede e girados em 3D.
+   O cursor gira a estrutura e empurra os pontos por perto. */
 (function () {
     'use strict';
 
@@ -12,13 +12,38 @@
     const paradinha = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     let L = 0, A = 0, dpr = 1;
+    let centroX = 0, centroY = 0;
     let pontos = [];
     let ligacoes = [];
 
-    /* Onde o mouse está (em pixels do canvas). Fora da área = null. */
     let mouse = null;
     let giroY = 0, giroX = 0;
     let alvoY = 0, alvoX = 0;
+    let tempo = 0;
+
+    /* As cores do prisma: a luz que atravessa a logo. */
+    const PRISMA = [
+        [ 96, 165, 250],  // azul
+        [ 56, 214, 214],  // ciano
+        [ 74, 222, 160],  // verde
+        [244, 208, 120],  // dourado
+        [232, 140, 190],  // rosa
+        [167, 139, 250]   // violeta
+    ];
+
+    function corDoPrisma(t) {
+        const p = (t % 1 + 1) % 1;
+        const escala = p * PRISMA.length;
+        const i = Math.floor(escala) % PRISMA.length;
+        const j = (i + 1) % PRISMA.length;
+        const f = escala - Math.floor(escala);
+        const a = PRISMA[i], b = PRISMA[j];
+        return [
+            Math.round(a[0] + (b[0] - a[0]) * f),
+            Math.round(a[1] + (b[1] - a[1]) * f),
+            Math.round(a[2] + (b[2] - a[2]) * f)
+        ];
+    }
 
     /* ── 1. Desenha a logo do Claude e lê os pixels dela ── */
     function silhuetaDoClaude(tamanho) {
@@ -32,7 +57,6 @@
         g.translate(meio, meio);
         g.rotate(-Math.PI / 12);
 
-        /* Os raios do símbolo: alternam comprido e curto, como na logo. */
         const RAIOS = 8;
         for (let i = 0; i < RAIOS; i++) {
             const comprimento = R * (i % 2 === 0 ? 1 : 0.76);
@@ -49,7 +73,6 @@
             g.restore();
         }
 
-        /* Miolo, pra rede não ficar oca no centro. */
         g.beginPath();
         g.arc(0, 0, R * 0.14, 0, Math.PI * 2);
         g.fill();
@@ -58,13 +81,13 @@
     }
 
     /* ── 2. Vira a silhueta em nuvem de pontos com profundidade ── */
-    function montarPontos(largura) {
+    function montarPontos(lado) {
         const tamanho = 340;
         const img = silhuetaDoClaude(tamanho).data;
-        const escala = (Math.min(largura, A) * 0.86) / tamanho;
-        const passo = largura < 520 ? 6 : 4;
+        const escala = lado / tamanho;
+        const passo = lado < 380 ? 6 : 4;
         const meio = tamanho / 2;
-        const brutos = [];
+        const lista = [];
 
         for (let y = 0; y < tamanho; y += passo) {
             for (let x = 0; x < tamanho; x += passo) {
@@ -75,33 +98,34 @@
                 const px = (jx - meio) * escala;
                 const py = (jy - meio) * escala;
 
-                /* Volume: mais "gordo" no miolo, fino nas pontas. */
-                const dist = Math.hypot(px, py) / (tamanho * escala * 0.5);
-                const grossura = Math.max(0.14, 1 - dist) * 46;
+                const dist = Math.hypot(px, py) / (lado * 0.5);
+                const grossura = Math.max(0.14, 1 - dist) * (lado * 0.11);
                 const pz = (Math.random() * 2 - 1) * grossura;
 
-                brutos.push({ x: px, y: py, z: pz, brilho: 0.55 + Math.random() * 0.45 });
+                /* A cor do ponto vem da diagonal: é a luz do prisma atravessando. */
+                const matiz = (px + py) / (lado * 1.4) + 0.5;
+
+                lista.push({ x: px, y: py, z: pz, matiz, brilho: 0.55 + Math.random() * 0.45 });
             }
         }
-        return brutos;
+        return lista;
     }
 
-    /* ── 3. Liga cada ponto aos vizinhos (a rede fica fixa, então calculamos uma vez só) ── */
+    /* ── 3. Liga cada ponto aos vizinhos (rede fixa: calculamos uma vez só) ── */
     function montarLigacoes(pts, alcance) {
         const pares = [];
-        const celula = alcance;
         const grade = new Map();
         const chave = (i, j) => i + ',' + j;
 
         pts.forEach((p, idx) => {
-            const k = chave(Math.floor(p.x / celula), Math.floor(p.y / celula));
+            const k = chave(Math.floor(p.x / alcance), Math.floor(p.y / alcance));
             if (!grade.has(k)) grade.set(k, []);
             grade.get(k).push(idx);
         });
 
         pts.forEach((p, idx) => {
-            const ci = Math.floor(p.x / celula);
-            const cj = Math.floor(p.y / celula);
+            const ci = Math.floor(p.x / alcance);
+            const cj = Math.floor(p.y / alcance);
             let grau = 0;
             const TETO = 4;
 
@@ -134,26 +158,66 @@
         tela.height = A * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        pontos = montarPontos(L);
-        ligacoes = montarLigacoes(pontos, L < 520 ? 26 : 22);
+        const estreito = L < 900;
+        centroX = estreito ? L * 0.5 : L * 0.63;
+        centroY = estreito ? A * 0.30 : A * 0.44;
+
+        const lado = estreito
+            ? Math.min(L * 0.78, A * 0.42)
+            : Math.min(L * 0.42, A * 0.78);
+
+        pontos = montarPontos(lado);
+        ligacoes = montarLigacoes(pontos, lado * 0.075);
     }
 
-    /* ── 4. Desenha ── */
-    const F = 520; /* distância da "câmera": quanto menor, mais perspectiva */
+    /* ── 4. O feixe de luz que atravessa a logo (o "prisma") ── */
+    function feixe() {
+        const raio = Math.max(L, A);
+        const g = ctx.createLinearGradient(
+            centroX - raio * 0.55, centroY + raio * 0.30,
+            centroX + raio * 0.55, centroY - raio * 0.30
+        );
+        g.addColorStop(0.00, 'rgba(96, 165, 250, 0)');
+        g.addColorStop(0.22, 'rgba(96, 165, 250, .16)');
+        g.addColorStop(0.38, 'rgba(56, 214, 214, .18)');
+        g.addColorStop(0.50, 'rgba(74, 222, 160, .20)');
+        g.addColorStop(0.62, 'rgba(244, 208, 120, .18)');
+        g.addColorStop(0.78, 'rgba(232, 140, 190, .15)');
+        g.addColorStop(1.00, 'rgba(167, 139, 250, 0)');
+
+        ctx.save();
+        ctx.filter = 'blur(46px)';
+        ctx.fillStyle = g;
+        ctx.translate(centroX, centroY);
+        ctx.rotate(-0.24 + Math.sin(tempo * 0.0004) * 0.05);
+        ctx.fillRect(-raio, -A * 0.16, raio * 2, A * 0.32);
+        ctx.restore();
+
+        /* Brilho no miolo, de onde a luz sai. */
+        const halo = ctx.createRadialGradient(centroX, centroY, 0, centroX, centroY, Math.min(L, A) * 0.42);
+        halo.addColorStop(0, 'rgba(120, 190, 255, .13)');
+        halo.addColorStop(0.5, 'rgba(90, 130, 220, .05)');
+        halo.addColorStop(1, 'rgba(10, 12, 20, 0)');
+        ctx.fillStyle = halo;
+        ctx.fillRect(0, 0, L, A);
+    }
+
+    /* ── 5. Desenha ── */
+    const F = 520;
 
     function quadro() {
+        tempo += 16;
         giroY += (alvoY - giroY) * 0.06;
         giroX += (alvoX - giroX) * 0.06;
         if (!paradinha && !mouse) giroY += 0.0022;
 
         const cy = Math.cos(giroY), sy = Math.sin(giroY);
         const cx = Math.cos(giroX), sx = Math.sin(giroX);
-        const meioL = L / 2, meioA = A / 2;
 
         ctx.clearRect(0, 0, L, A);
         ctx.globalCompositeOperation = 'lighter';
+        feixe();
 
-        /* Projeta todo mundo antes de desenhar as linhas. */
         for (const p of pontos) {
             let x = p.x * cy + p.z * sy;
             let z = -p.x * sy + p.z * cy;
@@ -161,17 +225,16 @@
             z = p.y * sx + z * cx;
 
             const perto = F / (F + z);
-            let px = meioL + x * perto;
-            let py = meioA + y * perto;
+            let px = centroX + x * perto;
+            let py = centroY + y * perto;
 
-            /* O cursor empurra o que está por perto. */
             if (mouse) {
                 const dx = px - mouse.x;
                 const dy = py - mouse.y;
                 const d = Math.hypot(dx, dy);
-                const raio = 110;
+                const raio = 120;
                 if (d < raio && d > 0.001) {
-                    const forca = (1 - d / raio) ** 2 * 34;
+                    const forca = (1 - d / raio) ** 2 * 38;
                     px += (dx / d) * forca;
                     py += (dy / d) * forca;
                 }
@@ -188,32 +251,33 @@
             const profundidade = (p.perto + q.perto) / 2;
             const frente = Math.max(0.12, Math.min(1, (profundidade - 0.92) * 6));
             const esticou = Math.hypot(p.px - q.px, p.py - q.py);
-            /* Se o cursor esticou demais a linha, ela se apaga. */
-            const tensao = Math.max(0, 1 - esticou / 70);
-            const alfa = (0.62 - folga * 0.30) * (0.25 + 0.75 * frente) * tensao;
+            const tensao = Math.max(0, 1 - esticou / 74);
+            const alfa = (0.50 - folga * 0.24) * (0.22 + 0.78 * frente) * tensao;
             if (alfa <= 0.01) continue;
 
-            ctx.strokeStyle = `rgba(231, 126, 70, ${alfa})`;
-            ctx.lineWidth = 0.55 + 0.55 * frente;
+            const [r, v, az] = corDoPrisma((p.matiz + q.matiz) / 2 + tempo * 0.00004);
+            ctx.strokeStyle = `rgba(${r}, ${v}, ${az}, ${alfa})`;
+            ctx.lineWidth = 0.5 + 0.5 * frente;
             ctx.beginPath();
             ctx.moveTo(p.px, p.py);
             ctx.lineTo(q.px, q.py);
             ctx.stroke();
         }
 
-        /* Pontos: um halo largo e fraco, e um miolo pequeno e forte. */
+        /* Pontos: halo colorido largo e miolo quase branco. */
         for (const p of pontos) {
-            const f = (p.perto - 0.92) * 6;   /* frente = 1, fundo = 0 */
+            const f = (p.perto - 0.92) * 6;
             const claro = Math.max(0.1, Math.min(1, f)) * p.brilho;
+            const [r, v, az] = corDoPrisma(p.matiz + tempo * 0.00004);
 
-            ctx.fillStyle = `rgba(214, 96, 48, ${0.13 * claro})`;
+            ctx.fillStyle = `rgba(${r}, ${v}, ${az}, ${0.16 * claro})`;
             ctx.beginPath();
-            ctx.arc(p.px, p.py, 6 * p.perto * (0.5 + claro * 0.6), 0, Math.PI * 2);
+            ctx.arc(p.px, p.py, 6.5 * p.perto * (0.5 + claro * 0.6), 0, Math.PI * 2);
             ctx.fill();
 
-            ctx.fillStyle = `rgba(255, ${Math.round(186 + 58 * claro)}, ${Math.round(140 + 78 * claro)}, ${0.42 + 0.58 * claro})`;
+            ctx.fillStyle = `rgba(${Math.round(210 + r * 0.18)}, ${Math.round(225 + v * 0.11)}, 255, ${0.34 + 0.62 * claro})`;
             ctx.beginPath();
-            ctx.arc(p.px, p.py, (0.9 + 0.8 * claro) * p.perto, 0, Math.PI * 2);
+            ctx.arc(p.px, p.py, (0.85 + 0.85 * claro) * p.perto, 0, Math.PI * 2);
             ctx.fill();
         }
 
@@ -221,16 +285,20 @@
         requestAnimationFrame(quadro);
     }
 
-    /* ── 5. Cursor ── */
-    palco.addEventListener('pointermove', (ev) => {
+    /* ── 6. Cursor (a cena é o fundo inteiro, então escutamos a janela) ── */
+    window.addEventListener('pointermove', (ev) => {
         const caixa = palco.getBoundingClientRect();
-        mouse = { x: ev.clientX - caixa.left, y: ev.clientY - caixa.top };
-        alvoY = (mouse.x / L - 0.5) * 1.5;
-        alvoX = -(mouse.y / A - 0.5) * 0.9;
-        palco.classList.add('mexeu');
+        const x = ev.clientX - caixa.left;
+        const y = ev.clientY - caixa.top;
+        if (x < 0 || y < 0 || x > L || y > A) { mouse = null; alvoY = 0; alvoX = 0; return; }
+
+        mouse = { x, y };
+        alvoY = ((x - centroX) / L) * 2.2;
+        alvoX = -((y - centroY) / A) * 1.2;
+        document.body.classList.add('mexeu');
     });
 
-    palco.addEventListener('pointerleave', () => {
+    window.addEventListener('pointerleave', () => {
         mouse = null;
         alvoY = 0;
         alvoX = 0;
