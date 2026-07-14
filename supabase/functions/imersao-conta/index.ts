@@ -43,19 +43,43 @@ Deno.serve(async (req) => {
 
     if (erroLista) return json({ error: 'Erro ao consultar a lista.' }, 500);
 
-    if (!aluna) {
+    // A Lara não está na lista de alunas, mas obviamente entra.
+    const { data: adm } = await admin
+      .from('usuarios')
+      .select('nome')
+      .ilike('email', email)
+      .eq('role', 'admin')
+      .maybeSingle();
+
+    if (!aluna && !adm) {
       return json({
         na_lista: false,
         mensagem: 'Esse e-mail não está na lista da turma. Use o mesmo e-mail da compra ou fale com a Lara.',
       });
     }
 
+    const nomeDela = aluna?.nome || adm?.nome || '';
+
     // Já existe conta para esse e-mail?
     const { data: lista } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-    const jaTemConta = !!lista?.users?.some((u) => (u.email || '').toLowerCase() === email);
+    const usuario = lista?.users?.find((u) => (u.email || '').toLowerCase() === email);
+    const jaTemConta = !!usuario;
 
     if (action === 'status') {
-      return json({ na_lista: true, tem_conta: jaTemConta, nome: aluna.nome || '' });
+      // Conta antiga: existe no Supabase (painel do Manager Club, por exemplo) mas nunca
+      // entrou na comunidade. A senha dela é a do painel antigo, que ninguém lembra.
+      // Nesse caso a tela precisa oferecer "criar senha nova" de cara.
+      let contaAntiga = false;
+      if (usuario) {
+        const { data: perfil } = await admin
+          .from('imersao_perfis')
+          .select('usuario_id')
+          .eq('usuario_id', usuario.id)
+          .maybeSingle();
+        contaAntiga = !perfil;
+      }
+
+      return json({ na_lista: true, tem_conta: jaTemConta, conta_antiga: contaAntiga, nome: nomeDela });
     }
 
     if (action === 'criar') {
@@ -67,7 +91,7 @@ Deno.serve(async (req) => {
         email,
         password: senha,
         email_confirm: true,
-        user_metadata: { nome: aluna.nome || '', origem: 'comunidade_imersao' },
+        user_metadata: { nome: nomeDela, origem: 'comunidade_imersao' },
       });
 
       if (erroCriar || !criado?.user) {
@@ -77,7 +101,7 @@ Deno.serve(async (req) => {
       // Perfil já nasce com o nome da lista, para o mural não mostrar "Aluna".
       await admin.from('imersao_perfis').insert({
         usuario_id: criado.user.id,
-        nome: aluna.nome || email.split('@')[0],
+        nome: nomeDela || email.split('@')[0],
       });
 
       return json({ ok: true });

@@ -278,7 +278,7 @@
                 <!-- Etapa 2: senha -->
                 <div class="etapa" id="etapaSenha">
                     <h2 id="oiVolta">Que bom te ver de novo</h2>
-                    <p class="dizeres">Digite sua senha pra entrar.</p>
+                    <p class="dizeres" id="dizeresSenha">Digite sua senha pra entrar.</p>
                     <p class="quem-e" id="ecoSenha"></p>
                     <form id="formSenha" novalidate>
                         <div class="linha-campo">
@@ -288,7 +288,7 @@
                     </form>
                     <div class="recado erro" id="recadoSenha"></div>
                     <div class="abaixo">
-                        <button id="linkEsqueci">Esqueci minha senha</button>
+                        <button id="linkEsqueci">Criar uma senha nova</button>
                         <button data-voltar>Usar outro e-mail</button>
                     </div>
                 </div>
@@ -383,6 +383,13 @@
                 if (data.tem_conta) {
                     document.getElementById('ecoSenha').textContent = email;
                     if (primeiroNome) document.getElementById('oiVolta').textContent = `Oi de novo, ${primeiroNome}`;
+
+                    /* Conta que já existia no site da Lara mas nunca entrou aqui: a senha dela
+                       é a do painel antigo, que quase ninguém lembra. Melhor avisar de cara. */
+                    document.getElementById('dizeresSenha').textContent = data.conta_antiga
+                        ? 'Esse e-mail já tinha uma conta no site da Lara. Se você não lembra a senha, clique em "criar uma senha nova" aqui embaixo e eu te mando um link por e-mail.'
+                        : 'Digite sua senha pra entrar.';
+
                     mostrar('senha');
                     document.getElementById('senha').focus();
                 } else {
