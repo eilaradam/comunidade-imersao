@@ -1,9 +1,9 @@
-/* ── Conexão com o Supabase (mesmo projeto do creators.laradam.com) ── */
+/* ── Conexão com o Supabase (projeto PRÓPRIO da comunidade, separado do Manager Club) ── */
 (function () {
     'use strict';
 
-    const SUPABASE_URL = 'https://mfrmnquvwwuxraqgemyh.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mcm1ucXV2d3d1eHJhcWdlbXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDI1NDIsImV4cCI6MjA4NzYxODU0Mn0.zmsi08dV5L1IlXJSr34vOii71w0g0OsD5_5DKio5g-o';
+    const SUPABASE_URL = 'https://ykypgdzihgxibeplvrjj.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlreXBnZHppaGd4aWJlcGx2cmpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwNTUwNzUsImV4cCI6MjA5OTYzMTA3NX0.5-C_7pD8Lsvk5IuM18u852zpMLqwG9jncTiANdnmC14';
 
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: { storageKey: 'sb-comunidade-imersao' }

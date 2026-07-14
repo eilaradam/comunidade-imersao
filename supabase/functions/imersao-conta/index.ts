@@ -45,10 +45,9 @@ Deno.serve(async (req) => {
 
     // A Lara não está na lista de alunas, mas obviamente entra.
     const { data: adm } = await admin
-      .from('usuarios')
-      .select('nome')
+      .from('imersao_admins')
+      .select('email')
       .ilike('email', email)
-      .eq('role', 'admin')
       .maybeSingle();
 
     if (!aluna && !adm) {
@@ -58,7 +57,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const nomeDela = aluna?.nome || adm?.nome || '';
+    const nomeDela = aluna?.nome || (adm ? 'Lara' : '');
 
     // Já existe conta para esse e-mail?
     const { data: lista } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
