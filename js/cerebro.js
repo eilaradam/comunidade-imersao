@@ -32,9 +32,13 @@
         ];
     }
 
-    /* O cursor vira um anel quando entra na logo. */
-    const seguidor = document.getElementById('seguidor');
     let raioLogo = 0;
+    let puxando = false;
+
+    /* Elástico: o ponto sai do lugar quando você puxa e a mola traz de volta. */
+    const MOLA = 0.055;
+    const AMORTECE = 0.88;
+    const LIMITE = 150;   /* até onde um ponto aceita ser esticado */
 
     /* ── 1. Desenha a logo do Claude e lê os pixels dela ── */
     function silhuetaDoClaude(tamanho) {
@@ -96,7 +100,12 @@
                 /* A cor do ponto vem da diagonal: é a luz do prisma atravessando. */
                 const matiz = (px + py) / (lado * 1.4) + 0.5;
 
-                lista.push({ x: px, y: py, z: pz, matiz, brilho: 0.55 + Math.random() * 0.45 });
+                lista.push({
+                    x: px, y: py, z: pz, matiz,
+                    brilho: 0.55 + Math.random() * 0.45,
+                    /* o quanto esse ponto está puxado pra fora do lugar, e a que velocidade */
+                    ox: 0, oy: 0, vx: 0, vy: 0
+                });
             }
         }
         return lista;
@@ -208,6 +217,11 @@
         ctx.globalCompositeOperation = 'lighter';
         feixe();
 
+        /* Perto do cursor a malha é puxada; segurando o botão, o puxão é bem mais forte
+           e alcança mais longe (é aí que você agarra a logo e leva pra onde quiser). */
+        const alcance = puxando ? 300 : 150;
+        const puxao = puxando ? 0.34 : 0.11;
+
         for (const p of pontos) {
             let x = p.x * cy + p.z * sy;
             let z = -p.x * sy + p.z * cy;
@@ -215,23 +229,38 @@
             z = p.y * sx + z * cx;
 
             const perto = F / (F + z);
-            let px = centroX + x * perto;
-            let py = centroY + y * perto;
+            /* Onde o ponto ficaria se ninguém mexesse nele. */
+            const bx = centroX + x * perto;
+            const by = centroY + y * perto;
 
             if (mouse) {
-                const dx = px - mouse.x;
-                const dy = py - mouse.y;
+                const dx = mouse.x - (bx + p.ox);
+                const dy = mouse.y - (by + p.oy);
                 const d = Math.hypot(dx, dy);
-                const raio = 120;
-                if (d < raio && d > 0.001) {
-                    const forca = (1 - d / raio) ** 2 * 38;
-                    px += (dx / d) * forca;
-                    py += (dy / d) * forca;
+                if (d < alcance && d > 0.001) {
+                    const quanto = (1 - d / alcance) ** 1.6 * puxao;
+                    p.vx += dx * quanto;
+                    p.vy += dy * quanto;
                 }
             }
 
-            p.px = px;
-            p.py = py;
+            /* A mola sempre tenta trazer o ponto de volta pro lugar dele. */
+            p.vx -= p.ox * MOLA;
+            p.vy -= p.oy * MOLA;
+            p.vx *= AMORTECE;
+            p.vy *= AMORTECE;
+            p.ox += p.vx;
+            p.oy += p.vy;
+
+            /* Nenhum ponto estica além do limite: a logo se deforma, não se desfaz. */
+            const estica = Math.hypot(p.ox, p.oy);
+            if (estica > LIMITE) {
+                p.ox *= LIMITE / estica;
+                p.oy *= LIMITE / estica;
+            }
+
+            p.px = bx + p.ox;
+            p.py = by + p.oy;
             p.perto = perto;
         }
 
@@ -277,35 +306,53 @@
     }
 
     /* ── 6. Cursor (a cena é o fundo inteiro, então escutamos a janela) ── */
-    function sairDaLogo() {
-        document.body.classList.remove('na-logo');
-        if (seguidor) seguidor.classList.remove('aceso');
+    function soltar() {
+        puxando = false;
+        document.body.classList.remove('puxando');
     }
 
     window.addEventListener('pointermove', (ev) => {
         const caixa = palco.getBoundingClientRect();
         const x = ev.clientX - caixa.left;
         const y = ev.clientY - caixa.top;
-        if (x < 0 || y < 0 || x > L || y > A) { mouse = null; alvoY = 0; alvoX = 0; sairDaLogo(); return; }
+        if (x < 0 || y < 0 || x > L || y > A) {
+            mouse = null;
+            alvoY = 0;
+            alvoX = 0;
+            document.body.classList.remove('na-logo');
+            return;
+        }
 
         mouse = { x, y };
-        alvoY = ((x - centroX) / L) * 2.2;
-        alvoX = -((y - centroY) / A) * 1.2;
+        alvoY = ((x - centroX) / L) * 0.9;
+        alvoX = -((y - centroY) / A) * 0.5;
 
-        /* Dentro da logo o cursor do sistema some e entra o anel de vidro. */
-        const dentro = Math.hypot(x - centroX, y - centroY) < raioLogo;
+        /* Sobre a logo, o cursor vira a mãozinha: é o convite pra pegar e puxar. */
+        const dentro = Math.hypot(x - centroX, y - centroY) < raioLogo * 1.25;
         document.body.classList.toggle('na-logo', dentro);
-        if (seguidor) {
-            seguidor.style.transform = `translate(${ev.clientX}px, ${ev.clientY}px)`;
-            seguidor.classList.toggle('aceso', dentro);
-        }
     });
+
+    window.addEventListener('pointerdown', (ev) => {
+        const caixa = palco.getBoundingClientRect();
+        const x = ev.clientX - caixa.left;
+        const y = ev.clientY - caixa.top;
+        if (x < 0 || y < 0 || x > L || y > A) return;
+        /* Só agarra pelo fundo. Em cima do formulário, o clique é do formulário. */
+        if (ev.target.closest('.forma, .barra')) return;
+
+        puxando = true;
+        document.body.classList.add('puxando');
+    });
+
+    window.addEventListener('pointerup', soltar);
+    window.addEventListener('pointercancel', soltar);
 
     window.addEventListener('pointerleave', () => {
         mouse = null;
         alvoY = 0;
         alvoX = 0;
-        sairDaLogo();
+        document.body.classList.remove('na-logo');
+        soltar();
     });
 
     let esperando;
