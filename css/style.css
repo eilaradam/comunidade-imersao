@@ -5,16 +5,16 @@
     --areia-escura: #E3D9CF;
     --nuvem: #FFFFFF;
 
-    --vidro: rgba(255, 255, 255, .52);
-    --vidro-forte: rgba(255, 255, 255, .74);
-    --vidro-fraco: rgba(255, 255, 255, .34);
-    --fio: rgba(255, 255, 255, .80);
-    --fio-tinta: rgba(58, 50, 42, .10);
-    --fio-tinta-forte: rgba(58, 50, 42, .18);
+    --vidro: rgba(255, 255, 255, .62);
+    --vidro-forte: rgba(255, 255, 255, .82);
+    --vidro-fraco: rgba(255, 255, 255, .40);
+    --fio: rgba(255, 255, 255, .9);
+    --fio-tinta: rgba(58, 50, 42, .14);
+    --fio-tinta-forte: rgba(58, 50, 42, .24);
 
-    --tinta: #2E2A26;
-    --tinta-media: #6B6158;
-    --tinta-fraca: #9A9089;
+    --tinta: #241F1A;
+    --tinta-media: #574C42;
+    --tinta-fraca: #837568;
 
     --pessego: #E3B195;
     --champanhe: #D9B98A;
