@@ -62,15 +62,17 @@
             pointer-events: none;
         }
 
-        .barra, .heroi, .rodape { position: relative; z-index: 2; }
+        .barra, .heroi { position: relative; z-index: 2; }
 
         /* ── Barra de cima ── */
         .barra {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
             align-items: center;
-            justify-content: space-between;
             gap: 16px;
         }
+        .barra .assinatura { text-align: center; }
+        .pilula { justify-self: start; }
         .pilula {
             display: inline-flex;
             align-items: center;
@@ -97,14 +99,6 @@
             color: var(--claro);
         }
 
-        .canto-direito { display: flex; align-items: center; gap: 22px; }
-        .canto-direito .fino {
-            font-size: 12px;
-            letter-spacing: .1em;
-            text-transform: uppercase;
-            color: var(--neblina);
-        }
-        .canto-direito .fino:hover { color: var(--claro); }
         .btn-claro {
             background: var(--leite);
             color: #0A0C14;
@@ -118,74 +112,14 @@
         }
         .btn-claro:hover { background: var(--claro); transform: translateY(-1px); }
 
-        /* ── Cartões flutuantes ── */
-        .flutua-turma {
-            position: absolute;
-            top: 84px;
-            right: clamp(20px, 3.4vw, 48px);
-            z-index: 3;
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            background: rgba(10, 14, 24, .55);
-            border: 1px solid var(--fio);
-            backdrop-filter: blur(16px);
-            border-radius: 22px;
-            padding: 18px 26px;
-        }
-        .flutua-turma .numero {
-            font-family: 'Fraunces', serif;
-            font-size: 40px;
-            font-weight: 400;
-            line-height: 1;
-            color: var(--claro);
-        }
-        .flutua-turma .rotulo {
-            font-size: 11px;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-            color: var(--neblina);
-            max-width: 84px;
-            line-height: 1.4;
-        }
-
-        .flutua-nota {
-            position: absolute;
-            right: clamp(20px, 3.4vw, 48px);
-            bottom: 118px;
-            z-index: 3;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            max-width: 330px;
-        }
-        .medalha {
-            width: 62px; height: 62px;
-            flex-shrink: 0;
-            border-radius: 50%;
-            border: 1px solid var(--fio);
-            background: rgba(10, 14, 24, .5);
-            backdrop-filter: blur(14px);
-            display: grid;
-            place-items: center;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--claro);
-        }
-        .flutua-nota p {
-            font-size: 12.5px;
-            line-height: 1.55;
-            color: var(--neblina);
-        }
-
-        /* ── Herói ── */
+        /* ── Herói: fica no meio da altura, encostado na esquerda ── */
         .heroi {
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
-            padding-bottom: 18px;
-            max-width: 640px;
+            justify-content: center;
+            max-width: 620px;
+            padding-bottom: 40px;
         }
         .sobrancelha {
             display: flex;
@@ -298,33 +232,12 @@
         .recado.erro { background: rgba(255, 120, 100, .1); border: 1px solid rgba(255, 140, 120, .3); color: #FFC4B8; }
         .recado.ok { background: rgba(110, 230, 190, .1); border: 1px solid rgba(110, 230, 190, .3); color: #A7EFD6; }
 
-        /* ── Rodapé ── */
-        .rodape {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(236, 231, 222, .08);
-            font-size: 11px;
-            letter-spacing: .14em;
-            text-transform: uppercase;
-            color: var(--neblina);
-        }
-        .rodape .dentro { display: flex; gap: 26px; flex-wrap: wrap; }
-
         @media (max-width: 980px) {
             body { padding: 8px; }
-            .folha { border-radius: 20px; padding: 16px 18px 20px; min-height: calc(100vh - 16px); }
+            .folha { border-radius: 20px; padding: 16px 18px 24px; min-height: calc(100vh - 16px); }
             .assinatura { display: none; }
-            .canto-direito .fino { display: none; }
-            .flutua-turma { top: auto; bottom: auto; right: 18px; top: 72px; padding: 12px 18px; gap: 12px; }
-            .flutua-turma .numero { font-size: 28px; }
-            .flutua-nota { display: none; }
-            .heroi { max-width: none; justify-content: flex-end; padding-top: 180px; }
+            .heroi { max-width: none; justify-content: flex-end; padding-bottom: 10px; }
             .heroi h1 { font-size: clamp(30px, 8.4vw, 44px); }
-            .rodape { flex-direction: column; align-items: flex-start; gap: 10px; font-size: 10px; }
-            .rodape .dentro { gap: 14px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -339,22 +252,8 @@
         <nav class="barra">
             <span class="pilula"><span class="traco"><i></i><i></i></span> Comunidade</span>
             <span class="assinatura">Imersão</span>
-            <span class="canto-direito">
-                <a class="fino" href="#" data-ir>Mural</a>
-                <a class="fino" href="#" data-ir>Materiais</a>
-                <button class="btn-claro" data-ir>Entrar</button>
-            </span>
+            <span class="canto-vazio"></span>
         </nav>
-
-        <aside class="flutua-turma">
-            <span class="numero">44</span>
-            <span class="rotulo">alunas na turma</span>
-        </aside>
-
-        <aside class="flutua-nota">
-            <span class="medalha">2 dias</span>
-            <p>De imersão construindo portfólio com o Claude. Aqui é onde a turma continua, mostra o que fez e troca o que funcionou.</p>
-        </aside>
 
         <main class="heroi">
             <p class="sobrancelha">Comunidade da Imersão Portfólio</p>
@@ -414,15 +313,6 @@
             </div>
         </main>
 
-        <footer class="rodape">
-            <span class="dentro">
-                <span>Mural</span>
-                <span>Materiais</span>
-                <span>Avisos</span>
-                <span>Portfólios</span>
-            </span>
-            <span>Acesso exclusivo das alunas</span>
-        </footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

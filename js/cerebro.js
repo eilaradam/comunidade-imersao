@@ -159,8 +159,8 @@
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         const estreito = L < 900;
-        centroX = estreito ? L * 0.5 : L * 0.63;
-        centroY = estreito ? A * 0.30 : A * 0.44;
+        centroX = estreito ? L * 0.5 : L * 0.68;
+        centroY = estreito ? A * 0.28 : A * 0.47;
 
         const lado = estreito
             ? Math.min(L * 0.78, A * 0.42)
