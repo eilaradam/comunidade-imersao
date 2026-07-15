@@ -6,6 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Admin · Comunidade Imersão</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/comunidade.css?v=2">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -80,6 +81,19 @@
     #bloqueio { text-align: center; padding: 80px 20px; }
     #bloqueio h2 { font-size: 20px; margin-bottom: 8px; }
     #bloqueio p { color: rgba(0,0,0,0.55); }
+
+    /* ── Preview dos cards (igual à comunidade) ── */
+    .admin-lista { padding: 22px; border-radius: 20px; background: linear-gradient(140deg, #ECE9F4, #F4EEF0 55%, #EAF1EE); }
+    .admin-lista.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-items: start; }
+    .admin-lista.lista { display: flex; flex-direction: column; gap: 14px; }
+    .admin-card { display: flex; flex-direction: column; gap: 10px; }
+    .admin-barra { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .admin-barra .nome { font-size: 11px; font-weight: 600; color: rgba(0,0,0,0.45); text-transform: uppercase; letter-spacing: .04em; }
+    .admin-barra .dir { display: flex; gap: 6px; }
+    .admin-prev { display: flex; }
+    .admin-prev > * { width: 100%; }
+    /* carrossel vira card estático dentro do admin */
+    .admin-lista .c-card { position: static; margin: 0; width: 100%; max-width: none; height: auto; transform: none !important; opacity: 1 !important; box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
 </style>
 </head>
 <body>
@@ -107,12 +121,72 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/sb.js?v=14"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script>
     (function () {
         'use strict';
-        const { sb, esc } = window.C || {};
+        const { sb, esc, quando } = window.C || {};
 
         const TONS = ['lavanda', 'menta', 'pessego', 'lavandaClara'];
+        const TOMCSS = {
+            lavanda: 'linear-gradient(135deg, #C8B8E0, #B8C6E8)',
+            lavandaClara: 'linear-gradient(135deg, #D8CEEE, #CBD5F2)',
+            menta: 'linear-gradient(135deg, #B8E0D0, #CBEBDE)',
+            pessego: 'linear-gradient(135deg, #E8C4B8, #F1D8C6)'
+        };
+        const TOMLIST = [TOMCSS.pessego, TOMCSS.lavanda, TOMCSS.menta, TOMCSS.lavandaClara];
+        const gtom = (k) => TOMCSS[k] || TOMCSS.pessego;
+
+        const LAYOUTS = { prompts: 'grid', destaques: 'grid', store: 'grid', materiais: 'lista', avisos: 'lista' };
+        const PREVIEWS = {
+            prompts: r => `<div class="p-card">
+                <div><span class="pill-cat">${esc(r.tema || '')}</span></div>
+                <h3>${esc(r.titulo || '')}</h3>
+                <div class="preview">${esc(r.descricao || r.prompt || '')}</div>
+                <div class="p-rodape"><button class="btn-preto">Copiar prompt</button></div>
+            </div>`,
+            destaques: r => {
+                const gratis = /gratu/i.test(r.preco || '');
+                return `<div class="c-card">
+                    <div class="c-thumb" style="background:${gtom(r.tom)}">
+                        ${r.off ? `<span class="off">${esc(r.off)} OFF</span>` : ''}
+                        <span class="badge">${esc(r.categoria || '')}</span>
+                    </div>
+                    <div class="c-corpo">
+                        <h3>${esc(r.titulo || '')}</h3>
+                        <div class="local"><i data-lucide="user"></i> ${esc(r.subtitulo || '')}</div>
+                        <div class="desc-label">Descrição</div>
+                        <p class="desc-text">${esc(r.descricao || '')}</p>
+                        <div class="stats">
+                            <div class="stat"><span class="stat-label">Aulas</span><span class="stat-val">${esc(r.aulas || '—')}</span></div>
+                            <div class="stat"><span class="stat-label">Duração</span><span class="stat-val">${esc(r.duracao || '—')}</span></div>
+                            <div class="stat"><span class="stat-label">Nota</span><span class="stat-val">${esc(r.nota || '—')}</span></div>
+                        </div>
+                        <div class="c-rodape">
+                            <div class="preco-bloco"><span class="preco-label">Valor</span>
+                                <span class="preco-linha">${r.preco_antigo ? `<s class="antes">${esc(r.preco_antigo)}</s>` : ''}<span class="preco${gratis ? ' gratis' : ''}">${esc(r.preco || '')}</span></span>
+                            </div>
+                            <button class="acao"><i data-lucide="${gratis ? 'play' : 'arrow-right'}"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+            },
+            store: r => `<div class="s-card">
+                <div class="s-thumb" style="background:${gtom(r.tom)}"><span class="badge">${esc(r.categoria || '')}</span></div>
+                <div class="s-corpo"><h3>${esc(r.titulo || '')}</h3><div class="desc">${esc(r.descricao || '')}</div>
+                    <div class="s-rodape"><span class="preco">${esc(r.preco || '')}</span><button class="btn-preto">Comprar</button></div></div>
+            </div>`,
+            materiais: (r, i) => `<div class="mat-item">
+                <div class="mat-ico" style="background:${TOMLIST[i % 4]}"><i data-lucide="file-text"></i></div>
+                <div class="mat-meio"><h3>${esc(r.titulo || '')}</h3><div class="tipo">${esc(r.descricao || '')}</div></div>
+                <a class="btn-glass"><i data-lucide="download"></i> Baixar</a>
+            </div>`,
+            avisos: r => `<div class="aviso">
+                <div class="data">${esc(quando ? quando(r.created_at) : '')}</div>
+                <h3>${esc(r.titulo || '')}</h3>
+                <div class="corpo">${esc(r.corpo || '')}</div>
+            </div>`
+        };
 
         const ENTIDADES = {
             prompts: {
@@ -214,29 +288,45 @@
 
         async function carregar() {
             const cfg = ENTIDADES[atual];
+            el('lista').className = '';
             el('lista').innerHTML = '<div class="vazio">Carregando…</div>';
             const { data, error } = await sb.from(cfg.tabela).select('*').order(cfg.ordena, { ascending: cfg.asc });
-            if (error) { el('lista').innerHTML = '<div class="vazio">Erro ao carregar.</div>'; return; }
-            if (!data || !data.length) { el('lista').innerHTML = '<div class="vazio">Nada aqui ainda. Clique em “+ Novo”.</div>'; return; }
+            if (error) { el('lista').className = ''; el('lista').innerHTML = '<div class="vazio">Erro ao carregar.</div>'; return; }
+            if (!data || !data.length) { el('lista').className = ''; el('lista').innerHTML = '<div class="vazio">Nada aqui ainda. Clique em “+ Novo”.</div>'; return; }
             const chave = cfg.chave || 'id';
             const temPub = cfg.campos.some(c => c.n === 'publicado');
-            el('lista').innerHTML = data.map(r => `
-                <div class="card"><div class="item">
-                    <div class="info">
-                        <b>${esc(String(cfg.titulo(r) || '(sem título)'))}</b>
-                        <span>${esc(String(cfg.sub(r) || ''))}</span>
-                    </div>
-                    ${temPub ? `<span class="tag-pub ${r.publicado ? 'sim' : 'nao'}">${r.publicado ? 'Publicado' : 'Rascunho'}</span>` : ''}
-                    <div class="acoes-item">
-                        <button class="btn ghost mini" data-k="${esc(String(r[chave]))}" data-acao="editar">Editar</button>
-                        <button class="btn perigo mini" data-k="${esc(String(r[chave]))}" data-acao="apagar">Apagar</button>
-                    </div>
-                </div></div>`).join('');
+            const prev = PREVIEWS[atual];
+            const ferramentas = (r) => `<span class="dir">
+                <button class="btn ghost mini" data-acao="editar" data-k="${esc(String(r[chave]))}">Editar</button>
+                <button class="btn perigo mini" data-acao="apagar" data-k="${esc(String(r[chave]))}">Apagar</button>
+            </span>`;
+            if (prev) {
+                el('lista').className = 'admin-lista ' + (LAYOUTS[atual] || 'grid');
+                el('lista').innerHTML = data.map((r, i) => `
+                    <div class="admin-card">
+                        <div class="admin-barra">
+                            <span class="nome">${temPub ? (r.publicado ? '● publicado' : '○ rascunho') : ''}</span>
+                            ${ferramentas(r)}
+                        </div>
+                        <div class="admin-prev">${prev(r, i)}</div>
+                    </div>`).join('');
+            } else {
+                el('lista').className = '';
+                el('lista').innerHTML = data.map(r => `
+                    <div class="card"><div class="item">
+                        <div class="info">
+                            <b>${esc(String(cfg.titulo(r) || '(sem título)'))}</b>
+                            <span>${esc(String(cfg.sub(r) || ''))}</span>
+                        </div>
+                        <div class="acoes-item">${ferramentas(r)}</div>
+                    </div></div>`).join('');
+            }
             el('lista').querySelectorAll('[data-acao="editar"]').forEach(b => b.addEventListener('click', () => {
                 const r = data.find(x => String(x[chave]) === b.dataset.k);
                 abrirForm(r);
             }));
             el('lista').querySelectorAll('[data-acao="apagar"]').forEach(b => b.addEventListener('click', () => apagar(b.dataset.k)));
+            if (window.lucide) lucide.createIcons();
         }
 
         function campoHTML(c, valor) {
