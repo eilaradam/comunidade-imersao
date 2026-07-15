@@ -43,50 +43,108 @@
     section { padding-top: 80px; scroll-margin-top: 40px; }
     section:last-of-type { padding-bottom: 0; }
 
-    /* ── MENU LATERAL FLUTUANTE ── */
+    /* ── MENU LATERAL COMPACTO (claro) ── */
     .menu {
         position: fixed;
-        top: 50%; left: 24px; transform: translateY(-50%);
-        width: 68px; padding: 16px 12px;
-        background: rgba(30, 30, 30, 0.35);
-        -webkit-backdrop-filter: blur(30px) saturate(1.5);
-        backdrop-filter: blur(30px) saturate(1.5);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 40px;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-        display: flex; flex-direction: column; align-items: center; gap: 8px;
+        top: 50%; left: 20px; transform: translateY(-50%);
+        width: 52px; padding: 10px 8px;
+        background: rgba(255, 255, 255, 0.45);
+        -webkit-backdrop-filter: blur(30px) saturate(1.6);
+        backdrop-filter: blur(30px) saturate(1.6);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 28px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+        display: flex; flex-direction: column; align-items: center; gap: 4px;
         z-index: 100;
+        transform-origin: left center;
+        transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms;
+    }
+    .menu.hidden {
+        transform: translateY(-50%) translateX(-30px) scale(0.7);
+        opacity: 0; pointer-events: none;
     }
     .menu a {
         position: relative;
-        width: 44px; height: 44px; border-radius: 14px;
+        width: 36px; height: 36px; border-radius: 11px;
         display: grid; place-items: center;
-        color: rgba(255, 255, 255, 0.75);
+        color: rgba(30, 30, 30, 0.55);
         text-decoration: none; cursor: pointer;
         transition: background 200ms ease, color 200ms ease, box-shadow 200ms ease;
     }
-    .menu a svg { width: 20px; height: 20px; }
-    .menu a:hover { background: rgba(255, 255, 255, 0.12); color: #FFFFFF; }
+    .menu a svg { width: 16px; height: 16px; stroke-width: 2; }
+    .menu a:hover { background: rgba(255, 255, 255, 0.6); color: rgba(30, 30, 30, 0.9); }
     .menu a.ativo {
-        background: rgba(255, 255, 255, 0.2); color: #FFFFFF;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.9); color: #1D1D1F;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.9);
     }
-    .menu .sep { margin-top: 12px; }
+    .sep-menu { width: 16px; height: 1px; background: rgba(30, 30, 30, 0.1); margin: 3px 0; }
     /* Tooltip */
     .menu a::after {
         content: attr(data-tip);
-        position: absolute; left: 56px; top: 50%;
+        position: absolute; left: 46px; top: 50%;
         transform: translateY(-50%) translateX(-4px);
         white-space: nowrap;
-        background: rgba(20, 20, 20, 0.85);
+        background: rgba(30, 30, 30, 0.9);
         -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
-        color: #fff; font-size: 13px; padding: 6px 12px; border-radius: 8px;
+        color: #fff; font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 8px;
         opacity: 0; pointer-events: none;
         transition: opacity 150ms ease, transform 150ms ease;
         z-index: 5;
     }
     .menu a:hover::after { opacity: 1; transform: translateY(-50%) translateX(0); }
-    .menu .mais-tip { display: none; }
+
+    /* ── FAB (aparece quando o menu esconde) ── */
+    .fab {
+        position: fixed; top: 24px; left: 24px;
+        width: 52px; height: 52px;
+        background: rgba(255, 255, 255, 0.55);
+        -webkit-backdrop-filter: blur(30px) saturate(1.6);
+        backdrop-filter: blur(30px) saturate(1.6);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        z-index: 101; cursor: pointer;
+        display: grid; place-items: center;
+        color: rgba(30, 30, 30, 0.7);
+        transform-origin: top left;
+        transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms, background 300ms;
+        opacity: 0; transform: scale(0.6); pointer-events: none;
+    }
+    .fab.visible { opacity: 1; transform: scale(1); pointer-events: auto; }
+    .fab:hover { color: #1D1D1F; }
+    .fab svg { width: 20px; height: 20px; stroke-width: 2; transition: transform 300ms ease; }
+    .fab.open { background: rgba(255, 255, 255, 0.85); }
+    .fab.open svg { transform: rotate(90deg); }
+
+    /* ── POPUP DO FAB ── */
+    .fab-menu {
+        position: fixed; top: 88px; left: 24px;
+        width: 240px;
+        background: rgba(255, 255, 255, 0.65);
+        -webkit-backdrop-filter: blur(40px) saturate(1.6);
+        backdrop-filter: blur(40px) saturate(1.6);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 20px; padding: 8px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+        z-index: 100;
+        transform-origin: top left;
+        transition: all 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+        opacity: 0; transform: translateY(-10px) scale(0.95); pointer-events: none;
+    }
+    .fab-menu.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+    .fab-menu a {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 12px; border-radius: 10px;
+        text-decoration: none; cursor: pointer;
+        color: rgba(30, 30, 30, 0.65);
+        transition: background 150ms ease;
+    }
+    .fab-menu a svg { width: 16px; height: 16px; stroke-width: 2; flex-shrink: 0; }
+    .fab-menu a span { font-size: 13px; font-weight: 500; color: rgba(30, 30, 30, 0.85); }
+    .fab-menu a:hover { background: rgba(255, 255, 255, 0.5); }
+    .fab-menu a.ativo { background: rgba(255, 255, 255, 0.8); color: #1D1D1F; }
+    .fab-menu a.ativo span { font-weight: 600; color: #1D1D1F; }
+    .sep-pop { display: block; height: 1px; background: rgba(30, 30, 30, 0.08); margin: 4px 12px; }
 
     /* ── Tipografia de seção ── */
     .h-sec { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; color: #1D1D1F; }
@@ -417,17 +475,22 @@
         .lane { padding-left: 0; padding-bottom: 84px; }
         .conteudo { padding: 0 20px; }
 
-        /* Menu vira bottom navigation */
+        /* Menu vira bottom navigation (sempre visível, sem esconder no scroll) */
         .menu {
-            top: auto; left: 12px; right: 12px; bottom: 12px; transform: none;
+            top: auto; left: 12px; right: 12px; bottom: 12px;
+            transform: none; opacity: 1; pointer-events: auto;
             width: auto; height: 56px; padding: 0 8px;
-            flex-direction: row; justify-content: space-around; gap: 4px;
-            border-radius: 32px;
+            flex-direction: row; justify-content: space-around; align-items: center; gap: 4px;
+            background: rgba(255, 255, 255, 0.55);
+            border-radius: 28px;
         }
-        .menu a::after { display: none; }         /* sem tooltip no mobile */
-        .menu .sep { margin-top: 0; }
+        .menu.hidden { transform: none; opacity: 1; pointer-events: auto; }
+        .menu a { width: 44px; height: 44px; border-radius: 12px; }
+        .menu a svg { width: 20px; height: 20px; }
+        .menu a::after { display: none; }           /* sem tooltip no mobile */
         .menu .so-desktop { display: none; }        /* Avisos e Store escondem */
-        .menu .mais-tip { display: grid; }          /* botão "mais" aparece */
+        .sep-menu { display: none; }
+        .fab, .fab-menu { display: none; }          /* FAB e popup somem no mobile */
 
         .h-sec, .destaque-titulo { font-size: 26px; }
         .saudacao h1 { font-size: 30px; }
@@ -449,22 +512,6 @@
         .grid-store { grid-template-columns: repeat(2, 1fr); }
     }
 
-    /* menu "mais" — folha inferior no mobile */
-    .folha-mais {
-        position: fixed; left: 12px; right: 12px; bottom: 76px; z-index: 99;
-        background: rgba(30, 30, 30, 0.55);
-        -webkit-backdrop-filter: blur(30px) saturate(1.5); backdrop-filter: blur(30px) saturate(1.5);
-        border: 1px solid rgba(255,255,255,0.12); border-radius: 24px; padding: 10px;
-        display: none; gap: 6px;
-    }
-    .folha-mais.aberta { display: flex; }
-    .folha-mais a {
-        flex: 1; display: flex; align-items: center; gap: 10px; justify-content: center;
-        color: rgba(255,255,255,0.85); text-decoration: none; font-size: 14px; font-weight: 500;
-        padding: 12px; border-radius: 16px;
-    }
-    .folha-mais a:hover { background: rgba(255,255,255,0.12); color: #fff; }
-    .folha-mais a svg { width: 18px; height: 18px; }
 </style>
 </head>
 <body>
@@ -477,22 +524,31 @@
     </div>
     <div id="cena"></div>
 
-    <!-- Menu lateral flutuante -->
-    <nav class="menu" id="menu">
-        <a data-target="inicio"    data-tip="Home"><i data-lucide="home"></i></a>
-        <a data-target="mural"     data-tip="Mural dos Alunos"><i data-lucide="layout-grid"></i></a>
+    <!-- Menu lateral compacto (esconde no scroll → vira FAB) -->
+    <nav class="menu" id="mainMenu">
+        <a data-target="inicio"    data-tip="Início"><i data-lucide="home"></i></a>
+        <a data-target="mural"     data-tip="Mural dos alunos"><i data-lucide="layout-grid"></i></a>
         <a data-target="prompts"   data-tip="Prompts"><i data-lucide="sparkles"></i></a>
         <a data-target="materiais" data-tip="Materiais"><i data-lucide="folder"></i></a>
         <a data-target="avisos"    data-tip="Avisos" class="so-desktop"><i data-lucide="bell"></i></a>
         <a data-target="store"     data-tip="Store" class="so-desktop"><i data-lucide="shopping-bag"></i></a>
-        <a class="mais-tip" id="btnMais" data-tip="Mais"><i data-lucide="menu"></i></a>
-        <a data-target="perfil"    data-tip="Meu Perfil" class="sep"><i data-lucide="user"></i></a>
+        <span class="sep-menu"></span>
+        <a data-target="perfil"    data-tip="Meu perfil"><i data-lucide="user"></i></a>
     </nav>
 
-    <!-- Folha "mais" (mobile) -->
-    <div class="folha-mais" id="folhaMais">
-        <a data-target="avisos"><i data-lucide="bell"></i> Avisos</a>
-        <a data-target="store"><i data-lucide="shopping-bag"></i> Store</a>
+    <!-- FAB (aparece após rolar) -->
+    <button class="fab" id="fab" aria-label="Abrir menu"><i data-lucide="menu"></i></button>
+
+    <!-- Popup do FAB -->
+    <div class="fab-menu" id="fabMenu">
+        <a data-target="inicio"><i data-lucide="home"></i><span>Início</span></a>
+        <a data-target="mural"><i data-lucide="layout-grid"></i><span>Mural dos alunos</span></a>
+        <a data-target="prompts"><i data-lucide="sparkles"></i><span>Prompts</span></a>
+        <a data-target="materiais"><i data-lucide="folder"></i><span>Materiais</span></a>
+        <a data-target="avisos"><i data-lucide="bell"></i><span>Avisos</span></a>
+        <a data-target="store"><i data-lucide="shopping-bag"></i><span>Store</span></a>
+        <span class="sep-pop"></span>
+        <a data-target="perfil"><i data-lucide="user"></i><span>Meu perfil</span></a>
     </div>
 
     <div class="lane">
@@ -1017,34 +1073,67 @@
         /* ─────────────── ÍCONES ─────────────── */
         if (window.lucide) lucide.createIcons();
 
-        /* ─────────────── NAVEGAÇÃO / SCROLL ─────────────── */
-        const itens = Array.from(document.querySelectorAll('.menu a[data-target]'));
-        const folhaLinks = Array.from(document.querySelectorAll('.folha-mais a[data-target]'));
-        const folha = document.getElementById('folhaMais');
+        /* ─────────────── NAVEGAÇÃO / SCROLL / FAB ─────────────── */
+        const menu = document.getElementById('mainMenu');
+        const fab = document.getElementById('fab');
+        const fabMenu = document.getElementById('fabMenu');
+        const todosLinks = Array.from(document.querySelectorAll('[data-target]'));
 
         function irPara(id) {
             const alvo = document.getElementById(id);
             if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            folha.classList.remove('aberta');
+            fab.classList.remove('open');
+            fabMenu.classList.remove('open');
         }
-        itens.forEach(a => a.addEventListener('click', () => irPara(a.getAttribute('data-target'))));
-        folhaLinks.forEach(a => a.addEventListener('click', () => irPara(a.getAttribute('data-target'))));
+        todosLinks.forEach(a => a.addEventListener('click', (e) => {
+            e.preventDefault();
+            irPara(a.getAttribute('data-target'));
+        }));
 
-        const btnMais = document.getElementById('btnMais');
-        if (btnMais) btnMais.addEventListener('click', () => folha.classList.toggle('aberta'));
+        /* FAB abre/fecha o popup */
+        fab.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const abrir = !fabMenu.classList.contains('open');
+            fabMenu.classList.toggle('open', abrir);
+            fab.classList.toggle('open', abrir);
+        });
+        /* Clicar fora fecha o popup */
+        document.addEventListener('click', (e) => {
+            if (!fabMenu.contains(e.target) && !fab.contains(e.target)) {
+                fabMenu.classList.remove('open');
+                fab.classList.remove('open');
+            }
+        });
 
-        /* IntersectionObserver marca item ativo */
+        /* Esconde o menu / mostra o FAB conforme o scroll */
+        let ticking = false;
+        function applyState() {
+            const scrolled = window.scrollY > 120;
+            if (scrolled) {
+                menu.classList.add('hidden');
+                fab.classList.add('visible');
+            } else {
+                menu.classList.remove('hidden');
+                fab.classList.remove('visible');
+                fab.classList.remove('open');
+                fabMenu.classList.remove('open');
+            }
+            ticking = false;
+        }
+        window.addEventListener('scroll', () => {
+            if (ticking) return;
+            ticking = true;
+            window.requestAnimationFrame(applyState);
+        });
+        applyState();
+
+        /* IntersectionObserver marca ativo no menu lateral E no popup */
         const secoes = ['inicio','mural','prompts','materiais','avisos','store','perfil'];
-        const mapa = {};
-        itens.forEach(a => mapa[a.getAttribute('data-target')] = a);
+        function marcarAtivo(id) {
+            todosLinks.forEach(a => a.classList.toggle('ativo', a.getAttribute('data-target') === id));
+        }
         const io = new IntersectionObserver((entries) => {
-            entries.forEach(en => {
-                if (en.isIntersecting) {
-                    itens.forEach(a => a.classList.remove('ativo'));
-                    const a = mapa[en.target.id];
-                    if (a) a.classList.add('ativo');
-                }
-            });
+            entries.forEach(en => { if (en.isIntersecting) marcarAtivo(en.target.id); });
         }, { threshold: 0.4 });
         secoes.forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
 
