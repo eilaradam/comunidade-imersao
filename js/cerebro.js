@@ -162,12 +162,13 @@
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         const estreito = L < 900;
-        centroX = estreito ? L * 0.5 : L * 0.68;
-        centroY = estreito ? A * 0.28 : A * 0.47;
+        /* A logo é o centro do palco: sempre no meio, e grande. */
+        centroX = L * 0.5;
+        centroY = estreito ? A * 0.34 : A * 0.5;
 
         const lado = estreito
-            ? Math.min(L * 0.78, A * 0.42)
-            : Math.min(L * 0.42, A * 0.78);
+            ? Math.min(L * 0.92, A * 0.5)
+            : Math.min(L * 0.62, A * 0.96);
 
         raioLogo = lado * 0.52;
         pontos = montarPontos(lado);

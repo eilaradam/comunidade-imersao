@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="stylesheet" href="css/style.css?v=6">
     <style>
         body {
             min-height: 100vh;
@@ -40,7 +40,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(100deg, rgba(247, 242, 236, .92) 0%, rgba(247, 242, 236, .55) 34%, transparent 62%);
+            background: linear-gradient(100deg, rgba(247, 242, 236, .82) 0%, rgba(247, 242, 236, .38) 26%, transparent 48%);
             pointer-events: none;
         }
 
@@ -81,10 +81,11 @@
         .assinatura {
             text-align: center;
             font-family: 'Fraunces', serif;
-            font-size: 17px;
-            letter-spacing: .2em;
+            font-size: 16px;
+            letter-spacing: .14em;
             text-transform: uppercase;
             color: var(--tinta);
+            white-space: nowrap;
         }
 
         /* ── Herói: no meio da altura, encostado na esquerda ── */
@@ -125,16 +126,16 @@
             color: transparent;
         }
 
-        /* ── Formulário: um painel de vidro fosco que flutua sobre a cena ── */
+        /* ── Formulário: um painel de vidro fosco, compacto, que flutua sobre a cena ── */
         .forma {
-            max-width: 500px;
-            background: var(--vidro);
-            border: 1px solid var(--fio);
-            backdrop-filter: var(--desfoque);
-            -webkit-backdrop-filter: var(--desfoque);
-            border-radius: 28px;
-            padding: 28px;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), var(--sombra-alta);
+            max-width: 400px;
+            background: rgba(255, 255, 255, .28);
+            border: 1px solid rgba(255, 255, 255, .7);
+            backdrop-filter: blur(40px) saturate(140%);
+            -webkit-backdrop-filter: blur(40px) saturate(140%);
+            border-radius: 26px;
+            padding: 22px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), var(--sombra-alta);
         }
         .etapa { display: none; }
         .etapa.ativa { display: block; animation: sobe 380ms cubic-bezier(.2,.7,.3,1) both; }
@@ -216,8 +217,8 @@
         <div class="cena" id="palcoCerebro"><canvas id="cerebro"></canvas></div>
 
         <nav class="barra">
-            <span class="pilula"><span class="traco"><i></i><i></i></span> Comunidade</span>
-            <span class="assinatura">Imersão</span>
+            <span class="canto-vazio"></span>
+            <span class="assinatura">Comunidade Imersão com o Claude</span>
             <span class="canto-vazio"></span>
         </nav>
 
@@ -282,8 +283,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/sb.js?v=5"></script>
-    <script src="js/cerebro.js?v=5"></script>
+    <script src="js/sb.js?v=6"></script>
+    <script src="js/cerebro.js?v=6"></script>
     <script>
     (function () {
         'use strict';
