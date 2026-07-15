@@ -135,7 +135,7 @@
 
     /* Carrossel 3D */
     .carrossel {
-        position: relative; height: 500px;
+        position: relative; height: 600px;
         perspective: 1800px;
     }
     .palco {
@@ -143,7 +143,7 @@
     }
     .c-card {
         position: absolute; left: 50%; top: 50%;
-        width: 320px; height: 440px; margin: -220px 0 0 -160px;
+        width: 320px; height: 504px; margin: -252px 0 0 -160px;
         background: rgba(255, 255, 255, 0.35);
         -webkit-backdrop-filter: blur(30px) saturate(1.6);
         backdrop-filter: blur(30px) saturate(1.6);
@@ -154,18 +154,45 @@
         transition: transform 400ms cubic-bezier(0.25, 0.1, 0.25, 1), opacity 400ms cubic-bezier(0.25, 0.1, 0.25, 1);
         display: flex; flex-direction: column;
     }
-    .c-thumb { position: relative; height: 200px; flex-shrink: 0; }
+    .c-thumb { position: relative; height: 188px; flex-shrink: 0; }
     .c-thumb .badge { position: absolute; top: 12px; right: 12px; }
-    .c-corpo { padding: 20px; display: flex; flex-direction: column; flex: 1; }
-    .c-corpo h3 { font-size: 18px; font-weight: 600; color: #1D1D1F; line-height: 1.25; }
-    .c-corpo .desc { font-size: 13px; color: rgba(0,0,0,0.55); margin-top: 8px; }
-    .c-rodape { margin-top: auto; display: flex; align-items: center; justify-content: space-between; padding-top: 16px; }
-    .c-rodape .acessar {
-        font-family: inherit; background: none; border: none; cursor: pointer;
-        font-size: 14px; font-weight: 600; color: #1D1D1F;
-        display: inline-flex; align-items: center; gap: 5px;
+    .c-thumb .off {
+        position: absolute; top: 12px; left: 12px;
+        font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #fff;
+        background: rgba(29, 29, 31, 0.85);
+        -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+        padding: 4px 10px; border-radius: 999px;
     }
-    .c-rodape .acessar:hover { gap: 8px; }
+    .c-corpo { padding: 16px 20px 18px; display: flex; flex-direction: column; flex: 1; }
+    .c-corpo h3 { font-size: 18px; font-weight: 600; color: #1D1D1F; line-height: 1.2; }
+    .c-corpo .local {
+        display: flex; align-items: center; gap: 5px;
+        font-size: 12.5px; color: rgba(0,0,0,0.5); margin-top: 5px;
+    }
+    .c-corpo .local svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .desc-label { font-size: 13px; font-weight: 600; color: #1D1D1F; margin-top: 14px; }
+    .desc-text {
+        font-size: 12.5px; color: rgba(0,0,0,0.55); line-height: 1.45; margin-top: 4px;
+        display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .stats { display: flex; gap: 8px; margin-top: 16px; }
+    .stat { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+    .stat-label { font-size: 11px; color: rgba(0,0,0,0.45); }
+    .stat-val { font-size: 15px; font-weight: 600; color: #1D1D1F; }
+    .c-rodape { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; padding-top: 16px; }
+    .preco-bloco { display: flex; flex-direction: column; gap: 3px; }
+    .preco-label { font-size: 12px; color: rgba(0,0,0,0.45); }
+    .preco-linha { display: flex; align-items: baseline; gap: 8px; }
+    .antes { font-size: 13px; color: rgba(0,0,0,0.35); }
+    .acao {
+        width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+        background: #1D1D1F; color: #fff; border: none; cursor: pointer;
+        display: grid; place-items: center;
+        transition: background 200ms ease, transform 120ms ease;
+    }
+    .acao:hover { background: #000; }
+    .acao:active { transform: scale(0.94); }
+    .acao svg { width: 20px; height: 20px; }
 
     .seta {
         position: absolute; top: 50%; transform: translateY(-50%);
@@ -319,9 +346,10 @@
         .saudacao h1 { font-size: 30px; }
 
         /* Carrossel menor */
-        .carrossel { height: 440px; }
-        .c-card { width: 260px; height: 380px; margin: -190px 0 0 -130px; }
-        .c-thumb { height: 170px; }
+        .carrossel { height: 560px; }
+        .c-card { width: 272px; height: 486px; margin: -243px 0 0 -136px; }
+        .c-thumb { height: 160px; }
+        .desc-text { -webkit-line-clamp: 2; }
         .seta.esq { left: -4px; }
         .seta.dir { right: -4px; }
 
@@ -492,11 +520,21 @@
 
         /* ─────────────── CARROSSEL 3D (destaque) ─────────────── */
         const destaques = [
-            { titulo: 'Landing pages com Claude Code', desc: 'Aula gravada', preco: 'R$ 197', cat: 'GRAVADA', tom: tom.pessego },
-            { titulo: 'Boas-vindas da Comunidade',     desc: 'Vídeo da Lara', preco: null,    cat: 'GRATUITA', tom: tom.lavanda },
-            { titulo: 'Prompts que convertem: UGC',    desc: 'Aula gravada', preco: 'R$ 147', cat: 'GRAVADA', tom: tom.menta },
-            { titulo: 'Encontro ao vivo desta semana', desc: 'Quinta 20h',   preco: null,    cat: 'AO VIVO',  tom: tom.lavandaClara },
-            { titulo: 'Imersão Portfólio Claude v2',   desc: 'Nova turma',   preco: 'R$ 397', cat: 'IMERSÃO',  tom: tom.pessego }
+            { titulo: 'Landing pages com Claude Code', autor: 'Lara Dam', cat: 'GRAVADA', off: '20%',
+              desc: 'Monte landing pages que convertem do zero, com o Claude Code passo a passo. Ideal pra quem vende serviço, mentoria ou infoproduto.',
+              aulas: '8 aulas', duracao: '2h10', nota: '4.9', antes: 'R$ 247', preco: 'R$ 197', tom: tom.pessego },
+            { titulo: 'Boas-vindas da Comunidade', autor: 'Lara Dam', cat: 'GRATUITA', off: null,
+              desc: 'Comece por aqui: um tour pela comunidade, como aproveitar cada aba e o que fazer na sua primeira semana dentro da Imersão.',
+              aulas: '3 aulas', duracao: '22 min', nota: '5.0', antes: null, preco: 'Gratuita', tom: tom.lavanda },
+            { titulo: 'Prompts que convertem: UGC', autor: 'Lara Dam', cat: 'GRAVADA', off: '25%',
+              desc: 'Os prompts que eu uso pra criar roteiros de UGC que vendem. Copie, adapte pro seu nicho e grave conteúdo que gera resultado.',
+              aulas: '6 aulas', duracao: '1h30', nota: '4.8', antes: 'R$ 197', preco: 'R$ 147', tom: tom.menta },
+            { titulo: 'Encontro ao vivo desta semana', autor: 'Ao vivo · Quinta 20h', cat: 'AO VIVO', off: null,
+              desc: 'Nosso encontro semanal com feedback ao vivo dos seus projetos. Traga sua landing ou portfólio e saia com os próximos passos.',
+              aulas: '1 encontro', duracao: '90 min', nota: 'Novo', antes: null, preco: 'Gratuita', tom: tom.lavandaClara },
+            { titulo: 'Imersão Portfólio Claude v2', autor: 'Turma de agosto', cat: 'IMERSÃO', off: '33%',
+              desc: 'A imersão completa pra montar um portfólio profissional com Claude do início ao fim, com acompanhamento e desafios semanais.',
+              aulas: '12 aulas', duracao: '6h', nota: '4.9', antes: 'R$ 597', preco: 'R$ 397', tom: tom.pessego }
         ];
 
         const palco = document.getElementById('palco');
@@ -505,16 +543,31 @@
         destaques.forEach((d, i) => {
             const card = document.createElement('div');
             card.className = 'c-card';
+            const gratis = /gratu/i.test(d.preco);
             card.innerHTML = `
                 <div class="c-thumb" style="background:${d.tom}">
+                    ${d.off ? `<span class="off">${d.off} OFF</span>` : ''}
                     <span class="badge">${d.cat}</span>
                 </div>
                 <div class="c-corpo">
                     <h3>${d.titulo}</h3>
-                    <div class="desc">${d.desc}</div>
+                    <div class="local"><i data-lucide="user"></i> ${d.autor}</div>
+                    <div class="desc-label">Descrição</div>
+                    <p class="desc-text">${d.desc}</p>
+                    <div class="stats">
+                        <div class="stat"><span class="stat-label">Aulas</span><span class="stat-val">${d.aulas}</span></div>
+                        <div class="stat"><span class="stat-label">Duração</span><span class="stat-val">${d.duracao}</span></div>
+                        <div class="stat"><span class="stat-label">Nota</span><span class="stat-val">${d.nota}</span></div>
+                    </div>
                     <div class="c-rodape">
-                        ${d.preco ? `<span class="preco">${d.preco}</span>` : `<span class="preco gratis">Gratuita</span>`}
-                        <button class="acessar">Acessar <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
+                        <div class="preco-bloco">
+                            <span class="preco-label">Valor</span>
+                            <span class="preco-linha">
+                                ${d.antes ? `<s class="antes">${d.antes}</s>` : ''}
+                                <span class="preco${gratis ? ' gratis' : ''}">${d.preco}</span>
+                            </span>
+                        </div>
+                        <button class="acao" aria-label="Acessar"><i data-lucide="${gratis ? 'play' : 'arrow-right'}"></i></button>
                     </div>
                 </div>`;
             card.addEventListener('click', () => {
