@@ -1,8 +1,8 @@
-/* ── Vidro líquido: uma forma orgânica que ondula como água e reage ao cursor ──
-   Um blob translúcido azul com reflexos iridescentes (rosa/cobre) que passeiam
-   pela superfície. A silhueta ondula sozinha, somando harmônicos senoidais.
-   Quando o cursor chega perto, a "energia" sobe: a ondulação cresce e a forma
-   incha na direção do cursor, como água reagindo ao toque. */
+/* ── Vidro líquido em WebGL: uma forma de vidro que ondula e refrata como água ──
+   Um shader desenha um blob de vidro com superfície ondulante (ruído fbm),
+   refração falsa, brilho fresnel na borda, reflexos iridescentes (rosa/cobre)
+   e faíscas de cáustica. O cursor injeta "energia": a superfície agita mais e
+   a forma faz uma ondulação extra em volta do ponteiro. */
 (function () {
     'use strict';
 
@@ -10,163 +10,191 @@
     const palco = document.getElementById('palcoCerebro');
     if (!tela || !palco) return;
 
-    const ctx = tela.getContext('2d');
+    const gl = tela.getContext('webgl', { alpha: true, premultipliedAlpha: false, antialias: true })
+            || tela.getContext('experimental-webgl', { alpha: true, premultipliedAlpha: false });
+    if (!gl) return;   /* sem WebGL: fundo fica só o creme, sem quebrar nada */
+
     const paradinha = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const passivo = palco.hasAttribute('data-passivo');
 
-    const TAU = Math.PI * 2;
-    let L = 0, A = 0, dpr = 1;
-    let cx = 0, cy = 0, R = 0;
-    let mouse = null;
-    let energia = 0;   /* 0..1 — sobe quando o cursor está perto */
+    const vsrc = `
+        attribute vec2 aPos;
+        void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+    `;
 
-    /* Harmônicos que deformam a silhueta. Cada um gira numa velocidade própria. */
-    const ondas = [
-        { k: 2, a: 0.11, v: 0.00042 },
-        { k: 3, a: 0.075, v: -0.00058 },
-        { k: 5, a: 0.05, v: 0.00074 },
-        { k: 7, a: 0.032, v: -0.00048 },
-    ];
-    ondas.forEach(o => (o.f = Math.random() * TAU));
+    const fsrc = `
+        precision mediump float;
+        uniform vec2 uRes;
+        uniform float uTime;
+        uniform vec2 uMouse;
+        uniform float uEnergy;
+        uniform vec2 uCenter;
+
+        float hash(vec2 p){
+            p = fract(p * vec2(123.34, 456.21));
+            p += dot(p, p + 45.32);
+            return fract(p.x * p.y);
+        }
+        float noise(vec2 p){
+            vec2 i = floor(p), f = fract(p);
+            float a = hash(i), b = hash(i+vec2(1.0,0.0));
+            float c = hash(i+vec2(0.0,1.0)), d = hash(i+vec2(1.0,1.0));
+            vec2 u = f*f*(3.0-2.0*f);
+            return mix(mix(a,b,u.x), mix(c,d,u.x), u.y);
+        }
+        float fbm(vec2 p){
+            float v = 0.0, a = 0.5;
+            for(int i=0;i<5;i++){ v += a*noise(p); p = p*2.03 + 1.7; a *= 0.5; }
+            return v;
+        }
+
+        void main(){
+            vec2 uv  = (gl_FragCoord.xy - 0.5*uRes) / uRes.y;
+            vec2 muv = (uMouse        - 0.5*uRes) / uRes.y;
+            vec2 p  = uv  - uCenter;
+            vec2 pm = muv - uCenter;
+
+            float t = uTime * 0.0001;
+            float radius = 0.34;
+
+            /* Ondulação orgânica da silhueta (domain warp). */
+            vec2 w = vec2(fbm(p*2.0 + t), fbm(p*2.0 + vec2(5.2,1.3) - t));
+            float warpAmt = 0.22 + uEnergy*0.12;
+
+            /* Onda extra em volta do cursor. */
+            float dm = length(p - pm);
+            float ripple = exp(-dm*dm*7.0) * uEnergy;
+
+            float shape = length(p + (w-0.5)*warpAmt) - radius - ripple*0.05;
+            float aa = 1.6 / uRes.y;
+            float mask = smoothstep(aa, -aa, shape);
+
+            /* Espessura (domo) e normal da superfície com micro-ondas. */
+            float rr = length(p);
+            float h  = sqrt(max(0.0, radius*radius - rr*rr));
+            float freq = 6.0 + uEnergy*3.5;
+            float e = 0.0035;
+            float n0 = fbm(p*freq + t*9.0 + ripple*3.0);
+            float nx = fbm((p+vec2(e,0.0))*freq + t*9.0 + ripple*3.0) - n0;
+            float ny = fbm((p+vec2(0.0,e))*freq + t*9.0 + ripple*3.0) - n0;
+            vec3 N = normalize(vec3(-(p.x*1.4) - nx*5.0, -(p.y*1.4) - ny*5.0, h*3.2 + 0.35));
+
+            vec3 V = vec3(0.0, 0.0, 1.0);
+            float fres = pow(1.0 - max(dot(N,V), 0.0), 3.0);
+
+            /* Refração falsa: um fundo procedural deslocado pela normal. */
+            vec2 refr = uv + N.xy*0.28;
+            vec3 bgIn  = mix(vec3(0.82,0.88,0.97), vec3(0.96,0.90,0.93), clamp(refr.y*0.6+0.5, 0.0, 1.0));
+            vec3 glass = mix(vec3(0.33,0.49,0.72), vec3(0.74,0.85,0.97), clamp(N.z, 0.0, 1.0));
+            vec3 col = mix(glass, bgIn, 0.4);
+
+            /* Iridescência (fina película) puxada pro rosa. */
+            float ang = atan(N.y, N.x);
+            vec3 irid = 0.5 + 0.5*cos(vec3(0.0,2.1,4.2) + ang*2.0 + n0*6.2);
+            irid = mix(vec3(1.0,0.72,0.80), irid, 0.55);
+            col += fres * irid * 0.7;
+
+            /* Faíscas de cáustica: linhas finas e brilhantes. */
+            float spark = pow(max(0.0, 1.0 - abs(n0-0.5)*5.5), 7.0);
+            col += spark * vec3(1.0,0.74,0.62) * (1.1 + uEnergy*0.7);
+
+            /* Brilho especular. */
+            vec3 Ld = normalize(vec3(-0.45, 0.6, 0.75));
+            float spec = pow(max(dot(reflect(-Ld, N), V), 0.0), 42.0);
+            col += spec * vec3(1.0);
+
+            /* Halo suave em volta. */
+            float dcontorno = length(p + (w-0.5)*warpAmt);
+            float halo = smoothstep(radius+0.24, radius-0.02, dcontorno) * 0.16;
+            float alpha = max(mask, halo*(1.0-mask));
+
+            gl_FragColor = vec4(col, clamp(alpha, 0.0, 1.0));
+        }
+    `;
+
+    function compilar(tipo, src) {
+        const s = gl.createShader(tipo);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+            console.warn('shader:', gl.getShaderInfoLog(s));
+            return null;
+        }
+        return s;
+    }
+
+    const vs = compilar(gl.VERTEX_SHADER, vsrc);
+    const fs = compilar(gl.FRAGMENT_SHADER, fsrc);
+    if (!vs || !fs) return;
+
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+        console.warn('link:', gl.getProgramInfoLog(prog));
+        return;
+    }
+    gl.useProgram(prog);
+
+    /* Triângulo que cobre a tela toda. */
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const aPos = gl.getAttribLocation(prog, 'aPos');
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    const uRes = gl.getUniformLocation(prog, 'uRes');
+    const uTime = gl.getUniformLocation(prog, 'uTime');
+    const uMouse = gl.getUniformLocation(prog, 'uMouse');
+    const uEnergy = gl.getUniformLocation(prog, 'uEnergy');
+    const uCenter = gl.getUniformLocation(prog, 'uCenter');
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.clearColor(0, 0, 0, 0);
+
+    let L = 0, A = 0, dpr = 1;
+    let cxUv = 0.14, cyUv = 0.0;
+    let mouse = null;
+    let energia = 0;
 
     function medir() {
         const c = palco.getBoundingClientRect();
         dpr = Math.min(window.devicePixelRatio || 1, 2);
         L = c.width; A = c.height;
-        tela.width = L * dpr; tela.height = A * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        const estreito = L < 900;
-        cx = estreito ? L * 0.5 : L * 0.62;
-        cy = estreito ? A * 0.34 : A * 0.5;
-        R = Math.min(L, A) * 0.3;
+        tela.width = L * dpr;
+        tela.height = A * dpr;
+        gl.viewport(0, 0, tela.width, tela.height);
+        const retrato = L / A < 0.95;
+        cxUv = retrato ? 0.0 : 0.14;
+        cyUv = retrato ? -0.14 : 0.0;
     }
 
-    function difAng(a, b) {
-        let d = a - b;
-        while (d > Math.PI) d -= TAU;
-        while (d < -Math.PI) d += TAU;
-        return d;
-    }
+    function quadro(ms) {
+        if (paradinha) ms = 6000;
 
-    /* Raio da silhueta num ângulo, no instante t. */
-    function raio(ang, t, bump) {
-        let rr = 1;
-        for (const o of ondas) {
-            rr += o.a * (1 + energia * 0.9) * Math.sin(o.k * ang + t * o.v + o.f);
-        }
-        if (bump) {
-            const dd = difAng(ang, bump.ang) / 0.85;
-            rr += bump.amp * Math.exp(-dd * dd);
-        }
-        return R * rr;
-    }
-
-    function caminho(t, bump) {
-        const N = 140;
-        ctx.beginPath();
-        for (let i = 0; i <= N; i++) {
-            const ang = (i / N) * TAU;
-            const r = raio(ang, t, bump);
-            const x = cx + Math.cos(ang) * r;
-            const y = cy + Math.sin(ang) * r;
-            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.closePath();
-    }
-
-    /* Faixas de luz que atravessam o vidro — o reflexo iridescente. */
-    function faixa(t, off, cor, amp, esp) {
-        ctx.beginPath();
-        const base = cy - R * 0.9 + off;
-        const x0 = cx - R * 1.3, x1 = cx + R * 1.3;
-        for (let x = x0; x <= x1; x += 5) {
-            const onda = Math.sin(x * 0.019 + t * 0.0016 + off) * amp
-                       + Math.sin(x * 0.052 - t * 0.0023) * amp * 0.4;
-            const y = base + onda + (t * 0.02 % (R * 2));
-            if (x === x0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.strokeStyle = cor;
-        ctx.lineWidth = esp;
-        ctx.shadowColor = cor;
-        ctx.shadowBlur = 18;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-    }
-
-    function quadro(t) {
-        if (paradinha) t = 6000;   /* pose estática, sem animar */
-
-        /* Energia persegue o alvo (perto do cursor = 1). */
+        /* Energia sobe perto do cursor. */
         let alvo = 0;
-        let bump = null;
         if (mouse && !passivo) {
-            const d = Math.hypot(mouse.x - cx, mouse.y - cy);
-            alvo = Math.max(0, Math.min(1, 1 - (d - R) / (R * 1.4)));
-            if (alvo > 0.02) {
-                bump = { ang: Math.atan2(mouse.y - cy, mouse.x - cx), amp: 0.16 * alvo };
-            }
+            const mxUv = (mouse.x - L * 0.5) / A;
+            const myUv = (mouse.y - A * 0.5) / A;
+            const d = Math.hypot(mxUv - cxUv, myUv - cyUv);
+            alvo = Math.max(0, Math.min(1, 1 - (d - 0.34) / 0.5));
         }
         energia += (alvo - energia) * 0.06;
 
-        ctx.clearRect(0, 0, L, A);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform2f(uRes, tela.width, tela.height);
+        gl.uniform1f(uTime, ms);
+        gl.uniform1f(uEnergy, energia);
+        gl.uniform2f(uCenter, cxUv, cyUv);
+        /* mouse em pixels de framebuffer, y pra cima (igual gl_FragCoord). */
+        if (mouse) gl.uniform2f(uMouse, mouse.x * dpr, (A - mouse.y) * dpr);
+        else gl.uniform2f(uMouse, -9999, -9999);
 
-        /* Halo suave por trás, pra forma "respirar" sobre o fundo. */
-        const halo = ctx.createRadialGradient(cx, cy, R * 0.2, cx, cy, R * 1.7);
-        halo.addColorStop(0, 'rgba(190, 214, 245, 0.28)');
-        halo.addColorStop(1, 'rgba(190, 214, 245, 0)');
-        ctx.fillStyle = halo;
-        ctx.fillRect(0, 0, L, A);
-
-        caminho(t, bump);
-
-        /* ── Dentro do vidro ── */
-        ctx.save();
-        ctx.clip();
-
-        /* Corpo: azul de vidro, claro em cima à esquerda, fundo mais profundo. */
-        const corpo = ctx.createRadialGradient(
-            cx - R * 0.4, cy - R * 0.55, R * 0.1,
-            cx, cy, R * 1.25
-        );
-        corpo.addColorStop(0.00, 'rgba(228, 240, 253, 0.94)');
-        corpo.addColorStop(0.45, 'rgba(158, 192, 230, 0.86)');
-        corpo.addColorStop(0.80, 'rgba(96, 136, 190, 0.90)');
-        corpo.addColorStop(1.00, 'rgba(58, 96, 152, 0.94)');
-        ctx.fillStyle = corpo;
-        ctx.fillRect(cx - R * 1.6, cy - R * 1.6, R * 3.2, R * 3.2);
-
-        /* Reflexos iridescentes (aditivos, brilham). */
-        ctx.globalCompositeOperation = 'lighter';
-        const g = 1 + energia * 0.6;   /* cursor perto: reflexos mais vivos */
-        faixa(t, -R * 0.35, 'rgba(255, 176, 198, 0.55)', R * 0.10 * g, 2.4);
-        faixa(t, R * 0.05, 'rgba(255, 206, 168, 0.50)', R * 0.13 * g, 2.0);
-        faixa(t, R * 0.5, 'rgba(200, 224, 255, 0.45)', R * 0.11 * g, 1.8);
-        faixa(t, R * 0.95, 'rgba(255, 190, 210, 0.42)', R * 0.09 * g, 1.6);
-        ctx.globalCompositeOperation = 'source-over';
-
-        /* Brilho especular no topo. */
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(-0.5);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
-        ctx.beginPath();
-        ctx.ellipse(-R * 0.34, -R * 0.5, R * 0.26, R * 0.1, 0, 0, TAU);
-        ctx.fill();
-        ctx.restore();
-
-        ctx.restore();
-
-        /* Borda de vidro: um fio de luz claro no contorno. */
-        caminho(t, bump);
-        const rim = ctx.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
-        rim.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
-        rim.addColorStop(0.5, 'rgba(210, 228, 250, 0.25)');
-        rim.addColorStop(1, 'rgba(150, 185, 225, 0.55)');
-        ctx.strokeStyle = rim;
-        ctx.lineWidth = 1.6;
-        ctx.stroke();
-
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
         requestAnimationFrame(quadro);
     }
 
