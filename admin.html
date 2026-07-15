@@ -180,6 +180,13 @@
                     { n: 'corpo', l: 'Corpo', t: 'textarea', req: true },
                     { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
                 ]
+            },
+            admins: {
+                tabela: 'imersao_admins', nome: 'Admins', ordena: 'created_at', asc: false, chave: 'email',
+                titulo: r => r.email, sub: r => 'Administradora',
+                campos: [
+                    { n: 'email', l: 'E-mail do admin (o mesmo que ela usa pra logar na comunidade)', t: 'text', req: true }
+                ]
             }
         };
 
@@ -211,23 +218,25 @@
             const { data, error } = await sb.from(cfg.tabela).select('*').order(cfg.ordena, { ascending: cfg.asc });
             if (error) { el('lista').innerHTML = '<div class="vazio">Erro ao carregar.</div>'; return; }
             if (!data || !data.length) { el('lista').innerHTML = '<div class="vazio">Nada aqui ainda. Clique em “+ Novo”.</div>'; return; }
+            const chave = cfg.chave || 'id';
+            const temPub = cfg.campos.some(c => c.n === 'publicado');
             el('lista').innerHTML = data.map(r => `
                 <div class="card"><div class="item">
                     <div class="info">
                         <b>${esc(String(cfg.titulo(r) || '(sem título)'))}</b>
                         <span>${esc(String(cfg.sub(r) || ''))}</span>
                     </div>
-                    <span class="tag-pub ${r.publicado ? 'sim' : 'nao'}">${r.publicado ? 'Publicado' : 'Rascunho'}</span>
+                    ${temPub ? `<span class="tag-pub ${r.publicado ? 'sim' : 'nao'}">${r.publicado ? 'Publicado' : 'Rascunho'}</span>` : ''}
                     <div class="acoes-item">
-                        <button class="btn ghost mini" data-editar="${r.id}">Editar</button>
-                        <button class="btn perigo mini" data-apagar="${r.id}">Apagar</button>
+                        <button class="btn ghost mini" data-k="${esc(String(r[chave]))}" data-acao="editar">Editar</button>
+                        <button class="btn perigo mini" data-k="${esc(String(r[chave]))}" data-acao="apagar">Apagar</button>
                     </div>
                 </div></div>`).join('');
-            el('lista').querySelectorAll('[data-editar]').forEach(b => b.addEventListener('click', () => {
-                const r = data.find(x => String(x.id) === b.dataset.editar);
+            el('lista').querySelectorAll('[data-acao="editar"]').forEach(b => b.addEventListener('click', () => {
+                const r = data.find(x => String(x[chave]) === b.dataset.k);
                 abrirForm(r);
             }));
-            el('lista').querySelectorAll('[data-apagar]').forEach(b => b.addEventListener('click', () => apagar(b.dataset.apagar)));
+            el('lista').querySelectorAll('[data-acao="apagar"]').forEach(b => b.addEventListener('click', () => apagar(b.dataset.k)));
         }
 
         function campoHTML(c, valor) {
@@ -271,17 +280,19 @@
                 if (c.req && (payload[c.n] === null || payload[c.n] === '')) { recado('Preencha: ' + c.l); return; }
             }
             const btn = el('btnSalvar'); btn.disabled = true; btn.textContent = 'Salvando…';
+            const chave = cfg.chave || 'id';
             let res;
-            if (editando) res = await sb.from(cfg.tabela).update(payload).eq('id', editando.id);
+            if (editando) res = await sb.from(cfg.tabela).update(payload).eq(chave, editando[chave]);
             else res = await sb.from(cfg.tabela).insert(payload);
             btn.disabled = false; btn.textContent = 'Salvar';
             if (res.error) { recado('Não consegui salvar: ' + res.error.message); return; }
             recado('Salvo!', 'ok'); fecharForm(); carregar();
         }
 
-        async function apagar(id) {
+        async function apagar(val) {
             if (!confirm('Apagar de verdade? Isso não volta.')) return;
-            const { error } = await sb.from(ENTIDADES[atual].tabela).delete().eq('id', id);
+            const cfg = ENTIDADES[atual];
+            const { error } = await sb.from(cfg.tabela).delete().eq(cfg.chave || 'id', val);
             if (error) { recado('Não consegui apagar: ' + error.message); return; }
             recado('Apagado.', 'ok'); carregar();
         }
