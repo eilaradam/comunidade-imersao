@@ -1167,7 +1167,7 @@
                     </div>
                     <span class="selo">${esc(rotulo[p.tipo] || p.tipo || '')}</span>
                 </header>
-                <div class="corpo-post">${esc(p.texto)}</div>
+                ${p.texto ? `<div class="corpo-post">${esc(p.texto)}</div>` : ''}
                 ${link ? `<p style="margin-top:10px"><a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(link)}</a></p>` : ''}
                 ${p.imagem_url ? `<img class="foto-post" src="${esc(p.imagem_url)}" alt="" loading="lazy">` : ''}
                 ${p.prompt ? `<div class="caixa-prompt"><div class="ferramentas-prompt"><button class="mini" data-copiar="${p.id}">Copiar</button></div><pre id="prompt-${p.id}">${esc(p.prompt)}</pre></div>` : ''}
@@ -1373,8 +1373,8 @@
             const ehVideo = tipoPost === 'video';
             if (ehVideo) {
                 if (!videoInfoAtual) return recadoMural('Cole um link de vídeo válido (TikTok, Instagram ou YouTube).');
-            } else if (!texto) {
-                return recadoMural('Escreva alguma coisa antes de publicar.');
+            } else if (!texto && !arquivoPost) {
+                return recadoMural('Escreva algo ou adicione uma imagem antes de publicar.');
             }
             const btn = document.getElementById('btnPublicar');
             btn.disabled = true; btn.textContent = 'Publicando...';
