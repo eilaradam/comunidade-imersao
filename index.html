@@ -1,289 +1,237 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex">
-    <title>Entrar · Comunidade Imersão</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=13">
-    <style>
-        body {
-            min-height: 100vh;
-            padding: 14px;
-            display: flex;
-            background: var(--areia-escura);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Entrar · Comunidade Imersão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        background: #FAFAFC;
+        color: #1D1D1F;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+    }
 
-        /* ── A folha de vidro que segura a cena ── */
-        .folha {
-            position: relative;
-            flex: 1;
-            min-height: calc(100vh - 28px);
-            border-radius: 32px;
-            overflow: hidden;
-            background:
-                radial-gradient(120% 90% at 72% 8%, #FDFCFA 0%, var(--areia-clara) 46%, var(--areia) 100%);
-            display: flex;
-            flex-direction: column;
-            padding: 24px clamp(20px, 3.6vw, 52px) 30px;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), var(--sombra-alta);
-        }
+    /* ── CAMADA A: blobs de cor suave, bem desfocados, o mais atrás ── */
+    .blobs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(120px); will-change: transform; }
+    .b1 { width: 620px; height: 620px; background: #B8C6E8; opacity: .6; left: 50%; top: 46%; margin: -310px 0 0 -430px; animation: fl1 24s ease-in-out infinite; }
+    .b2 { width: 560px; height: 560px; background: #E8C4B8; opacity: .55; left: 50%; top: 50%; margin: -280px 0 0 -110px; animation: fl2 29s ease-in-out infinite; }
+    .b3 { width: 700px; height: 700px; background: #C8B8E0; opacity: .5; left: 50%; top: 55%; margin: -350px 0 0 -360px; animation: fl3 22s ease-in-out infinite; }
+    .b4 { width: 470px; height: 470px; background: #B8E0D0; opacity: .55; left: 50%; top: 42%; margin: -235px 0 0 -40px; animation: fl4 26s ease-in-out infinite; }
+    @keyframes fl1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-42px,32px); } }
+    @keyframes fl2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(36px,-40px); } }
+    @keyframes fl3 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,42px); } }
+    @keyframes fl4 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-30px,-34px); } }
 
-        .cena { position: absolute; inset: 0; pointer-events: none; }
-        .cena canvas { width: 100%; height: 100%; display: block; }
+    /* ── CAMADA B: starburst de partículas ── */
+    #cena { position: fixed; inset: 0; z-index: 1; }
+    #cena canvas { display: block; }
 
-        /* Um véu de luz do lado do texto, pra tipografia nunca disputar com a rede. */
-        .folha::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(100deg, rgba(247, 242, 236, .82) 0%, rgba(247, 242, 236, .38) 26%, transparent 48%);
-            pointer-events: none;
-        }
+    /* ── Card de login (glassmorphism visionOS) ── */
+    .card {
+        position: relative;
+        z-index: 2;
+        width: 400px;
+        max-width: 90vw;
+        padding: 48px 40px;
+        background: rgba(255, 255, 255, 0.0);
+        -webkit-backdrop-filter: blur(5px) saturate(1.5);
+        backdrop-filter: blur(5px) saturate(1.5);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 28px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+    .card::before {
+        content: '';
+        position: absolute; top: 0; left: 24px; right: 24px; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+    }
 
-        .barra, .heroi { position: relative; z-index: 2; }
+    .card h1 { font-size: 24px; font-weight: 600; letter-spacing: -.01em; color: #1D1D1F; }
+    .card .sub { font-size: 15px; color: rgba(0, 0, 0, 0.5); margin-top: 6px; margin-bottom: 30px; }
 
-        /* Dentro da logo o cursor avisa que dá pra pegar e puxar. */
-        body.na-logo { cursor: grab; }
-        body.puxando, body.puxando * { cursor: grabbing; }
+    .campo { margin-bottom: 18px; }
+    .campo label {
+        display: block;
+        font-size: 13px;
+        color: rgba(0, 0, 0, 0.5);
+        letter-spacing: 0.02em;
+        margin-bottom: 8px;
+    }
+    .campo input {
+        width: 100%;
+        font-family: inherit;
+        font-size: 16px;
+        color: #1D1D1F;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.25);
+        -webkit-backdrop-filter: blur(15px);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 14px;
+        padding: 14px 16px;
+        outline: none;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+        transition: border-color 250ms ease, box-shadow 250ms ease, background 250ms ease;
+    }
+    .campo input::placeholder { color: rgba(0, 0, 0, 0.3); }
+    .campo input:focus {
+        border-color: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.35), inset 0 1px 2px rgba(0, 0, 0, 0.04);
+        background: rgba(255, 255, 255, 0.6);
+    }
+    .campo input:-webkit-autofill,
+    .campo input:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0 40px rgba(255, 255, 255, 0.9) inset;
+        -webkit-text-fill-color: #1D1D1F;
+        transition: background-color 5000s;
+    }
 
-        /* ── Barra de cima ── */
-        .barra {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            align-items: center;
-            gap: 16px;
-        }
-        .pilula {
-            justify-self: start;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: .16em;
-            text-transform: uppercase;
-            color: var(--tinta-media);
-            background: var(--vidro-forte);
-            border: 1px solid var(--fio);
-            backdrop-filter: var(--desfoque);
-            -webkit-backdrop-filter: var(--desfoque);
-            border-radius: 999px;
-            padding: 11px 20px;
-            box-shadow: var(--sombra);
-        }
-        .pilula .traco { display: grid; gap: 3px; }
-        .pilula .traco i { display: block; width: 13px; height: 1px; background: var(--tinta-media); }
+    .entrar {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        font-family: inherit;
+        font-size: 16px;
+        font-weight: 600;
+        color: #FFFFFF;
+        background: #1D1D1F;
+        border: none;
+        border-radius: 14px;
+        padding: 16px;
+        margin-top: 6px;
+        cursor: pointer;
+        transition: background 200ms ease, transform 120ms ease, box-shadow 200ms ease;
+    }
+    .entrar::after {
+        content: '';
+        position: absolute; inset: 0;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 50%);
+        pointer-events: none;
+    }
+    .entrar:hover { background: #000000; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); }
+    .entrar:active { transform: scale(0.98); }
+    .entrar:disabled { opacity: .6; cursor: default; }
 
-        .assinatura {
-            text-align: center;
-            font-family: 'Fraunces', serif;
-            font-size: 16px;
-            letter-spacing: .14em;
-            text-transform: uppercase;
-            color: var(--tinta);
-            white-space: nowrap;
-        }
+    /* ── Etapas do login ── */
+    .etapa { display: none; }
+    .etapa.ativa { display: block; animation: sobe 380ms cubic-bezier(.2,.7,.3,1) both; }
+    @keyframes sobe { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .etapa h2 { font-size: 20px; font-weight: 600; color: #1D1D1F; margin-bottom: 4px; }
+    .etapa .dizeres { font-size: 14px; color: rgba(0, 0, 0, 0.5); margin-bottom: 16px; }
+    .quem-e {
+        display: inline-block; font-size: 13px; color: rgba(0, 0, 0, 0.55);
+        background: rgba(255, 255, 255, 0.35); border: 1px solid rgba(255, 255, 255, 0.6);
+        -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+        border-radius: 999px; padding: 6px 14px; margin-bottom: 16px; word-break: break-all;
+    }
 
-        /* ── Herói: no meio da altura, encostado na esquerda ── */
-        .heroi {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            max-width: 640px;
-            padding-bottom: 40px;
-        }
-        .sobrancelha {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: .18em;
-            text-transform: uppercase;
-            color: var(--terracota);
-            margin-bottom: 20px;
-        }
-        .sobrancelha::before { content: '›'; font-size: 14px; }
+    .recado {
+        font-size: 13.5px; padding: 11px 14px; border-radius: 12px; margin-top: 14px; display: none;
+        color: #1D1D1F; background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.7);
+        -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    }
+    .recado.show { display: block; }
 
-        .heroi h1 {
-            font-weight: 300;
-            font-size: clamp(36px, 4.8vw, 64px);
-            line-height: 1.05;
-            letter-spacing: -.02em;
-            margin-bottom: 28px;
-        }
-        .heroi h1 em {
-            font-style: italic;
-            font-weight: 400;
-            background: linear-gradient(100deg, var(--terracota), var(--champanhe) 55%, var(--pessego));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
+    .abaixo { display: flex; gap: 18px; margin-top: 18px; justify-content: center; flex-wrap: wrap; }
+    .abaixo button {
+        font-family: inherit; background: none; border: none; cursor: pointer;
+        font-size: 13px; color: rgba(0, 0, 0, 0.5);
+    }
+    .abaixo button:hover { color: #1D1D1F; text-decoration: underline; }
 
-        /* ── Formulário: um painel de vidro fosco, compacto, que flutua sobre a cena ── */
-        .forma {
-            max-width: 400px;
-            background: rgba(255, 255, 255, .28);
-            border: 1px solid rgba(255, 255, 255, .7);
-            backdrop-filter: blur(40px) saturate(140%);
-            -webkit-backdrop-filter: blur(40px) saturate(140%);
-            border-radius: 26px;
-            padding: 22px;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), var(--sombra-alta);
-        }
-        .etapa { display: none; }
-        .etapa.ativa { display: block; animation: sobe 380ms cubic-bezier(.2,.7,.3,1) both; }
-        @keyframes sobe { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-
-        .linha-campo {
-            display: flex;
-            gap: 6px;
-            background: rgba(255, 255, 255, .78);
-            border: 1px solid var(--fio);
-            border-radius: 999px;
-            padding: 7px 7px 7px 12px;
-            box-shadow: inset 0 1px 3px rgba(58, 50, 42, .05);
-            transition: border-color var(--transicao), box-shadow var(--transicao);
-        }
-        .linha-campo:focus-within {
-            border-color: var(--champanhe);
-            box-shadow: inset 0 1px 3px rgba(58, 50, 42, .05), 0 0 0 4px rgba(217, 185, 138, .22);
-        }
-        .linha-campo input {
-            flex: 1;
-            min-width: 0;
-            background: none;
-            border: none;
-            outline: none;
-            box-shadow: none;
-            padding: 12px 14px;
-        }
-        .linha-campo input:focus { background: none; box-shadow: none; }
-        .linha-campo .btn { flex-shrink: 0; }
-        .linha-campo .btn .seta {
-            width: 20px; height: 20px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, .55);
-            display: grid; place-items: center;
-            font-size: 11px;
-        }
-        .par { display: flex; flex-direction: column; gap: 10px; }
-
-        .etapa h2 {
-            font-weight: 400;
-            font-size: 25px;
-            margin-bottom: 5px;
-        }
-        .etapa .dizeres { font-size: 14px; color: var(--tinta-media); margin-bottom: 16px; max-width: 44ch; }
-        .quem-e {
-            display: inline-block;
-            font-size: 12.5px;
-            color: var(--tinta-media);
-            background: var(--vidro-fraco);
-            border: 1px solid var(--fio);
-            border-radius: 999px;
-            padding: 7px 15px;
-            margin-bottom: 15px;
-            word-break: break-all;
-        }
-        .abaixo { display: flex; gap: 18px; margin-top: 16px; }
-        .abaixo button {
-            font-size: 12.5px;
-            color: var(--tinta-media);
-            border-bottom: 1px solid transparent;
-        }
-        .abaixo button:hover { color: var(--terracota); border-bottom-color: var(--champanhe); }
-
-        @media (max-width: 980px) {
-            body { padding: 8px; }
-            .folha { border-radius: 24px; padding: 18px 20px 26px; min-height: calc(100vh - 16px); }
-            .assinatura { display: none; }
-            .folha::after {
-                background: linear-gradient(to top, rgba(247, 242, 236, .96) 30%, rgba(247, 242, 236, .5) 55%, transparent 78%);
-            }
-            .heroi { max-width: none; justify-content: flex-end; padding-bottom: 12px; }
-            .heroi h1 { font-size: clamp(32px, 8.6vw, 46px); }
-        }
-    </style>
+    @media (max-width: 520px) {
+        .card { padding: 32px 24px; }
+    }
+</style>
 </head>
 <body>
-    <div class="folha">
-        <div class="cena" id="palcoCerebro"><canvas id="cerebro"></canvas></div>
+    <div class="blobs">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
+        <div class="blob b4"></div>
+    </div>
+    <div id="cena"></div>
 
-        <nav class="barra">
-            <span class="canto-vazio"></span>
-            <span class="assinatura">Comunidade Imersão com o Claude</span>
-            <span class="canto-vazio"></span>
-        </nav>
+    <main class="card">
+        <h1>Comunidade Imersão</h1>
+        <p class="sub">Acesse sua conta</p>
 
-        <main class="heroi">
-            <h1>Construa junto,<br>vá mais <em>longe</em></h1>
-
-            <div class="forma">
-                <!-- Etapa 1: e-mail -->
-                <div class="etapa ativa" id="etapaEmail">
-                    <form id="formEmail" novalidate>
-                        <div class="linha-campo">
-                            <input type="email" id="email" autocomplete="email" placeholder="Seu e-mail da compra" required>
-                            <button type="submit" class="btn" id="btnEmail">Entrar <span class="seta">→</span></button>
-                        </div>
-                    </form>
-                    <div class="recado erro" id="recadoEmail"></div>
-                </div>
-
-                <!-- Etapa 2: senha -->
-                <div class="etapa" id="etapaSenha">
-                    <h2 id="oiVolta">Que bom te ver de novo</h2>
-                    <p class="dizeres" id="dizeresSenha">Digite sua senha pra entrar.</p>
-                    <p class="quem-e" id="ecoSenha"></p>
-                    <form id="formSenha" novalidate>
-                        <div class="linha-campo">
-                            <input type="password" id="senha" autocomplete="current-password" placeholder="Sua senha" required>
-                            <button type="submit" class="btn" id="btnSenha">Entrar <span class="seta">→</span></button>
-                        </div>
-                    </form>
-                    <div class="recado erro" id="recadoSenha"></div>
-                    <div class="abaixo">
-                        <button id="linkEsqueci">Criar uma senha nova</button>
-                        <button data-voltar>Usar outro e-mail</button>
+        <div class="forma">
+            <!-- Etapa 1: e-mail -->
+            <div class="etapa ativa" id="etapaEmail">
+                <form id="formEmail" novalidate>
+                    <div class="campo">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" placeholder="seu e-mail da compra" autocomplete="email" required>
                     </div>
-                </div>
+                    <button type="submit" class="entrar" id="btnEmail">Continuar</button>
+                </form>
+                <div class="recado" id="recadoEmail"></div>
+            </div>
 
-                <!-- Etapa 3: criar senha -->
-                <div class="etapa" id="etapaCriar">
-                    <h2 id="oiNova">Boas-vindas</h2>
-                    <p class="dizeres">Primeiro acesso. Crie uma senha de pelo menos 6 caracteres.</p>
-                    <p class="quem-e" id="ecoCriar"></p>
-                    <form id="formCriar" novalidate>
-                        <div class="par">
-                            <div class="linha-campo">
-                                <input type="password" id="senhaNova" autocomplete="new-password" placeholder="Crie sua senha" required>
-                            </div>
-                            <div class="linha-campo">
-                                <input type="password" id="senhaConf" autocomplete="new-password" placeholder="Repita a senha" required>
-                                <button type="submit" class="btn" id="btnCriar">Criar <span class="seta">→</span></button>
-                            </div>
-                        </div>
-                    </form>
-                    <div class="recado erro" id="recadoCriar"></div>
-                    <div class="abaixo">
-                        <button data-voltar>Usar outro e-mail</button>
+            <!-- Etapa 2: senha -->
+            <div class="etapa" id="etapaSenha">
+                <h2 id="oiVolta">Que bom te ver de novo</h2>
+                <p class="dizeres" id="dizeresSenha">Digite sua senha pra entrar.</p>
+                <p class="quem-e" id="ecoSenha"></p>
+                <form id="formSenha" novalidate>
+                    <div class="campo">
+                        <label for="senha">Senha</label>
+                        <input type="password" id="senha" placeholder="sua senha" autocomplete="current-password" required>
                     </div>
+                    <button type="submit" class="entrar" id="btnSenha">Entrar</button>
+                </form>
+                <div class="recado" id="recadoSenha"></div>
+                <div class="abaixo">
+                    <button type="button" id="linkEsqueci">Criar uma senha nova</button>
+                    <button type="button" data-voltar>Usar outro e-mail</button>
                 </div>
             </div>
-        </main>
 
-    </div>
+            <!-- Etapa 3: criar senha -->
+            <div class="etapa" id="etapaCriar">
+                <h2 id="oiNova">Boas-vindas</h2>
+                <p class="dizeres">Primeiro acesso. Crie uma senha de pelo menos 6 caracteres.</p>
+                <p class="quem-e" id="ecoCriar"></p>
+                <form id="formCriar" novalidate>
+                    <div class="campo">
+                        <label for="senhaNova">Senha</label>
+                        <input type="password" id="senhaNova" placeholder="crie sua senha" autocomplete="new-password" required>
+                    </div>
+                    <div class="campo">
+                        <label for="senhaConf">Repita a senha</label>
+                        <input type="password" id="senhaConf" placeholder="repita a senha" autocomplete="new-password" required>
+                    </div>
+                    <button type="submit" class="entrar" id="btnCriar">Criar conta</button>
+                </form>
+                <div class="recado" id="recadoCriar"></div>
+                <div class="abaixo">
+                    <button type="button" data-voltar>Usar outro e-mail</button>
+                </div>
+            </div>
+        </div>
+    </main>
 
+    <!-- Fundo 3D: starburst de partículas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/starburst.js?v=14"></script>
+
+    <!-- Login real (Supabase) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/sb.js?v=13"></script>
-    <script src="js/agua.js?v=13"></script>
+    <script src="js/sb.js?v=14"></script>
     <script>
     (function () {
         'use strict';
@@ -346,8 +294,6 @@
                     document.getElementById('ecoSenha').textContent = email;
                     if (primeiroNome) document.getElementById('oiVolta').textContent = `Oi de novo, ${primeiroNome}`;
 
-                    /* Conta que já existia no site da Lara mas nunca entrou aqui: a senha dela
-                       é a do painel antigo, que quase ninguém lembra. Melhor avisar de cara. */
                     document.getElementById('dizeresSenha').textContent = data.conta_antiga
                         ? 'Esse e-mail já tinha uma conta no site da Lara. Se você não lembra a senha, clique em "criar uma senha nova" aqui embaixo e eu te mando um link por e-mail.'
                         : 'Digite sua senha pra entrar.';
@@ -435,12 +381,6 @@
             document.getElementById('formSenha').reset();
             document.getElementById('formCriar').reset();
             mostrar('email');
-            document.getElementById('email').focus();
-        }));
-
-        /* Os atalhos de cima só levam pro campo de e-mail. */
-        document.querySelectorAll('[data-ir]').forEach(a => a.addEventListener('click', (ev) => {
-            ev.preventDefault();
             document.getElementById('email').focus();
         }));
     })();
