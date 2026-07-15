@@ -1,16 +1,18 @@
 /* ── Comunidade Imersão · vidro claro sobre areia (creme, pêssego e champanhe) ── */
 :root {
-    --areia: #EFE7DF;
-    --areia-clara: #F7F2EC;
-    --areia-escura: #E3D9CF;
+    /* ── Vidro fosco flutuando sobre um fundo claro e arejado (estilo GreenMotive) ── */
+    --areia: #E8E6E2;          /* base clara e neutra pro vidro brilhar por cima */
+    --areia-clara: #F6F4F1;
+    --areia-escura: #DEDBD5;
     --nuvem: #FFFFFF;
 
-    --vidro: rgba(255, 255, 255, .62);
-    --vidro-forte: rgba(255, 255, 255, .82);
-    --vidro-fraco: rgba(255, 255, 255, .40);
-    --fio: rgba(255, 255, 255, .9);
-    --fio-tinta: rgba(58, 50, 42, .14);
-    --fio-tinta-forte: rgba(58, 50, 42, .24);
+    /* Vidro mais translúcido e fosco — dá pra ver a rede do Claude atravessando */
+    --vidro: rgba(255, 255, 255, .48);
+    --vidro-forte: rgba(255, 255, 255, .66);
+    --vidro-fraco: rgba(255, 255, 255, .34);
+    --fio: rgba(255, 255, 255, .85);
+    --fio-tinta: rgba(58, 50, 42, .12);
+    --fio-tinta-forte: rgba(58, 50, 42, .22);
 
     --tinta: #241F1A;
     --tinta-media: #574C42;
@@ -22,9 +24,11 @@
     --terracota: #C08457;
     --verde: #6E9078;
 
-    --raio: 20px;
-    --sombra: 0 2px 6px rgba(58, 50, 42, .04), 0 18px 40px rgba(58, 50, 42, .07);
-    --sombra-alta: 0 4px 10px rgba(58, 50, 42, .05), 0 30px 60px rgba(58, 50, 42, .10);
+    --raio: 26px;
+    --desfoque: blur(30px) saturate(135%);   /* o fosco do vidro */
+    /* Sombras grandes e suaves: os cartões parecem flutuar sobre a cena */
+    --sombra: 0 6px 22px rgba(58, 50, 42, .07), 0 22px 55px rgba(58, 50, 42, .10);
+    --sombra-alta: 0 10px 34px rgba(58, 50, 42, .10), 0 38px 80px rgba(58, 50, 42, .15);
     --transicao: 220ms cubic-bezier(.2, .7, .3, 1);
 }
 
@@ -117,9 +121,9 @@ label {
     background: var(--vidro);
     border: 1px solid var(--fio);
     border-radius: var(--raio);
-    backdrop-filter: blur(24px) saturate(120%);
-    -webkit-backdrop-filter: blur(24px) saturate(120%);
-    box-shadow: var(--sombra);
+    backdrop-filter: var(--desfoque);
+    -webkit-backdrop-filter: var(--desfoque);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), var(--sombra);
 }
 
 /* ── Recados ── */
