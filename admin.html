@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Admin · Comunidade Imersão</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        background: #FAFAFC; color: #1D1D1F; -webkit-font-smoothing: antialiased;
+        padding: 28px; max-width: 1000px; margin: 0 auto;
+    }
+    a { color: #1D1D1F; }
+    .topo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .topo h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+    .topo .volta { font-size: 14px; color: rgba(0,0,0,0.55); text-decoration: none; }
+    .topo .volta:hover { color: #1D1D1F; }
+
+    .abas { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .aba {
+        font-family: inherit; font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.55);
+        background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.08); border-radius: 999px;
+        padding: 9px 18px; cursor: pointer; transition: all 150ms ease;
+    }
+    .aba:hover { background: #fff; }
+    .aba.on { background: #1D1D1F; color: #fff; border-color: transparent; }
+
+    .barra { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .barra h2 { font-size: 18px; font-weight: 600; }
+    .btn {
+        font-family: inherit; font-size: 14px; font-weight: 600; color: #fff; background: #1D1D1F;
+        border: none; border-radius: 100px; padding: 10px 20px; cursor: pointer; transition: background 150ms ease;
+    }
+    .btn:hover { background: #000; }
+    .btn.ghost { background: rgba(0,0,0,0.06); color: #1D1D1F; }
+    .btn.ghost:hover { background: rgba(0,0,0,0.1); }
+    .btn.mini { font-size: 13px; padding: 7px 14px; }
+    .btn.perigo { background: rgba(200,68,26,0.1); color: rgba(200,68,26,0.95); }
+    .btn.perigo:hover { background: rgba(200,68,26,0.18); }
+
+    .card {
+        background: #fff; border: 1px solid rgba(0,0,0,0.07); border-radius: 16px;
+        padding: 16px 18px; margin-bottom: 12px;
+    }
+    .item { display: flex; align-items: center; gap: 14px; }
+    .item .info { flex: 1; min-width: 0; }
+    .item .info b { font-size: 15px; font-weight: 600; display: block; }
+    .item .info span { font-size: 13px; color: rgba(0,0,0,0.5); }
+    .tag-pub { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+    .tag-pub.sim { background: rgba(28,124,84,0.12); color: #1c7c54; }
+    .tag-pub.nao { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.5); }
+    .acoes-item { display: flex; gap: 8px; }
+
+    .form-card { background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 18px; padding: 22px; margin-bottom: 20px; display: none; }
+    .form-card.aberto { display: block; }
+    .form-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+    .campo { margin-bottom: 14px; }
+    .campo label { display: block; font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.6); margin-bottom: 6px; }
+    .campo input[type=text], .campo input[type=number], .campo textarea, .campo select {
+        width: 100%; font-family: inherit; font-size: 14px; color: #1D1D1F;
+        background: #fff; border: 1px solid rgba(0,0,0,0.15); border-radius: 10px; padding: 10px 12px; outline: none;
+    }
+    .campo input:focus, .campo textarea:focus, .campo select:focus { border-color: #1D1D1F; }
+    .campo textarea { resize: vertical; min-height: 80px; }
+    .campo.check { display: flex; align-items: center; gap: 8px; }
+    .campo.check input { width: 18px; height: 18px; }
+    .campo.check label { margin: 0; }
+    .form-acoes { display: flex; gap: 10px; margin-top: 6px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+
+    .recado { font-size: 14px; padding: 12px 16px; border-radius: 12px; margin-bottom: 16px; display: none; }
+    .recado.show { display: block; }
+    .recado.erro { background: rgba(200,68,26,0.1); color: rgba(200,68,26,0.95); }
+    .recado.ok { background: rgba(28,124,84,0.1); color: #1c7c54; }
+    .vazio { color: rgba(0,0,0,0.45); font-size: 14px; padding: 20px 0; }
+    #bloqueio { text-align: center; padding: 80px 20px; }
+    #bloqueio h2 { font-size: 20px; margin-bottom: 8px; }
+    #bloqueio p { color: rgba(0,0,0,0.55); }
+</style>
+</head>
+<body>
+    <div class="topo">
+        <h1>Admin · Comunidade</h1>
+        <a class="volta" href="app.html">← Voltar para a comunidade</a>
+    </div>
+
+    <div id="bloqueio" style="display:none">
+        <h2>Acesso restrito</h2>
+        <p>Essa área é só para administradoras. Fale com a Lara.</p>
+    </div>
+
+    <div id="painel" style="display:none">
+        <div class="abas" id="abas"></div>
+        <div class="recado" id="recado"></div>
+        <div class="barra">
+            <h2 id="tituloSecao"></h2>
+            <button class="btn" id="btnNovo">+ Novo</button>
+        </div>
+        <div class="form-card" id="formCard"></div>
+        <div id="lista"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/sb.js?v=14"></script>
+    <script>
+    (function () {
+        'use strict';
+        const { sb, esc } = window.C || {};
+
+        const TONS = ['lavanda', 'menta', 'pessego', 'lavandaClara'];
+
+        const ENTIDADES = {
+            prompts: {
+                tabela: 'imersao_prompts', nome: 'Prompts', ordena: 'created_at', asc: false,
+                titulo: r => r.titulo, sub: r => r.tema || '—',
+                campos: [
+                    { n: 'tema', l: 'Tema (badge do card)', t: 'text' },
+                    { n: 'titulo', l: 'Título', t: 'text', req: true },
+                    { n: 'descricao', l: 'Descrição curta (aparece no card)', t: 'textarea' },
+                    { n: 'prompt', l: 'Prompt completo (texto que é copiado)', t: 'textarea', req: true },
+                    { n: 'destaque', l: 'Destaque (aparece primeiro)', t: 'bool' },
+                    { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
+                ]
+            },
+            destaques: {
+                tabela: 'imersao_destaques', nome: 'Destaques', ordena: 'ordem', asc: true,
+                titulo: r => r.titulo, sub: r => r.categoria || '—',
+                campos: [
+                    { n: 'titulo', l: 'Título', t: 'text', req: true },
+                    { n: 'subtitulo', l: 'Subtítulo (autor/turma)', t: 'text' },
+                    { n: 'categoria', l: 'Categoria (badge)', t: 'text' },
+                    { n: 'descricao', l: 'Descrição', t: 'textarea' },
+                    { n: 'aulas', l: 'Aulas (ex: 8 aulas)', t: 'text' },
+                    { n: 'duracao', l: 'Duração (ex: 2h10)', t: 'text' },
+                    { n: 'nota', l: 'Nota (ex: 4.9)', t: 'text' },
+                    { n: 'preco', l: 'Preço (ex: R$ 197 ou Gratuita)', t: 'text' },
+                    { n: 'preco_antigo', l: 'Preço antigo (riscado)', t: 'text' },
+                    { n: 'off', l: 'Desconto (ex: 20%)', t: 'text' },
+                    { n: 'link', l: 'Link do botão Acessar', t: 'text' },
+                    { n: 'tom', l: 'Cor do card', t: 'tom' },
+                    { n: 'ordem', l: 'Ordem', t: 'num' },
+                    { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
+                ]
+            },
+            store: {
+                tabela: 'imersao_store', nome: 'Store', ordena: 'ordem', asc: true,
+                titulo: r => r.titulo, sub: r => r.preco || '—',
+                campos: [
+                    { n: 'titulo', l: 'Título', t: 'text', req: true },
+                    { n: 'descricao', l: 'Descrição', t: 'text' },
+                    { n: 'categoria', l: 'Categoria (badge)', t: 'text' },
+                    { n: 'preco', l: 'Preço (ex: R$ 97)', t: 'text' },
+                    { n: 'link', l: 'Link de checkout', t: 'text' },
+                    { n: 'tom', l: 'Cor do card', t: 'tom' },
+                    { n: 'ordem', l: 'Ordem', t: 'num' },
+                    { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
+                ]
+            },
+            materiais: {
+                tabela: 'imersao_materiais', nome: 'Materiais', ordena: 'ordem', asc: true,
+                titulo: r => r.titulo, sub: r => r.descricao || '—',
+                campos: [
+                    { n: 'titulo', l: 'Título', t: 'text', req: true },
+                    { n: 'descricao', l: 'Descrição (ex: PDF · 2.3 MB)', t: 'text' },
+                    { n: 'url', l: 'Link do arquivo', t: 'text' },
+                    { n: 'ordem', l: 'Ordem', t: 'num' },
+                    { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
+                ]
+            },
+            avisos: {
+                tabela: 'imersao_avisos', nome: 'Avisos', ordena: 'created_at', asc: false,
+                titulo: r => r.titulo, sub: r => (r.corpo || '').slice(0, 60),
+                campos: [
+                    { n: 'titulo', l: 'Título', t: 'text', req: true },
+                    { n: 'corpo', l: 'Corpo', t: 'textarea', req: true },
+                    { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
+                ]
+            }
+        };
+
+        let atual = 'prompts';
+        let editando = null;
+
+        const el = (id) => document.getElementById(id);
+        function recado(txt, tipo) {
+            const r = el('recado');
+            r.textContent = txt || '';
+            r.className = 'recado' + (txt ? ' show ' + (tipo || 'erro') : '');
+            if (txt && tipo === 'ok') setTimeout(() => { r.className = 'recado'; }, 3000);
+        }
+
+        function montarAbas() {
+            el('abas').innerHTML = Object.keys(ENTIDADES).map(k =>
+                `<button class="aba${k === atual ? ' on' : ''}" data-ent="${k}">${ENTIDADES[k].nome}</button>`).join('');
+            el('abas').querySelectorAll('.aba').forEach(b => b.addEventListener('click', () => {
+                atual = b.dataset.ent; editando = null; fecharForm();
+                document.querySelectorAll('.aba').forEach(a => a.classList.toggle('on', a.dataset.ent === atual));
+                el('tituloSecao').textContent = ENTIDADES[atual].nome;
+                carregar();
+            }));
+        }
+
+        async function carregar() {
+            const cfg = ENTIDADES[atual];
+            el('lista').innerHTML = '<div class="vazio">Carregando…</div>';
+            const { data, error } = await sb.from(cfg.tabela).select('*').order(cfg.ordena, { ascending: cfg.asc });
+            if (error) { el('lista').innerHTML = '<div class="vazio">Erro ao carregar.</div>'; return; }
+            if (!data || !data.length) { el('lista').innerHTML = '<div class="vazio">Nada aqui ainda. Clique em “+ Novo”.</div>'; return; }
+            el('lista').innerHTML = data.map(r => `
+                <div class="card"><div class="item">
+                    <div class="info">
+                        <b>${esc(String(cfg.titulo(r) || '(sem título)'))}</b>
+                        <span>${esc(String(cfg.sub(r) || ''))}</span>
+                    </div>
+                    <span class="tag-pub ${r.publicado ? 'sim' : 'nao'}">${r.publicado ? 'Publicado' : 'Rascunho'}</span>
+                    <div class="acoes-item">
+                        <button class="btn ghost mini" data-editar="${r.id}">Editar</button>
+                        <button class="btn perigo mini" data-apagar="${r.id}">Apagar</button>
+                    </div>
+                </div></div>`).join('');
+            el('lista').querySelectorAll('[data-editar]').forEach(b => b.addEventListener('click', () => {
+                const r = data.find(x => String(x.id) === b.dataset.editar);
+                abrirForm(r);
+            }));
+            el('lista').querySelectorAll('[data-apagar]').forEach(b => b.addEventListener('click', () => apagar(b.dataset.apagar)));
+        }
+
+        function campoHTML(c, valor) {
+            const v = valor == null ? '' : valor;
+            if (c.t === 'bool') {
+                const marcado = valor == null ? !!c.def : !!valor;
+                return `<div class="campo check"><input type="checkbox" id="f_${c.n}" ${marcado ? 'checked' : ''}><label for="f_${c.n}">${c.l}</label></div>`;
+            }
+            if (c.t === 'textarea') {
+                return `<div class="campo"><label for="f_${c.n}">${c.l}</label><textarea id="f_${c.n}">${esc(String(v))}</textarea></div>`;
+            }
+            if (c.t === 'tom') {
+                return `<div class="campo"><label for="f_${c.n}">${c.l}</label><select id="f_${c.n}">${['', ...TONS].map(t => `<option value="${t}"${t === v ? ' selected' : ''}>${t || '(padrão)'}</option>`).join('')}</select></div>`;
+            }
+            const tipo = c.t === 'num' ? 'number' : 'text';
+            return `<div class="campo"><label for="f_${c.n}">${c.l}</label><input type="${tipo}" id="f_${c.n}" value="${esc(String(v))}"></div>`;
+        }
+
+        function abrirForm(reg) {
+            editando = reg || null;
+            const cfg = ENTIDADES[atual];
+            el('formCard').innerHTML =
+                `<h3>${reg ? 'Editar' : 'Novo'} — ${cfg.nome}</h3>` +
+                cfg.campos.map(c => campoHTML(c, reg ? reg[c.n] : null)).join('') +
+                `<div class="form-acoes"><button class="btn" id="btnSalvar">Salvar</button><button class="btn ghost" id="btnCancelar">Cancelar</button></div>`;
+            el('formCard').classList.add('aberto');
+            el('btnSalvar').addEventListener('click', salvar);
+            el('btnCancelar').addEventListener('click', fecharForm);
+            el('formCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        function fecharForm() { el('formCard').classList.remove('aberto'); el('formCard').innerHTML = ''; editando = null; }
+
+        async function salvar() {
+            const cfg = ENTIDADES[atual];
+            const payload = {};
+            for (const c of cfg.campos) {
+                const campo = el('f_' + c.n);
+                if (c.t === 'bool') payload[c.n] = campo.checked;
+                else if (c.t === 'num') payload[c.n] = campo.value === '' ? 0 : parseInt(campo.value, 10) || 0;
+                else payload[c.n] = campo.value.trim() === '' ? null : campo.value.trim();
+                if (c.req && (payload[c.n] === null || payload[c.n] === '')) { recado('Preencha: ' + c.l); return; }
+            }
+            const btn = el('btnSalvar'); btn.disabled = true; btn.textContent = 'Salvando…';
+            let res;
+            if (editando) res = await sb.from(cfg.tabela).update(payload).eq('id', editando.id);
+            else res = await sb.from(cfg.tabela).insert(payload);
+            btn.disabled = false; btn.textContent = 'Salvar';
+            if (res.error) { recado('Não consegui salvar: ' + res.error.message); return; }
+            recado('Salvo!', 'ok'); fecharForm(); carregar();
+        }
+
+        async function apagar(id) {
+            if (!confirm('Apagar de verdade? Isso não volta.')) return;
+            const { error } = await sb.from(ENTIDADES[atual].tabela).delete().eq('id', id);
+            if (error) { recado('Não consegui apagar: ' + error.message); return; }
+            recado('Apagado.', 'ok'); carregar();
+        }
+
+        el('btnNovo').addEventListener('click', () => abrirForm(null));
+
+        /* ── Entrada: precisa estar logada E ser admin ── */
+        (async function () {
+            if (!sb) return;
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) { window.location.replace('index.html'); return; }
+            const { data: adm } = await sb.rpc('is_admin');
+            if (!adm) { el('bloqueio').style.display = 'block'; return; }
+            el('painel').style.display = 'block';
+            el('tituloSecao').textContent = ENTIDADES[atual].nome;
+            montarAbas();
+            carregar();
+        })();
+    })();
+    </script>
+</body>
+</html>

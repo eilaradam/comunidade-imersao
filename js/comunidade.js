@@ -34,49 +34,11 @@
         ];
 
         const palco = document.getElementById('palco');
-        if (palco) {
-        let ativo = Math.floor(destaques.length / 2);
-
-        destaques.forEach((d, i) => {
-            const card = document.createElement('div');
-            card.className = 'c-card';
-            const gratis = /gratu/i.test(d.preco);
-            card.innerHTML = `
-                <div class="c-thumb" style="background:${d.tom}">
-                    ${d.off ? `<span class="off">${d.off} OFF</span>` : ''}
-                    <span class="badge">${d.cat}</span>
-                </div>
-                <div class="c-corpo">
-                    <h3>${d.titulo}</h3>
-                    <div class="local"><i data-lucide="user"></i> ${d.autor}</div>
-                    <div class="desc-label">Descrição</div>
-                    <p class="desc-text">${d.desc}</p>
-                    <div class="stats">
-                        <div class="stat"><span class="stat-label">Aulas</span><span class="stat-val">${d.aulas}</span></div>
-                        <div class="stat"><span class="stat-label">Duração</span><span class="stat-val">${d.duracao}</span></div>
-                        <div class="stat"><span class="stat-label">Nota</span><span class="stat-val">${d.nota}</span></div>
-                    </div>
-                    <div class="c-rodape">
-                        <div class="preco-bloco">
-                            <span class="preco-label">Valor</span>
-                            <span class="preco-linha">
-                                ${d.antes ? `<s class="antes">${d.antes}</s>` : ''}
-                                <span class="preco${gratis ? ' gratis' : ''}">${d.preco}</span>
-                            </span>
-                        </div>
-                        <button class="acao" aria-label="Acessar"><i data-lucide="${gratis ? 'play' : 'arrow-right'}"></i></button>
-                    </div>
-                </div>`;
-            card.addEventListener('click', () => {
-                if (i !== ativo) { ativo = i; posicionar(); }
-            });
-            palco.appendChild(card);
-        });
-        const cards = Array.from(palco.children);
+        let ativoC = 0, cardsC = [];
 
         function posicionar() {
-            cards.forEach((card, i) => {
-                const off = i - ativo;
+            cardsC.forEach((card, i) => {
+                const off = i - ativoC;
                 const abs = Math.abs(off);
                 const escala = off === 0 ? 1.15 : abs === 1 ? 0.9 : 0.75;
                 const tx = off * 250;
@@ -88,24 +50,74 @@
                 card.style.pointerEvents = abs > 2 ? 'none' : 'auto';
             });
         }
-        function mover(dir) {
-            ativo = Math.max(0, Math.min(destaques.length - 1, ativo + dir));
-            posicionar();
-        }
-        document.getElementById('setaEsq').addEventListener('click', () => mover(-1));
-        document.getElementById('setaDir').addEventListener('click', () => mover(1));
-        posicionar();
+        function mover(dir) { ativoC = Math.max(0, Math.min(cardsC.length - 1, ativoC + dir)); posicionar(); }
 
-        /* Swipe no mobile */
-        let x0 = null;
-        palco.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
-        palco.addEventListener('touchend', e => {
-            if (x0 === null) return;
-            const dx = e.changedTouches[0].clientX - x0;
-            if (Math.abs(dx) > 40) mover(dx < 0 ? 1 : -1);
-            x0 = null;
-        }, { passive: true });
-        } /* fim do carrossel (só na home) */
+        function montarCarrossel(itens) {
+            if (!palco) return;
+            palco.innerHTML = '';
+            itens.forEach((d, i) => {
+                const card = document.createElement('div');
+                card.className = 'c-card';
+                const gratis = /gratu/i.test(d.preco || '');
+                card.innerHTML = `
+                <div class="c-thumb" style="background:${d.tom}">
+                    ${d.off ? `<span class="off">${esc(d.off)} OFF</span>` : ''}
+                    <span class="badge">${esc(d.cat || '')}</span>
+                </div>
+                <div class="c-corpo">
+                    <h3>${esc(d.titulo || '')}</h3>
+                    <div class="local"><i data-lucide="user"></i> ${esc(d.autor || '')}</div>
+                    <div class="desc-label">Descrição</div>
+                    <p class="desc-text">${esc(d.desc || '')}</p>
+                    <div class="stats">
+                        <div class="stat"><span class="stat-label">Aulas</span><span class="stat-val">${esc(d.aulas || '—')}</span></div>
+                        <div class="stat"><span class="stat-label">Duração</span><span class="stat-val">${esc(d.duracao || '—')}</span></div>
+                        <div class="stat"><span class="stat-label">Nota</span><span class="stat-val">${esc(d.nota || '—')}</span></div>
+                    </div>
+                    <div class="c-rodape">
+                        <div class="preco-bloco">
+                            <span class="preco-label">Valor</span>
+                            <span class="preco-linha">
+                                ${d.antes ? `<s class="antes">${esc(d.antes)}</s>` : ''}
+                                <span class="preco${gratis ? ' gratis' : ''}">${esc(d.preco || '')}</span>
+                            </span>
+                        </div>
+                        <button class="acao" aria-label="Acessar"><i data-lucide="${gratis ? 'play' : 'arrow-right'}"></i></button>
+                    </div>
+                </div>`;
+                card.addEventListener('click', () => { if (i !== ativoC) { ativoC = i; posicionar(); } });
+                palco.appendChild(card);
+            });
+            cardsC = Array.from(palco.children);
+            ativoC = Math.floor(cardsC.length / 2);
+            posicionar();
+            if (window.lucide) lucide.createIcons();
+        }
+
+        async function carregarDestaques() {
+            if (!palco) return;
+            let itens = destaques.map(d => ({ tom: d.tom, off: d.off, cat: d.cat, titulo: d.titulo, autor: d.autor, desc: d.desc, aulas: d.aulas, duracao: d.duracao, nota: d.nota, antes: d.antes, preco: d.preco }));
+            if (sb) {
+                try {
+                    const { data } = await sb.from('imersao_destaques').select('*').eq('publicado', true).order('ordem', { ascending: true }).order('created_at', { ascending: false });
+                    if (data && data.length) itens = data.map(r => ({ tom: tom[r.tom] || tom.lavanda, off: r.off, cat: r.categoria, titulo: r.titulo, autor: r.subtitulo, desc: r.descricao, aulas: r.aulas, duracao: r.duracao, nota: r.nota, antes: r.preco_antigo, preco: r.preco }));
+                } catch (e) {}
+            }
+            montarCarrossel(itens);
+        }
+
+        if (palco) {
+            const se = document.getElementById('setaEsq'); if (se) se.addEventListener('click', () => mover(-1));
+            const sd = document.getElementById('setaDir'); if (sd) sd.addEventListener('click', () => mover(1));
+            let x0 = null;
+            palco.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+            palco.addEventListener('touchend', e => {
+                if (x0 === null) return;
+                const dx = e.changedTouches[0].clientX - x0;
+                if (Math.abs(dx) > 40) mover(dx < 0 ? 1 : -1);
+                x0 = null;
+            }, { passive: true });
+        }
 
         /* ─────────────── MURAL — feed social (Supabase) ─────────────── */
         const rotulo = { resultado: 'Resultado', prompt: 'Prompt', duvida: 'Dúvida' };
@@ -766,20 +778,27 @@
             { cat: 'ROTEIRO UGC', titulo: 'Depoimento em vídeo autêntico', texto: 'Transforme esse depoimento cru [TEXTO] em um roteiro falado de 30 segundos, mantendo naturalidade, com pausas marcadas e ênfase nas palavras-chave.' }
         ];
         const promptsGrid = document.getElementById('prompts-grid');
-        if (promptsGrid) {
-            promptsGrid.innerHTML = prompts.map((p, i) => `
-            <div class="p-card">
-                <div><span class="pill-cat">${p.cat}</span></div>
-                <h3>${p.titulo}</h3>
-                <div class="preview">${p.texto}</div>
-                <div class="p-rodape">
-                    <button class="btn-preto" data-copiar="${i}">Copiar prompt</button>
-                </div>
-            </div>`).join('');
+        async function carregarPromptsSecao() {
+            if (!promptsGrid) return;
+            let itens = prompts.map(p => ({ cat: p.cat, titulo: p.titulo, texto: p.texto, copia: p.texto }));
+            if (sb) {
+                try {
+                    const { data } = await sb.from('imersao_prompts').select('*').eq('publicado', true)
+                        .order('destaque', { ascending: false }).order('created_at', { ascending: false });
+                    if (data && data.length) itens = data.map(r => ({ cat: r.tema, titulo: r.titulo, texto: r.descricao || r.prompt, copia: r.prompt }));
+                } catch (e) {}
+            }
+            promptsGrid.innerHTML = itens.map((p, i) => `
+                <div class="p-card">
+                    <div><span class="pill-cat">${esc(p.cat || '')}</span></div>
+                    <h3>${esc(p.titulo || '')}</h3>
+                    <div class="preview">${esc(p.texto || '')}</div>
+                    <div class="p-rodape"><button class="btn-preto" data-copiar="${i}">Copiar prompt</button></div>
+                </div>`).join('');
             promptsGrid.querySelectorAll('[data-copiar]').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const p = prompts[+btn.getAttribute('data-copiar')];
-                    navigator.clipboard.writeText(p.texto).then(() => {
+                    const p = itens[+btn.getAttribute('data-copiar')];
+                    navigator.clipboard.writeText(p.copia || p.texto || '').then(() => {
                         const orig = btn.textContent;
                         btn.textContent = 'Copiado!';
                         setTimeout(() => { btn.textContent = orig; }, 1500);
@@ -796,16 +815,29 @@
             { titulo: 'Guia de prompts para Claude',    tipo: 'PDF · 3.7 MB',  ico: 'sparkles',     tom: tom.lavandaClara },
             { titulo: 'Kit de posts para lançamento',   tipo: 'ZIP · 8.2 MB',  ico: 'image',        tom: tom.pessego }
         ];
-        const matEl = document.getElementById('materiais-lista');
-        if (matEl) matEl.innerHTML = materiais.map(m => `
-            <div class="mat-item">
-                <div class="mat-ico" style="background:${m.tom}"><i data-lucide="${m.ico}"></i></div>
-                <div class="mat-meio">
-                    <h3>${m.titulo}</h3>
-                    <div class="tipo">${m.tipo}</div>
-                </div>
-                <button class="btn-glass"><i data-lucide="download"></i> Baixar</button>
-            </div>`).join('');
+        const tomLista = [tom.pessego, tom.lavanda, tom.menta, tom.lavandaClara];
+        async function carregarMateriaisSecao() {
+            const matEl = document.getElementById('materiais-lista');
+            if (!matEl) return;
+            let itens = materiais.map(m => ({ titulo: m.titulo, sub: m.tipo, url: '#', ico: m.ico, tom: m.tom }));
+            if (sb) {
+                try {
+                    const { data } = await sb.from('imersao_materiais').select('*').eq('publicado', true)
+                        .order('ordem', { ascending: true }).order('created_at', { ascending: false });
+                    if (data && data.length) itens = data.map((r, i) => ({ titulo: r.titulo, sub: r.descricao, url: r.url || '#', ico: 'file-text', tom: tomLista[i % 4] }));
+                } catch (e) {}
+            }
+            matEl.innerHTML = itens.map(m => `
+                <div class="mat-item">
+                    <div class="mat-ico" style="background:${m.tom}"><i data-lucide="${m.ico || 'file-text'}"></i></div>
+                    <div class="mat-meio">
+                        <h3>${esc(m.titulo || '')}</h3>
+                        <div class="tipo">${esc(m.sub || '')}</div>
+                    </div>
+                    <a class="btn-glass" href="${esc(m.url || '#')}" target="_blank" rel="noopener"><i data-lucide="download"></i> Baixar</a>
+                </div>`).join('');
+            if (window.lucide) lucide.createIcons();
+        }
 
         /* ─────────────── AVISOS ─────────────── */
         const avisos = [
@@ -814,14 +846,24 @@
             { data: '05 JUL 2026', tipo: 'IMPORTANTE', titulo: 'Atualize seu portfólio no Mural',      corpo: 'Quem terminou o projeto da semana pode subir no Mural dos Alunos. Os melhores vão ser destacados na home da comunidade e nas redes da Lara.' },
             { data: '01 JUL 2026', tipo: 'NOVIDADE',   titulo: 'Abrimos a Store da comunidade',        corpo: 'Agora você encontra aulas avulsas, mentorias 1:1 e packs de prompts direto aqui dentro, com preço de comunidade. Confere a aba Store.' }
         ];
-        const avEl = document.getElementById('avisos-lista');
-        if (avEl) avEl.innerHTML = avisos.map(a => `
-            <div class="aviso">
-                <span class="pill-cat">${a.tipo}</span>
-                <div class="data">${a.data}</div>
-                <h3>${a.titulo}</h3>
-                <div class="corpo">${a.corpo}</div>
-            </div>`).join('');
+        async function carregarAvisosSecao() {
+            const avEl = document.getElementById('avisos-lista');
+            if (!avEl) return;
+            let itens = avisos.map(a => ({ data: a.data, tipo: a.tipo, titulo: a.titulo, corpo: a.corpo }));
+            if (sb) {
+                try {
+                    const { data } = await sb.from('imersao_avisos').select('*').eq('publicado', true).order('created_at', { ascending: false });
+                    if (data && data.length) itens = data.map(r => ({ data: quando ? quando(r.created_at) : '', tipo: null, titulo: r.titulo, corpo: r.corpo }));
+                } catch (e) {}
+            }
+            avEl.innerHTML = itens.map(a => `
+                <div class="aviso">
+                    ${a.tipo ? `<span class="pill-cat">${esc(a.tipo)}</span>` : ''}
+                    <div class="data">${esc(a.data || '')}</div>
+                    <h3>${esc(a.titulo || '')}</h3>
+                    <div class="corpo">${esc(a.corpo || '')}</div>
+                </div>`).join('');
+        }
 
         /* ─────────────── STORE ─────────────── */
         const store = [
@@ -832,21 +874,32 @@
             { titulo: 'Imersão Portfólio v2',          desc: 'Turma de agosto',     preco: 'R$ 397', cat: 'IMERSÃO',  tom: tom.pessego },
             { titulo: 'Pack templates de proposta',    desc: 'Editáveis no Canva',  preco: 'R$ 67',  cat: 'PACK',     tom: tom.menta }
         ];
-        const stEl = document.getElementById('store-grid');
-        if (stEl) stEl.innerHTML = store.map(s => `
-            <div class="s-card">
-                <div class="s-thumb" style="background:${s.tom}">
-                    <span class="badge">${s.cat}</span>
-                </div>
-                <div class="s-corpo">
-                    <h3>${s.titulo}</h3>
-                    <div class="desc">${s.desc}</div>
-                    <div class="s-rodape">
-                        <span class="preco">${s.preco}</span>
-                        <button class="btn-preto">Comprar</button>
+        async function carregarStoreSecao() {
+            const stEl = document.getElementById('store-grid');
+            if (!stEl) return;
+            let itens = store.map(s => ({ titulo: s.titulo, desc: s.desc, preco: s.preco, cat: s.cat, tom: s.tom, link: null }));
+            if (sb) {
+                try {
+                    const { data } = await sb.from('imersao_store').select('*').eq('publicado', true)
+                        .order('ordem', { ascending: true }).order('created_at', { ascending: false });
+                    if (data && data.length) itens = data.map(r => ({ titulo: r.titulo, desc: r.descricao, preco: r.preco, cat: r.categoria, tom: tom[r.tom] || tom.pessego, link: r.link }));
+                } catch (e) {}
+            }
+            stEl.innerHTML = itens.map(s => `
+                <div class="s-card">
+                    <div class="s-thumb" style="background:${s.tom}">
+                        <span class="badge">${esc(s.cat || '')}</span>
                     </div>
-                </div>
-            </div>`).join('');
+                    <div class="s-corpo">
+                        <h3>${esc(s.titulo || '')}</h3>
+                        <div class="desc">${esc(s.desc || '')}</div>
+                        <div class="s-rodape">
+                            <span class="preco">${esc(s.preco || '')}</span>
+                            ${s.link ? `<a class="btn-preto" href="${esc(s.link)}" target="_blank" rel="noopener">Comprar</a>` : `<button class="btn-preto">Comprar</button>`}
+                        </div>
+                    </div>
+                </div>`).join('');
+        }
 
         /* ─────────────── ÍCONES ─────────────── */
         if (window.lucide) lucide.createIcons();
@@ -965,9 +1018,23 @@
                     window.location.replace('index.html');
                 });
 
+                /* Link de Admin no perfil (só para admins) */
+                try {
+                    const { data: adm } = await sb.rpc('is_admin');
+                    const la = document.getElementById('linkAdmin');
+                    if (adm && la) la.style.display = 'flex';
+                } catch (e) {}
+
                 await carregarMural();
                 await carregarSeusPosts();
-                if (ehHome) carregarContador();
+                if (ehHome) {
+                    carregarContador();
+                    carregarDestaques();
+                    carregarPromptsSecao();
+                    carregarMateriaisSecao();
+                    carregarAvisosSecao();
+                    carregarStoreSecao();
+                }
             } catch (e) {
                 /* Sem backend disponível: mantém os placeholders visuais. */
             }
