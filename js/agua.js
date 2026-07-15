@@ -1,7 +1,8 @@
-/* ── Esfera de sonho: um orbe pastel suave, iridescente, com um redemoinho macio ──
-   Tudo feito com gradientes radiais bem suaves (sem bordas duras), cores leves
-   de rosa/azul/lavanda, um anel/redemoinho girando devagar por dentro e um
-   respiro lento. O cursor dá um leve empurrãozinho e acende um pouco mais. */
+/* ── Bola de gel azul com ondas rolando pela superfície (tipo geleia) ──
+   Uma esfera azul com relevos horizontais que viajam de baixo pra cima, como
+   ondas dando a volta num globo. A silhueta morpha de leve (jelly). Sombreado
+   radial dá o 3D; um brilho especular e um véu magenta nas depressões completam.
+   O cursor engrossa as ondas e empurra a forma de leve. */
 (function () {
     'use strict';
 
@@ -18,7 +19,15 @@
     let cx = 0, cy = 0, R = 0;
     let mouse = null;
     let energia = 0;
-    let ox = 0, oy = 0;   /* deslocamento suave em direção ao cursor */
+    let ox = 0, oy = 0;
+
+    /* Harmônicos que deformam a silhueta (jelly bem sutil). */
+    const ondas = [
+        { k: 2, a: 0.05, v: 0.00040 },
+        { k: 3, a: 0.035, v: -0.00052 },
+        { k: 5, a: 0.022, v: 0.00068 },
+    ];
+    ondas.forEach(o => (o.f = Math.random() * TAU));
 
     function medir() {
         const c = palco.getBoundingClientRect();
@@ -29,103 +38,116 @@
         const retrato = L / A < 0.95;
         cx = retrato ? L * 0.5 : L * 0.62;
         cy = retrato ? A * 0.34 : A * 0.5;
-        R = Math.min(L, A) * (retrato ? 0.3 : 0.28);
+        R = Math.min(L, A) * (retrato ? 0.32 : 0.3);
     }
 
-    function radial(x, y, r0, r1, paradas) {
-        const g = ctx.createRadialGradient(x, y, r0, x, y, r1);
-        for (const [p, cor] of paradas) g.addColorStop(p, cor);
-        return g;
+    function raio(ang, t, bump) {
+        let rr = 1;
+        for (const o of ondas) rr += o.a * (1 + energia * 0.8) * Math.sin(o.k * ang + t * o.v + o.f);
+        if (bump) {
+            let d = ang - bump.ang;
+            while (d > Math.PI) d -= TAU; while (d < -Math.PI) d += TAU;
+            rr += bump.amp * Math.exp(-(d / 0.9) * (d / 0.9));
+        }
+        return R * rr;
+    }
+
+    function caminho(x, y, t, bump) {
+        const N = 120;
+        ctx.beginPath();
+        for (let i = 0; i <= N; i++) {
+            const ang = (i / N) * TAU;
+            const r = raio(ang, t, bump);
+            const px = x + Math.cos(ang) * r;
+            const py = y + Math.sin(ang) * r;
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+    }
+
+    function mix(a, b, k) { return a + (b - a) * k; }
+    function cor(l) {
+        /* l: 0 (vale) .. 1 (crista). Azul profundo -> azul claro, com toque magenta nos vales. */
+        let r = mix(52, 170, l), g = mix(68, 194, l), b = mix(206, 252, l);
+        const roxo = (1 - l) * 0.28;
+        r = mix(r, 150, roxo); g = mix(g, 96, roxo); b = mix(b, 224, roxo);
+        return `rgb(${r | 0}, ${g | 0}, ${b | 0})`;
     }
 
     function quadro(ms) {
         if (paradinha) ms = 4000;
-        const t = ms * 0.001;
+        const t = ms;
 
-        /* Energia + parallax suave em direção ao cursor. */
-        let alvo = 0;
+        let alvo = 0, bump = null;
         if (mouse && !passivo) {
             const d = Math.hypot(mouse.x - cx, mouse.y - cy);
-            alvo = Math.max(0, Math.min(1, 1 - (d - R) / (R * 1.6)));
+            alvo = Math.max(0, Math.min(1, 1 - (d - R) / (R * 1.4)));
+            if (alvo > 0.02) bump = { ang: Math.atan2(mouse.y - cy, mouse.x - cx), amp: 0.1 * alvo };
         }
         energia += (alvo - energia) * 0.05;
-        const mx = mouse ? mouse.x : cx;
-        const my = mouse ? mouse.y : cy;
-        ox += ((mx - cx) * 0.05 * energia - ox) * 0.06;
-        oy += ((my - cy) * 0.05 * energia - oy) * 0.06;
+        const mx = mouse ? mouse.x : cx, my = mouse ? mouse.y : cy;
+        ox += ((mx - cx) * 0.04 * energia - ox) * 0.06;
+        oy += ((my - cy) * 0.04 * energia - oy) * 0.06;
 
         const x = cx + ox, y = cy + oy;
-        const respiro = 1 + Math.sin(t * 0.6) * 0.015;   /* respiração lenta */
-        const r = R * respiro;
+        const r = R * (1 + Math.sin(t * 0.0006) * 0.012);
 
         ctx.clearRect(0, 0, L, A);
 
-        /* 1. Halo externo bem suave. */
-        ctx.fillStyle = radial(x, y, r * 0.4, r * 1.9, [
-            [0, 'rgba(238, 232, 249, 0.55)'],
-            [0.55, 'rgba(228, 224, 245, 0.22)'],
-            [1, 'rgba(228, 224, 245, 0)']
-        ]);
-        ctx.beginPath(); ctx.arc(x, y, r * 1.9, 0, TAU); ctx.fill();
+        /* Halo suave. */
+        const halo = ctx.createRadialGradient(x, y, r * 0.5, x, y, r * 1.7);
+        halo.addColorStop(0, 'rgba(120, 150, 240, 0.20)');
+        halo.addColorStop(1, 'rgba(120, 150, 240, 0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath(); ctx.arc(x, y, r * 1.7, 0, TAU); ctx.fill();
 
-        /* 2. Corpo da esfera: branco no miolo, derretendo pra lavanda e some na borda. */
-        ctx.fillStyle = radial(x - r * 0.2, y - r * 0.24, r * 0.05, r * 1.04, [
-            [0, 'rgba(255, 255, 255, 0.96)'],
-            [0.34, 'rgba(236, 227, 247, 0.86)'],
-            [0.72, 'rgba(214, 210, 238, 0.6)'],
-            [1, 'rgba(214, 210, 238, 0)']
-        ]);
-        ctx.beginPath(); ctx.arc(x, y, r * 1.06, 0, TAU); ctx.fill();
-
-        /* 3. Brilhos iridescentes (screen = luz somando, sempre suave). */
         ctx.save();
-        ctx.beginPath(); ctx.arc(x, y, r * 1.12, 0, TAU); ctx.clip();
+        caminho(x, y, t, bump);
+        ctx.clip();
+
+        /* 1. Ondas rolando: gradiente vertical cujas bandas se apertam nos polos
+              (mapeamento por latitude) e viajam de baixo pra cima com o tempo. */
+        const banda = ctx.createLinearGradient(0, y - r, 0, y + r);
+        const STOPS = 46;
+        const fase = t * 0.0013;
+        const K = 5.2;
+        const amp = 1 + energia * 0.5;
+        for (let i = 0; i <= STOPS; i++) {
+            const f = i / STOPS;
+            const lat = Math.asin(Math.max(-1, Math.min(1, f * 2 - 1)));   /* -PI/2..PI/2 */
+            const wv = Math.sin(lat * K - fase) * amp;
+            const l = Math.max(0, Math.min(1, 0.5 + 0.5 * wv));
+            banda.addColorStop(f, cor(l));
+        }
+        ctx.fillStyle = banda;
+        ctx.fillRect(x - r * 1.2, y - r * 1.2, r * 2.4, r * 2.4);
+
+        /* 2. Sombreado esférico (multiply): claro no topo-esquerda, escuro na borda. */
+        ctx.globalCompositeOperation = 'multiply';
+        const esf = ctx.createRadialGradient(x - r * 0.32, y - r * 0.36, r * 0.1, x, y, r * 1.12);
+        esf.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        esf.addColorStop(0.55, 'rgba(224, 230, 255, 1)');
+        esf.addColorStop(0.85, 'rgba(150, 165, 235, 1)');
+        esf.addColorStop(1, 'rgba(64, 74, 150, 1)');
+        ctx.fillStyle = esf;
+        ctx.fillRect(x - r * 1.2, y - r * 1.2, r * 2.4, r * 2.4);
+
+        /* 3. Brilho especular (screen) no topo-esquerda. */
         ctx.globalCompositeOperation = 'screen';
-
-        const giroP = t * 0.25;
-        ctx.fillStyle = radial(x + Math.cos(giroP) * r * 0.4, y + r * 0.45, 0, r * 1.15, [
-            [0, 'rgba(246, 182, 214, 0.6)'],
-            [1, 'rgba(246, 182, 214, 0)']
-        ]);
+        const bri = ctx.createRadialGradient(x - r * 0.34, y - r * 0.42, 0, x - r * 0.34, y - r * 0.42, r * 0.6);
+        bri.addColorStop(0, 'rgba(255, 255, 255, 0.75)');
+        bri.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = bri;
         ctx.fillRect(x - r * 1.2, y - r * 1.2, r * 2.4, r * 2.4);
 
-        ctx.fillStyle = radial(x + Math.cos(giroP + 2.2) * r * 0.5, y + r * 0.5, 0, r * 1.15, [
-            [0, 'rgba(168, 200, 246, 0.62)'],
-            [1, 'rgba(168, 200, 246, 0)']
-        ]);
+        /* 4. Rim de luz fria embaixo (subsurface), como nos prints. */
+        const rim = ctx.createRadialGradient(x + r * 0.15, y + r * 0.7, 0, x + r * 0.15, y + r * 0.7, r * 0.8);
+        rim.addColorStop(0, 'rgba(150, 190, 255, 0.5)');
+        rim.addColorStop(1, 'rgba(150, 190, 255, 0)');
+        ctx.fillStyle = rim;
         ctx.fillRect(x - r * 1.2, y - r * 1.2, r * 2.4, r * 2.4);
 
-        ctx.fillStyle = radial(x - r * 0.35, y - r * 0.1, 0, r * 0.9, [
-            [0, 'rgba(198, 224, 214, 0.32)'],
-            [1, 'rgba(198, 224, 214, 0)']
-        ]);
-        ctx.fillRect(x - r * 1.2, y - r * 1.2, r * 2.4, r * 2.4);
-
-        /* 4. Redemoinho/anel macio, inclinado, girando devagar. */
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(t * 0.12 + 0.3);
-        ctx.scale(1, 0.6);
-        const anel = radial(0, 0, r * 0.16, r * 0.72, [
-            [0, 'rgba(255, 255, 255, 0)'],
-            [0.42, 'rgba(255, 255, 255, 0)'],
-            [0.56, 'rgba(232, 214, 250, 0.5)'],
-            [0.72, 'rgba(250, 196, 222, 0.45)'],
-            [0.9, 'rgba(186, 210, 248, 0.34)'],
-            [1, 'rgba(186, 210, 248, 0)']
-        ]);
-        ctx.fillStyle = anel;
-        ctx.beginPath(); ctx.arc(0, 0, r * 0.76, 0, TAU); ctx.fill();
         ctx.restore();
-
-        ctx.restore();  /* fim do clip/screen */
-
-        /* 5. Brilho especular suave no alto. */
-        ctx.fillStyle = radial(x - r * 0.28, y - r * 0.36, 0, r * 0.5, [
-            [0, 'rgba(255, 255, 255, 0.7)'],
-            [1, 'rgba(255, 255, 255, 0)']
-        ]);
-        ctx.beginPath(); ctx.arc(x - r * 0.28, y - r * 0.36, r * 0.5, 0, TAU); ctx.fill();
 
         requestAnimationFrame(quadro);
     }
