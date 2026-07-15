@@ -209,23 +209,110 @@
     .seta.dir { right: -8px; }
     .seta svg { width: 22px; height: 22px; }
 
-    /* ── Mural — masonry via columns ── */
-    .masonry { column-count: 3; column-gap: 20px; }
-    .m-card {
-        break-inside: avoid; margin-bottom: 20px;
+    /* ── Mural — feed social (estilo Threads) ── */
+    .avatar-sm {
+        width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; overflow: hidden;
+        background: linear-gradient(135deg, #C8B8E0, #B8C6E8);
+        display: grid; place-items: center; font-size: 15px; font-weight: 600; color: rgba(0,0,0,0.55);
+    }
+    .avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+
+    .composer {
         background: rgba(255, 255, 255, 0.4);
         -webkit-backdrop-filter: blur(25px); backdrop-filter: blur(25px);
-        border: 1px solid rgba(255, 255, 255, 0.6);
-        border-radius: 20px; overflow: hidden;
-        transition: transform 200ms ease, box-shadow 200ms ease;
+        border: 1px solid rgba(255,255,255,0.6); border-radius: 20px;
+        padding: 18px 20px; margin-bottom: 24px;
     }
-    .m-card:hover { transform: translateY(-3px); box-shadow: 0 18px 44px rgba(0,0,0,0.14); }
-    .m-thumb { width: 100%; }
-    .m-corpo { padding: 16px; }
-    .m-corpo .aluno { font-size: 14px; font-weight: 600; color: #1D1D1F; }
-    .m-corpo .proj { font-size: 15px; color: #1D1D1F; margin-top: 3px; }
-    .m-corpo .ver { display: inline-block; font-size: 13px; color: rgba(0,0,0,0.55); margin-top: 10px; text-decoration: none; }
-    .m-corpo .ver:hover { color: #1D1D1F; }
+    .comp-top { display: flex; gap: 14px; }
+    #txtPost {
+        flex: 1; border: none; background: none; outline: none; resize: none;
+        font-family: inherit; font-size: 16px; color: #1D1D1F; line-height: 1.5;
+        padding-top: 10px; min-height: 44px; max-height: 320px;
+    }
+    #txtPost::placeholder { color: rgba(0,0,0,0.35); }
+    .previa { display: none; margin-top: 12px; position: relative; width: fit-content; }
+    .previa.show { display: block; }
+    .previa img { max-height: 240px; max-width: 100%; border-radius: 14px; display: block; }
+    .previa button {
+        position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%;
+        border: none; background: rgba(0,0,0,0.6); color: #fff; cursor: pointer; font-size: 16px; line-height: 1;
+    }
+    .comp-baixo { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; gap: 12px; flex-wrap: wrap; }
+    .comp-esq { display: flex; align-items: center; gap: 12px; }
+    .anexo {
+        width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; cursor: pointer;
+        color: rgba(0,0,0,0.5); background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.6);
+        transition: background 150ms ease;
+    }
+    .anexo:hover { background: rgba(255,255,255,0.8); }
+    .anexo svg { width: 18px; height: 18px; }
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip {
+        font-family: inherit; font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.55);
+        background: rgba(30,30,30,0.06); border: none; border-radius: 999px; padding: 7px 13px;
+        cursor: pointer; transition: background 150ms ease, color 150ms ease;
+    }
+    .chip.on { background: #1D1D1F; color: #fff; }
+
+    .recado { display: none; font-size: 13px; margin-top: 12px; padding: 10px 14px; border-radius: 12px;
+        color: #1D1D1F; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.7); }
+    .recado.show { display: block; }
+    .recado.ok { color: #1c7c54; }
+
+    .feed { display: flex; flex-direction: column; gap: 16px; }
+    .post {
+        background: rgba(255, 255, 255, 0.4);
+        -webkit-backdrop-filter: blur(25px); backdrop-filter: blur(25px);
+        border: 1px solid rgba(255,255,255,0.6); border-radius: 20px; padding: 20px 22px;
+    }
+    .topo-post { display: flex; align-items: center; gap: 12px; }
+    .topo-post .quem { flex: 1; min-width: 0; }
+    .topo-post .quem b { display: block; font-size: 14px; font-weight: 600; color: #1D1D1F; }
+    .topo-post .quem span { font-size: 12px; color: rgba(0,0,0,0.45); }
+    .selo {
+        font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+        padding: 4px 10px; border-radius: 999px; color: rgba(0,0,0,0.55); background: rgba(30,30,30,0.08);
+    }
+    .corpo-post { font-size: 15px; line-height: 1.55; color: #1D1D1F; margin-top: 14px; white-space: pre-wrap; word-wrap: break-word; }
+    .post a { color: #1D1D1F; text-decoration: underline; word-break: break-all; }
+    .foto-post { width: 100%; border-radius: 16px; margin-top: 14px; display: block; }
+    .caixa-prompt { margin-top: 14px; background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.6); border-radius: 14px; padding: 14px; }
+    .ferramentas-prompt { display: flex; gap: 8px; justify-content: flex-end; }
+    .mini { font-family: inherit; font-size: 12px; font-weight: 600; color: #1D1D1F; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.7); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+    .caixa-prompt pre { font-family: inherit; font-size: 13px; white-space: pre-wrap; word-wrap: break-word; color: rgba(0,0,0,0.7); margin-top: 8px; }
+
+    .acoes { display: flex; align-items: center; gap: 6px; margin-top: 16px; }
+    .acao {
+        display: inline-flex; align-items: center; gap: 6px; font-family: inherit; font-size: 13px; font-weight: 500;
+        color: rgba(0,0,0,0.6); background: none; border: none; cursor: pointer; padding: 6px 12px; border-radius: 999px;
+        transition: background 150ms ease, color 150ms ease;
+    }
+    .acao svg { width: 17px; height: 17px; }
+    .acao:hover { background: rgba(255,255,255,0.55); color: #1D1D1F; }
+    .acao.curtido { color: rgba(200,68,26,0.95); }
+    .acao.curtido svg { fill: currentColor; }
+    .acao.apagar { margin-left: auto; }
+    .acao.apagar:hover { color: rgba(200,68,26,0.95); }
+
+    .comentarios { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(0,0,0,0.06); flex-direction: column; gap: 12px; }
+    .comentarios.show { display: flex; }
+    .coment { display: flex; gap: 10px; }
+    .coment .avatar-sm { width: 34px; height: 34px; font-size: 12px; }
+    .balao { background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.6); border-radius: 14px; padding: 10px 14px; flex: 1; min-width: 0; }
+    .balao b { font-size: 13px; font-weight: 600; color: #1D1D1F; }
+    .balao time { font-size: 11px; color: rgba(0,0,0,0.4); margin-left: 8px; }
+    .balao p { font-size: 14px; color: rgba(0,0,0,0.75); line-height: 1.45; margin-top: 4px; white-space: pre-wrap; word-wrap: break-word; }
+    .escrever { display: flex; gap: 8px; align-items: center; }
+    .escrever .avatar-sm { width: 34px; height: 34px; font-size: 12px; }
+    .escrever input {
+        flex: 1; min-width: 0; font-family: inherit; font-size: 14px; color: #1D1D1F;
+        background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.6); border-radius: 999px;
+        padding: 9px 16px; outline: none; transition: background 150ms ease;
+    }
+    .escrever input:focus { background: rgba(255,255,255,0.8); }
+    .btn-pequeno { font-size: 13px; padding: 9px 16px; }
+    .vazio { text-align: center; color: rgba(0,0,0,0.5); font-size: 14px; padding: 44px 0; }
+    .vazio strong { display: block; font-size: 16px; color: #1D1D1F; margin-bottom: 6px; }
 
     /* ── Prompts — grid 2 col ── */
     .grid-prompts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -354,13 +441,11 @@
         .seta.dir { right: -4px; }
 
         /* Grids 1 coluna */
-        .masonry { column-count: 1; }
         .grid-prompts { grid-template-columns: 1fr; }
         .grid-store { grid-template-columns: 1fr; }
         .perfil-box { padding: 28px 22px; }
     }
     @media (min-width: 769px) and (max-width: 1024px) {
-        .masonry { column-count: 2; }
         .grid-store { grid-template-columns: repeat(2, 1fr); }
     }
 
@@ -431,9 +516,36 @@
             <section id="mural">
                 <div class="cabeca">
                     <div class="h-sec">Mural dos alunos</div>
-                    <div class="sub-sec">Os portfólios e projetos que a comunidade está construindo</div>
+                    <div class="sub-sec">O feed da comunidade — publique, comente e curta o que a galera está construindo</div>
                 </div>
-                <div class="masonry" id="mural-grid"></div>
+
+                <form class="composer" id="composer">
+                    <div class="comp-top">
+                        <div class="avatar-sm" id="meuAvatar">L</div>
+                        <textarea id="txtPost" placeholder="Compartilhe um projeto, um aprendizado ou uma dúvida..." maxlength="3000"></textarea>
+                    </div>
+                    <div class="previa" id="previa">
+                        <img id="imgPrevia" alt="">
+                        <button type="button" id="tiraPrevia" aria-label="Remover imagem">×</button>
+                    </div>
+                    <div class="comp-baixo">
+                        <div class="comp-esq">
+                            <label class="anexo" title="Adicionar imagem">
+                                <i data-lucide="image"></i>
+                                <input type="file" id="arquivo" accept="image/*" hidden>
+                            </label>
+                            <div class="chips" id="tipos">
+                                <button type="button" class="chip on" data-tipo="resultado">Resultado</button>
+                                <button type="button" class="chip" data-tipo="prompt">Prompt</button>
+                                <button type="button" class="chip" data-tipo="duvida">Dúvida</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-preto" id="btnPublicar">Publicar</button>
+                    </div>
+                    <div class="recado" id="recadoMural"></div>
+                </form>
+
+                <div class="feed" id="feed"></div>
             </section>
 
             <!-- ── SEÇÃO 3 — PROMPTS ── -->
@@ -509,6 +621,9 @@
     <script>
     (function () {
         'use strict';
+
+        const { sb, esc, urlSegura, iniciais, quando } = window.C || {};
+        let usuario = null, perfil = null;
 
         /* ── Tons dos blobs (placeholders de thumbnail) ── */
         const tom = {
@@ -609,24 +724,209 @@
             x0 = null;
         }, { passive: true });
 
-        /* ─────────────── MURAL ─────────────── */
-        const mural = [
-            { aluno: 'Ana Silva',        proj: 'Portfólio UGC beauty',            alt: 300, tom: tom.pessego },
-            { aluno: 'João Santos',      proj: 'Landing de mentoria',             alt: 220, tom: tom.lavanda },
-            { aluno: 'Marina Costa',     proj: 'Site de receitas com Claude',     alt: 260, tom: tom.menta },
-            { aluno: 'Rafael Oliveira',  proj: 'Portfólio de fotografia',         alt: 320, tom: tom.lavandaClara },
-            { aluno: 'Beatriz Lima',     proj: 'Loja de artesanato',              alt: 210, tom: tom.pessego },
-            { aluno: 'Pedro Almeida',    proj: 'Landing para curso de violão',    alt: 280, tom: tom.menta }
-        ];
-        document.getElementById('mural-grid').innerHTML = mural.map(m => `
-            <div class="m-card">
-                <div class="m-thumb" style="height:${m.alt}px;background:${m.tom}"></div>
-                <div class="m-corpo">
-                    <div class="aluno">${m.aluno}</div>
-                    <div class="proj">${m.proj}</div>
-                    <a class="ver" href="#">Ver projeto ↗</a>
+        /* ─────────────── MURAL — feed social (Supabase) ─────────────── */
+        const rotulo = { resultado: 'Resultado', prompt: 'Prompt', duvida: 'Dúvida' };
+        let tipoPost = 'resultado';
+        let arquivoPost = null;
+
+        const composer = document.getElementById('composer');
+        const txtPost = document.getElementById('txtPost');
+        const feedEl = document.getElementById('feed');
+
+        function avatarHTML(nome, url) {
+            return url ? `<img src="${esc(url)}" alt="">` : esc(iniciais(nome || 'Aluna'));
+        }
+
+        function recadoMural(txt, tipo) {
+            const el = document.getElementById('recadoMural');
+            el.textContent = txt || '';
+            el.className = 'recado' + (txt ? ' show ' + (tipo || 'erro') : '');
+            if (txt && tipo === 'ok') setTimeout(() => { el.className = 'recado'; }, 3000);
+        }
+
+        async function carregarMural() {
+            if (!sb) return;
+            const { data, error } = await sb.rpc('imersao_feed', { p_limit: 40, p_offset: 0 });
+            if (error) { feedEl.innerHTML = '<p class="vazio">Não consegui carregar o mural agora.</p>'; return; }
+            const posts = data || [];
+            if (!posts.length) {
+                feedEl.innerHTML = '<p class="vazio"><strong>O mural está esperando por você</strong>Seja a primeira a publicar algo na comunidade.</p>';
+                return;
+            }
+            feedEl.innerHTML = posts.map(desenharPost).join('');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function desenharPost(p) {
+            const link = urlSegura(p.link);
+            const coments = p.comentarios || [];
+            const nc = coments.length;
+            return `
+            <article class="post" data-post="${p.id}">
+                <header class="topo-post">
+                    <div class="avatar-sm">${avatarHTML(p.autor_nome, p.autor_avatar)}</div>
+                    <div class="quem">
+                        <b>${esc(p.autor_nome)}</b>
+                        <span>${esc(quando(p.created_at))}${p.autor_instagram ? ' · ' + esc(p.autor_instagram) : ''}</span>
+                    </div>
+                    <span class="selo">${esc(rotulo[p.tipo] || p.tipo || '')}</span>
+                </header>
+                <div class="corpo-post">${esc(p.texto)}</div>
+                ${link ? `<p style="margin-top:10px"><a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(link)}</a></p>` : ''}
+                ${p.imagem_url ? `<img class="foto-post" src="${esc(p.imagem_url)}" alt="" loading="lazy">` : ''}
+                ${p.prompt ? `<div class="caixa-prompt"><div class="ferramentas-prompt"><button class="mini" data-copiar="${p.id}">Copiar</button></div><pre id="prompt-${p.id}">${esc(p.prompt)}</pre></div>` : ''}
+                <footer class="acoes">
+                    <button class="acao${p.eu_curti ? ' curtido' : ''}" data-curtir="${p.id}">
+                        <i data-lucide="heart"></i><span data-contagem="${p.id}">${p.n_curtidas || 0}</span>
+                    </button>
+                    <button class="acao" data-comentar="${p.id}"><i data-lucide="message-circle"></i><span data-ncoment="${p.id}">${nc || 'Comentar'}</span></button>
+                    ${p.sou_autor ? `<button class="acao apagar" data-apagar="${p.id}" aria-label="Apagar"><i data-lucide="trash-2"></i></button>` : ''}
+                </footer>
+                <div class="comentarios" id="coments-${p.id}">
+                    ${coments.map(desenharComentario).join('')}
+                    <form class="escrever" data-form-coment="${p.id}">
+                        <div class="avatar-sm">${avatarHTML(perfil && perfil.nome, perfil && perfil.avatar_url)}</div>
+                        <input type="text" placeholder="Escreva um comentário" maxlength="2000" required>
+                        <button type="submit" class="btn-preto btn-pequeno">Enviar</button>
+                    </form>
                 </div>
-            </div>`).join('');
+            </article>`;
+        }
+
+        function desenharComentario(c) {
+            return `
+            <div class="coment">
+                <div class="avatar-sm">${avatarHTML(c.autor_nome, c.autor_avatar)}</div>
+                <div class="balao">
+                    <b>${esc(c.autor_nome)}</b><time>${esc(quando(c.created_at))}</time>
+                    <p>${esc(c.texto)}</p>
+                </div>
+            </div>`;
+        }
+
+        /* Composer: crescer, tipo, imagem */
+        if (txtPost) txtPost.addEventListener('input', () => {
+            txtPost.style.height = 'auto';
+            txtPost.style.height = txtPost.scrollHeight + 'px';
+        });
+        const elTipos = document.getElementById('tipos');
+        if (elTipos) elTipos.addEventListener('click', (e) => {
+            const chip = e.target.closest('.chip'); if (!chip) return;
+            elTipos.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+            chip.classList.add('on'); tipoPost = chip.dataset.tipo;
+        });
+        const inputArquivo = document.getElementById('arquivo');
+        if (inputArquivo) inputArquivo.addEventListener('change', (e) => {
+            const f = e.target.files[0]; if (!f) return;
+            if (f.size > 5 * 1024 * 1024) { recadoMural('A imagem precisa ter menos de 5 MB.'); e.target.value = ''; return; }
+            arquivoPost = f;
+            document.getElementById('imgPrevia').src = URL.createObjectURL(f);
+            document.getElementById('previa').classList.add('show');
+        });
+        const tiraPrevia = document.getElementById('tiraPrevia');
+        if (tiraPrevia) tiraPrevia.addEventListener('click', () => {
+            arquivoPost = null; inputArquivo.value = '';
+            document.getElementById('previa').classList.remove('show');
+        });
+
+        async function subirImagem(arquivo) {
+            const ext = (arquivo.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const caminho = `${usuario.id}/${Date.now()}.${ext}`;
+            const { error } = await sb.storage.from('imersao').upload(caminho, arquivo, { upsert: false });
+            if (error) throw error;
+            return sb.storage.from('imersao').getPublicUrl(caminho).data.publicUrl;
+        }
+
+        if (composer) composer.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!usuario) return recadoMural('Faça login para publicar.');
+            const texto = txtPost.value.trim();
+            if (!texto) return recadoMural('Escreva alguma coisa antes de publicar.');
+            const btn = document.getElementById('btnPublicar');
+            btn.disabled = true; btn.textContent = 'Publicando...';
+            recadoMural('');
+            try {
+                let imagem_url = null;
+                if (arquivoPost) imagem_url = await subirImagem(arquivoPost);
+                const { error } = await sb.from('imersao_posts').insert({
+                    autor_id: usuario.id, tipo: tipoPost, texto, prompt: null, link: null, imagem_url
+                });
+                if (error) throw error;
+                composer.reset(); txtPost.style.height = 'auto';
+                arquivoPost = null; document.getElementById('previa').classList.remove('show');
+                elTipos.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+                elTipos.querySelector('.chip[data-tipo="resultado"]').classList.add('on');
+                tipoPost = 'resultado';
+                await carregarMural();
+            } catch (err) {
+                recadoMural('Não consegui publicar agora. Tente de novo.');
+            } finally {
+                btn.disabled = false; btn.textContent = 'Publicar';
+            }
+        });
+
+        /* Cliques no feed (delegação) */
+        if (feedEl) feedEl.addEventListener('click', async (e) => {
+            const curtir = e.target.closest('[data-curtir]');
+            const comentar = e.target.closest('[data-comentar]');
+            const copiar = e.target.closest('[data-copiar]');
+            const apagar = e.target.closest('[data-apagar]');
+
+            if (curtir) {
+                if (!usuario) return;
+                const id = Number(curtir.dataset.curtir);
+                const estava = curtir.classList.contains('curtido');
+                const cont = curtir.querySelector(`[data-contagem="${id}"]`);
+                curtir.classList.toggle('curtido');
+                cont.textContent = Math.max(0, Number(cont.textContent) + (estava ? -1 : 1));
+                const { error } = estava
+                    ? await sb.from('imersao_curtidas').delete().eq('post_id', id).eq('usuario_id', usuario.id)
+                    : await sb.from('imersao_curtidas').insert({ post_id: id, usuario_id: usuario.id });
+                if (error) { curtir.classList.toggle('curtido'); cont.textContent = Number(cont.textContent) + (estava ? 1 : -1); }
+                return;
+            }
+            if (comentar) {
+                const cx = document.getElementById('coments-' + comentar.dataset.comentar);
+                cx.classList.toggle('show');
+                if (cx.classList.contains('show')) cx.querySelector('input').focus();
+                return;
+            }
+            if (copiar) {
+                const pre = document.getElementById('prompt-' + copiar.dataset.copiar);
+                try { await navigator.clipboard.writeText(pre.textContent); copiar.textContent = 'Copiado'; setTimeout(() => { copiar.textContent = 'Copiar'; }, 1500); } catch (_) {}
+                return;
+            }
+            if (apagar) {
+                if (!confirm('Apagar essa publicação?')) return;
+                const id = Number(apagar.dataset.apagar);
+                const { error } = await sb.from('imersao_posts').delete().eq('id', id);
+                if (error) return recadoMural('Não consegui apagar agora.');
+                const art = document.querySelector(`[data-post="${id}"]`);
+                if (art) art.remove();
+            }
+        });
+
+        if (feedEl) feedEl.addEventListener('submit', async (e) => {
+            const form = e.target.closest('[data-form-coment]');
+            if (!form) return;
+            e.preventDefault();
+            if (!usuario) return;
+            const id = Number(form.dataset.formComent);
+            const campo = form.querySelector('input');
+            const texto = campo.value.trim();
+            if (!texto) return;
+            const btn = form.querySelector('button');
+            btn.disabled = true;
+            const { error } = await sb.from('imersao_comentarios').insert({ post_id: id, autor_id: usuario.id, texto });
+            btn.disabled = false;
+            if (error) return recadoMural('Não consegui comentar agora.');
+            campo.value = '';
+            const novo = document.createElement('div');
+            novo.innerHTML = desenharComentario({ texto, created_at: new Date().toISOString(), autor_nome: (perfil && perfil.nome) || 'Você', autor_avatar: perfil && perfil.avatar_url });
+            form.parentNode.insertBefore(novo.firstElementChild, form);
+            const nEl = document.querySelector(`[data-ncoment="${id}"]`);
+            if (nEl) nEl.textContent = document.querySelectorAll('#coments-' + id + ' .coment').length;
+        });
 
         /* ─────────────── PROMPTS ─────────────── */
         const prompts = [
@@ -750,30 +1050,45 @@
 
         /* ─────────────── GUARD DE SESSÃO + PERFIL ─────────────── */
         (async function () {
+            if (!sb) return;
             try {
-                const { sb } = window.C;
                 const { data: { session } } = await sb.auth.getSession();
                 if (!session) { window.location.replace('index.html'); return; }
+                usuario = session.user;
+                const email = usuario.email || '';
 
-                const user = session.user;
-                let nome = '', email = user.email || '';
+                /* Perfil (cria se ainda não existir) */
+                let pf = null;
                 try {
-                    const { data } = await sb.from('imersao_perfis').select('nome').eq('usuario_id', user.id).maybeSingle();
-                    if (data && data.nome) nome = data.nome;
-                } catch (e) {}
-                if (!nome) nome = (email.split('@')[0] || 'Lara');
+                    const r = await sb.from('imersao_perfis').select('*').eq('usuario_id', usuario.id).maybeSingle();
+                    pf = r.data;
+                    if (!pf) {
+                        const nomeBase = (usuario.user_metadata && usuario.user_metadata.nome) || (email.split('@')[0] || 'Aluna');
+                        const novo = await sb.from('imersao_perfis').insert({ usuario_id: usuario.id, nome: nomeBase }).select().maybeSingle();
+                        pf = novo.data || { usuario_id: usuario.id, nome: nomeBase };
+                    }
+                } catch (e) { pf = { nome: email.split('@')[0] || 'Aluna' }; }
+                perfil = pf;
 
+                const nome = perfil.nome || (email.split('@')[0] || 'Aluna');
                 const primeiro = nome.split(' ')[0];
                 document.getElementById('nomeUsuaria').textContent = primeiro;
                 document.getElementById('perfilNome').textContent = nome;
                 document.getElementById('perfilEmail').textContent = email;
-                const ini = window.C.iniciais ? window.C.iniciais(nome) : (primeiro[0] || 'L');
-                document.getElementById('avatar').textContent = ini.toUpperCase();
+                const ini = (iniciais ? iniciais(nome) : (primeiro[0] || 'L')).toUpperCase();
+                document.getElementById('avatar').textContent = ini;
+                document.getElementById('meuAvatar').innerHTML = avatarHTML(nome, perfil.avatar_url);
+                if (perfil.avatar_url) {
+                    document.getElementById('avatar').innerHTML =
+                        `<img src="${esc(perfil.avatar_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+                }
 
                 document.getElementById('btnSair').addEventListener('click', async () => {
                     await sb.auth.signOut();
                     window.location.replace('index.html');
                 });
+
+                await carregarMural();
             } catch (e) {
                 /* Sem backend disponível: mantém os placeholders visuais. */
             }
