@@ -1313,7 +1313,7 @@
         const inputArquivo = document.getElementById('arquivo');
         if (inputArquivo) inputArquivo.addEventListener('change', (e) => {
             const f = e.target.files[0]; if (!f) return;
-            if (f.size > 5 * 1024 * 1024) { recadoMural('A imagem precisa ter menos de 5 MB.'); e.target.value = ''; return; }
+            if (!/^image\//.test(f.type)) { recadoMural('Selecione um arquivo de imagem.'); e.target.value = ''; return; }
             arquivoPost = f;
             document.getElementById('imgPrevia').src = URL.createObjectURL(f);
             document.getElementById('previa').classList.add('show');
@@ -1324,10 +1324,44 @@
             document.getElementById('previa').classList.remove('show');
         });
 
+        /* Redimensiona/comprime a imagem no navegador antes de subir.
+           Aceita qualquer imagem; devolve um arquivo leve (webp/jpeg). */
+        function comprimirImagem(file) {
+            return new Promise((resolve) => {
+                if (!/^image\//.test(file.type) || file.type === 'image/gif') return resolve(file);
+                const MAXLADO = 1600, QUAL = 0.85;
+                const precisaPorTamanho = file.size > 1.5 * 1024 * 1024;
+                const url = URL.createObjectURL(file);
+                const img = new Image();
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    const grande = img.width > MAXLADO || img.height > MAXLADO;
+                    if (!precisaPorTamanho && !grande) return resolve(file);
+                    let w = img.width, h = img.height;
+                    if (grande) { const e = MAXLADO / Math.max(w, h); w = Math.round(w * e); h = Math.round(h * e); }
+                    const cv = document.createElement('canvas');
+                    cv.width = w; cv.height = h;
+                    cv.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const usar = (blob) => resolve(blob && blob.size < file.size ? blob : file);
+                    cv.toBlob((blob) => {
+                        if (blob) usar(blob);
+                        else cv.toBlob((b2) => usar(b2), 'image/jpeg', QUAL);   /* fallback p/ navegadores sem webp */
+                    }, 'image/webp', QUAL);
+                };
+                img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+                img.src = url;
+            });
+        }
+
         async function subirImagem(arquivo) {
-            const ext = (arquivo.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const enviar = await comprimirImagem(arquivo);
+            const tipo = enviar.type || arquivo.type || 'image/jpeg';
+            const ext = tipo === 'image/webp' ? 'webp'
+                      : tipo === 'image/jpeg' ? 'jpg'
+                      : tipo === 'image/png' ? 'png'
+                      : (arquivo.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
             const caminho = `${usuario.id}/${Date.now()}.${ext}`;
-            const { error } = await sb.storage.from('imersao').upload(caminho, arquivo, { upsert: false });
+            const { error } = await sb.storage.from('imersao').upload(caminho, enviar, { upsert: false, contentType: tipo });
             if (error) throw error;
             return sb.storage.from('imersao').getPublicUrl(caminho).data.publicUrl;
         }
