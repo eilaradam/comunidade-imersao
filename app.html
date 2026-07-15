@@ -1,1336 +1,730 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex">
-    <title>Comunidade Imersão</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=13">
-    <style>
-        body {
-            background:
-                radial-gradient(110% 80% at 78% 0%, #FDFCFA 0%, var(--areia-clara) 48%, var(--areia) 100%);
-            background-attachment: fixed;
-            min-height: 100vh;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Comunidade Imersão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    html, body { min-height: 100%; }
+    body {
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        background: #FAFAFC;
+        color: #1D1D1F;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+    }
 
-        /* A logo do Claude vive no fundo da plataforma inteira, só como atmosfera.
-           Bem apagada de propósito: quem manda aqui é o conteúdo. */
-        .cena {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-            opacity: .32;
-        }
-        .cena canvas { width: 100%; height: 100%; display: block; }
+    /* ── CAMADA A: blobs de cor suave, o mais atrás — igual ao login, fixos ── */
+    .blobs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(120px); will-change: transform; }
+    .b1 { width: 620px; height: 620px; background: #B8C6E8; opacity: .6; left: 50%; top: 46%; margin: -310px 0 0 -430px; animation: fl1 24s ease-in-out infinite; }
+    .b2 { width: 560px; height: 560px; background: #E8C4B8; opacity: .55; left: 50%; top: 50%; margin: -280px 0 0 -110px; animation: fl2 29s ease-in-out infinite; }
+    .b3 { width: 700px; height: 700px; background: #C8B8E0; opacity: .5; left: 50%; top: 55%; margin: -350px 0 0 -360px; animation: fl3 22s ease-in-out infinite; }
+    .b4 { width: 470px; height: 470px; background: #B8E0D0; opacity: .55; left: 50%; top: 42%; margin: -235px 0 0 -40px; animation: fl4 26s ease-in-out infinite; }
+    @keyframes fl1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-42px,32px); } }
+    @keyframes fl2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(36px,-40px); } }
+    @keyframes fl3 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,42px); } }
+    @keyframes fl4 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-30px,-34px); } }
 
-        .casca {
-            position: relative;
-            z-index: 1;
-            display: grid;
-            grid-template-columns: 264px 1fr;
-            min-height: 100vh;
-        }
+    /* ── CAMADA B: starburst de partículas — fixo, não rola ── */
+    #cena { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+    #cena canvas { display: block; }
 
-        /* ── Menu lateral ── */
-        .lateral {
-            margin: 14px 0 14px 14px;
-            border: 1px solid var(--fio);
-            border-radius: 26px;
-            background: var(--vidro);
-            backdrop-filter: blur(30px) saturate(135%);
-            -webkit-backdrop-filter: blur(30px) saturate(135%);
-            box-shadow: var(--sombra);
-            padding: 26px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            position: sticky;
-            top: 14px;
-            height: calc(100vh - 28px);
-        }
-        .marca { padding: 0 12px 26px; line-height: 1.25; }
-        .marca small {
-            display: block;
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: .2em;
-            text-transform: uppercase;
-            color: var(--terracota);
-            margin-bottom: 6px;
-        }
-        .marca b {
-            font-family: 'Fraunces', serif;
-            font-weight: 400;
-            font-size: 21px;
-            color: var(--tinta);
-        }
-        .item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-radius: 14px;
-            font-size: 14.5px;
-            color: var(--tinta-media);
-            width: 100%;
-            text-align: left;
-            border: 1px solid transparent;
-            transition: background var(--transicao), color var(--transicao), border-color var(--transicao), box-shadow var(--transicao);
-        }
-        .item:hover { background: var(--vidro-fraco); color: var(--tinta); }
-        .item.ativo {
-            background: var(--vidro-forte);
-            border-color: var(--fio);
-            color: var(--tinta);
-            box-shadow: 0 2px 6px rgba(58, 50, 42, .06);
-        }
-        .item .ico { font-size: 15px; width: 18px; text-align: center; color: var(--terracota); }
+    /* ── Layout geral ── */
+    .lane { position: relative; z-index: 2; padding-left: 116px; }
+    .conteudo { max-width: 1200px; margin: 0 auto; padding: 0 48px 0; }
 
-        .rodape-lateral { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--fio-tinta); }
-        .eu { display: flex; align-items: center; gap: 11px; padding: 10px 12px; font-size: 14px; }
-        .eu strong { font-weight: 500; color: var(--tinta); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .sair { font-size: 12px; color: var(--tinta-fraca); padding: 8px 12px; }
-        .sair:hover { color: var(--terracota); }
+    section { padding-top: 80px; scroll-margin-top: 40px; }
+    section:last-of-type { padding-bottom: 0; }
 
-        /* ── Palco ── */
-        .palco { padding: 46px 32px 90px; }
-        .tela { display: none; max-width: 720px; margin: 0 auto; }
-        .tela.show { display: block; animation: entra 380ms cubic-bezier(.2,.7,.3,1) both; }
-        .tela.larga { max-width: 1000px; }
-        @keyframes entra { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    /* ── MENU LATERAL FLUTUANTE ── */
+    .menu {
+        position: fixed;
+        top: 50%; left: 24px; transform: translateY(-50%);
+        width: 68px; padding: 16px 12px;
+        background: rgba(30, 30, 30, 0.35);
+        -webkit-backdrop-filter: blur(30px) saturate(1.5);
+        backdrop-filter: blur(30px) saturate(1.5);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 40px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        display: flex; flex-direction: column; align-items: center; gap: 8px;
+        z-index: 100;
+    }
+    .menu a {
+        position: relative;
+        width: 44px; height: 44px; border-radius: 14px;
+        display: grid; place-items: center;
+        color: rgba(255, 255, 255, 0.75);
+        text-decoration: none; cursor: pointer;
+        transition: background 200ms ease, color 200ms ease, box-shadow 200ms ease;
+    }
+    .menu a svg { width: 20px; height: 20px; }
+    .menu a:hover { background: rgba(255, 255, 255, 0.12); color: #FFFFFF; }
+    .menu a.ativo {
+        background: rgba(255, 255, 255, 0.2); color: #FFFFFF;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+    }
+    .menu .sep { margin-top: 12px; }
+    /* Tooltip */
+    .menu a::after {
+        content: attr(data-tip);
+        position: absolute; left: 56px; top: 50%;
+        transform: translateY(-50%) translateX(-4px);
+        white-space: nowrap;
+        background: rgba(20, 20, 20, 0.85);
+        -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+        color: #fff; font-size: 13px; padding: 6px 12px; border-radius: 8px;
+        opacity: 0; pointer-events: none;
+        transition: opacity 150ms ease, transform 150ms ease;
+        z-index: 5;
+    }
+    .menu a:hover::after { opacity: 1; transform: translateY(-50%) translateX(0); }
+    .menu .mais-tip { display: none; }
 
-        .titulo-tela { font-size: 36px; font-weight: 300; letter-spacing: -.015em; margin-bottom: 6px; }
-        .sub-tela { color: var(--tinta-media); font-size: 15px; margin-bottom: 32px; }
+    /* ── Tipografia de seção ── */
+    .h-sec { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; color: #1D1D1F; }
+    .sub-sec { font-size: 15px; color: rgba(0, 0, 0, 0.55); margin-top: 6px; }
+    .cabeca { margin-bottom: 32px; }
 
-        /* ── Vidro padrão dos blocos ── */
-        .publicar, .post, .cartao-prompt, .material, .aviso, .vitrine, .caixa, .meu-portfolio {
-            background: var(--vidro);
-            border: 1px solid var(--fio);
-            border-radius: var(--raio);
-            backdrop-filter: blur(30px) saturate(135%);
-            -webkit-backdrop-filter: blur(30px) saturate(135%);
-            box-shadow: var(--sombra);
-        }
+    /* Cartelas glass reutilizáveis */
+    .badge {
+        display: inline-block; font-size: 11px; text-transform: uppercase;
+        letter-spacing: 0.08em; font-weight: 600;
+        background: rgba(255, 255, 255, 0.7); color: rgba(0,0,0,0.6);
+        padding: 4px 10px; border-radius: 999px;
+    }
+    .pill-cat {
+        display: inline-block; font-size: 11px; text-transform: uppercase;
+        letter-spacing: 0.06em; font-weight: 600; color: rgba(0,0,0,0.55);
+        background: rgba(30, 30, 30, 0.08); padding: 4px 10px; border-radius: 999px;
+    }
+    .preco { font-size: 16px; font-weight: 600; color: #1D1D1F; }
+    .preco.gratis { color: rgba(0,0,0,0.55); font-weight: 500; }
 
-        /* ── Publicar ── */
-        .publicar { padding: 20px; margin-bottom: 26px; }
-        .publicar textarea {
-            border: none;
-            background: none;
-            box-shadow: none;
-            padding: 6px 0;
-            resize: none;
-            min-height: 44px;
-            font-size: 16px;
-        }
-        .publicar textarea:focus { background: none; box-shadow: none; }
-        .extras { display: none; margin-top: 14px; }
-        .publicar.aberto .extras { display: block; animation: entra 240ms ease both; }
-        .tipos { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-        .chip {
-            font-size: 12px;
-            font-weight: 500;
-            letter-spacing: .04em;
-            padding: 9px 16px;
-            border-radius: 999px;
-            border: 1px solid var(--fio-tinta);
-            background: var(--vidro-fraco);
-            color: var(--tinta-media);
-            transition: all var(--transicao);
-        }
-        .chip:hover { border-color: var(--champanhe); color: var(--tinta); }
-        .chip.on {
-            background: linear-gradient(180deg, var(--champanhe-claro), var(--champanhe));
-            border-color: rgba(255, 255, 255, .8);
-            color: #3A322A;
-            box-shadow: 0 6px 16px rgba(201, 166, 107, .28);
-        }
-        .extras textarea, .extras input[type="url"] { margin-bottom: 10px; font-size: 14px; }
-        .extras textarea { min-height: 92px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 13px; }
-        .barra-publicar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
-        .anexo {
-            font-size: 12px;
-            letter-spacing: .04em;
-            color: var(--tinta-media);
-            padding: 10px 15px;
-            border-radius: 12px;
-            border: 1px dashed var(--fio-tinta-forte);
-            margin: 0;
-            text-transform: none;
-            font-weight: 500;
-        }
-        .anexo:hover { color: var(--terracota); border-color: var(--champanhe); }
-        .previa { position: relative; margin-top: 10px; display: none; }
-        .previa.show { display: block; }
-        .previa img { width: 100%; border-radius: 14px; display: block; }
-        .tira-previa {
-            position: absolute; top: 8px; right: 8px;
-            background: var(--vidro-forte);
-            border: 1px solid var(--fio);
-            color: var(--tinta);
-            width: 30px; height: 30px; border-radius: 50%;
-            font-size: 15px; line-height: 1;
-            backdrop-filter: blur(10px);
-        }
+    .btn-preto {
+        font-family: inherit; font-size: 13px; font-weight: 600; color: #fff;
+        background: #1D1D1F; border: none; border-radius: 100px;
+        padding: 10px 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+        transition: background 200ms ease, transform 120ms ease;
+    }
+    .btn-preto:hover { background: #000; }
+    .btn-preto:active { transform: scale(0.97); }
+    .btn-glass {
+        font-family: inherit; font-size: 13px; font-weight: 600; color: #1D1D1F;
+        background: rgba(255, 255, 255, 0.6);
+        -webkit-backdrop-filter: blur(15px); backdrop-filter: blur(15px);
+        border: 1px solid rgba(255,255,255,0.7); border-radius: 999px;
+        padding: 9px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+        transition: background 200ms ease, transform 120ms ease;
+    }
+    .btn-glass:hover { background: rgba(255, 255, 255, 0.8); }
+    .btn-glass svg { width: 16px; height: 16px; }
 
-        /* ── Post ── */
-        .post { padding: 24px; margin-bottom: 16px; animation: entra 420ms ease both; }
-        .topo-post { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-        .quem { flex: 1; min-width: 0; }
-        .quem b { font-size: 15px; font-weight: 600; color: var(--tinta); display: block; }
-        .quem span { font-size: 12px; color: var(--tinta-fraca); }
-        .selo {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: .1em;
-            text-transform: uppercase;
-            padding: 6px 11px;
-            border-radius: 8px;
-            border: 1px solid var(--fio-tinta);
-            background: var(--vidro-fraco);
-            color: var(--tinta-media);
-        }
-        .selo.prompt { border-color: rgba(217, 185, 138, .6); color: #9A7A46; }
-        .selo.duvida { border-color: rgba(192, 132, 87, .5); color: var(--terracota); }
-        .corpo-post { font-size: 15.5px; white-space: pre-wrap; word-wrap: break-word; }
-        .foto-post { margin-top: 14px; border-radius: 14px; width: 100%; display: block; border: 1px solid var(--fio); }
+    /* ── SEÇÃO 1 — INÍCIO ── */
+    .saudacao h1 { font-size: 40px; font-weight: 600; letter-spacing: -0.02em; color: #1D1D1F; }
+    .saudacao p { font-size: 16px; color: rgba(0,0,0,0.55); margin-top: 8px; }
+    .saudacao { margin-bottom: 48px; }
+    .destaque-titulo { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
 
-        .caixa-prompt {
-            position: relative;
-            margin-top: 14px;
-            background: rgba(255, 255, 255, .5);
-            border: 1px solid var(--fio-tinta);
-            border-radius: 14px;
-            padding: 14px;
-        }
-        .caixa-prompt pre {
-            font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-            font-size: 12.5px;
-            line-height: 1.65;
-            white-space: pre-wrap;
-            word-break: break-word;
-            color: #55493D;
-            max-height: 260px;
-            overflow: auto;
-            padding-top: 26px;
-        }
-        .ferramentas-prompt { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; }
-        .mini {
-            font-size: 11px;
-            letter-spacing: .04em;
-            font-weight: 500;
-            padding: 6px 12px;
-            border-radius: 9px;
-            border: 1px solid var(--fio-tinta);
-            color: var(--tinta-media);
-            background: var(--vidro-forte);
-        }
-        .mini:hover { color: var(--terracota); border-color: var(--champanhe); }
+    /* Carrossel 3D */
+    .carrossel {
+        position: relative; height: 500px;
+        perspective: 1800px;
+    }
+    .palco {
+        position: relative; height: 100%; transform-style: preserve-3d;
+    }
+    .c-card {
+        position: absolute; left: 50%; top: 50%;
+        width: 320px; height: 440px; margin: -220px 0 0 -160px;
+        background: rgba(255, 255, 255, 0.35);
+        -webkit-backdrop-filter: blur(30px) saturate(1.6);
+        backdrop-filter: blur(30px) saturate(1.6);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+        overflow: hidden; cursor: pointer;
+        transition: transform 400ms cubic-bezier(0.25, 0.1, 0.25, 1), opacity 400ms cubic-bezier(0.25, 0.1, 0.25, 1);
+        display: flex; flex-direction: column;
+    }
+    .c-thumb { position: relative; height: 200px; flex-shrink: 0; }
+    .c-thumb .badge { position: absolute; top: 12px; right: 12px; }
+    .c-corpo { padding: 20px; display: flex; flex-direction: column; flex: 1; }
+    .c-corpo h3 { font-size: 18px; font-weight: 600; color: #1D1D1F; line-height: 1.25; }
+    .c-corpo .desc { font-size: 13px; color: rgba(0,0,0,0.55); margin-top: 8px; }
+    .c-rodape { margin-top: auto; display: flex; align-items: center; justify-content: space-between; padding-top: 16px; }
+    .c-rodape .acessar {
+        font-family: inherit; background: none; border: none; cursor: pointer;
+        font-size: 14px; font-weight: 600; color: #1D1D1F;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .c-rodape .acessar:hover { gap: 8px; }
 
-        .acoes {
-            display: flex; align-items: center; gap: 4px;
-            margin-top: 16px; padding-top: 14px;
-            border-top: 1px solid var(--fio-tinta);
-        }
-        .acao {
-            display: flex; align-items: center; gap: 7px;
-            font-size: 13px; color: var(--tinta-media);
-            padding: 9px 13px; border-radius: 11px;
-            transition: background var(--transicao), color var(--transicao);
-        }
-        .acao:hover { background: var(--vidro-forte); color: var(--tinta); }
-        .acao.curtido { color: var(--terracota); }
-        .acao.curtido .coracao { animation: pop 340ms ease; }
-        @keyframes pop { 0% { transform: scale(1); } 45% { transform: scale(1.35); } 100% { transform: scale(1); } }
-        .apagar { margin-left: auto; font-size: 12px; color: var(--tinta-fraca); }
-        .apagar:hover { color: #A6543A; background: none; }
+    .seta {
+        position: absolute; top: 50%; transform: translateY(-50%);
+        width: 44px; height: 44px; border-radius: 999px;
+        background: rgba(255, 255, 255, 0.5);
+        -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.6);
+        display: grid; place-items: center; cursor: pointer; z-index: 60;
+        color: #1D1D1F;
+        transition: background 200ms ease;
+    }
+    .seta:hover { background: rgba(255, 255, 255, 0.75); }
+    .seta.esq { left: -8px; }
+    .seta.dir { right: -8px; }
+    .seta svg { width: 22px; height: 22px; }
 
-        /* ── Comentários ── */
-        .comentarios { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--fio-tinta); display: none; }
-        .comentarios.show { display: block; }
-        .coment { display: flex; gap: 10px; margin-bottom: 12px; }
-        .coment .avatar { width: 32px; height: 32px; font-size: 11px; }
-        .balao { background: rgba(255, 255, 255, .55); border: 1px solid var(--fio); border-radius: 14px; padding: 10px 15px; flex: 1; }
-        .balao b { font-size: 13.5px; font-weight: 600; color: var(--tinta); }
-        .balao time { font-size: 11px; color: var(--tinta-fraca); margin-left: 7px; }
-        .balao p { font-size: 14px; margin-top: 3px; white-space: pre-wrap; word-wrap: break-word; }
-        .escrever { display: flex; gap: 10px; }
-        .escrever input { font-size: 14px; padding: 11px 15px; }
+    /* ── Mural — masonry via columns ── */
+    .masonry { column-count: 3; column-gap: 20px; }
+    .m-card {
+        break-inside: avoid; margin-bottom: 20px;
+        background: rgba(255, 255, 255, 0.4);
+        -webkit-backdrop-filter: blur(25px); backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 20px; overflow: hidden;
+        transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    .m-card:hover { transform: translateY(-3px); box-shadow: 0 18px 44px rgba(0,0,0,0.14); }
+    .m-thumb { width: 100%; }
+    .m-corpo { padding: 16px; }
+    .m-corpo .aluno { font-size: 14px; font-weight: 600; color: #1D1D1F; }
+    .m-corpo .proj { font-size: 15px; color: #1D1D1F; margin-top: 3px; }
+    .m-corpo .ver { display: inline-block; font-size: 13px; color: rgba(0,0,0,0.55); margin-top: 10px; text-decoration: none; }
+    .m-corpo .ver:hover { color: #1D1D1F; }
 
-        /* ── Biblioteca de prompts ── */
-        .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
-        .cartao-prompt { padding: 24px; margin-bottom: 16px; }
-        .cartao-prompt.destaque { border-color: var(--champanhe); }
-        .topo-cartao { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
-        .cartao-prompt h3 { font-size: 20px; flex: 1; }
-        .cartao-prompt .tema {
-            font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
-            color: #9A7A46; border: 1px solid rgba(217, 185, 138, .6); background: rgba(239, 220, 192, .4);
-            border-radius: 8px; padding: 6px 11px; white-space: nowrap;
+    /* ── Prompts — grid 2 col ── */
+    .grid-prompts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .p-card {
+        background: rgba(255, 255, 255, 0.4);
+        -webkit-backdrop-filter: blur(25px); backdrop-filter: blur(25px);
+        border: 1px solid rgba(255,255,255,0.6);
+        border-radius: 18px; padding: 24px;
+        display: flex; flex-direction: column;
+    }
+    .p-card h3 { font-size: 17px; font-weight: 600; color: #1D1D1F; margin-top: 12px; }
+    .p-card .preview {
+        font-size: 14px; color: rgba(0,0,0,0.6); line-height: 1.5; margin-top: 8px;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .p-card .p-rodape { margin-top: 18px; }
+
+    /* ── Materiais — lista ── */
+    .lista-mat { display: flex; flex-direction: column; gap: 14px; }
+    .mat-item {
+        background: rgba(255, 255, 255, 0.4);
+        -webkit-backdrop-filter: blur(25px); backdrop-filter: blur(25px);
+        border: 1px solid rgba(255,255,255,0.6); border-radius: 16px;
+        padding: 20px 24px; display: flex; align-items: center; gap: 20px;
+        transition: transform 200ms ease;
+    }
+    .mat-item:hover { transform: translateX(3px); }
+    .mat-ico { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; flex-shrink: 0; color: rgba(0,0,0,0.6); }
+    .mat-ico svg { width: 22px; height: 22px; }
+    .mat-meio { flex: 1; min-width: 0; }
+    .mat-meio h3 { font-size: 16px; font-weight: 600; color: #1D1D1F; }
+    .mat-meio .tipo { font-size: 13px; color: rgba(0,0,0,0.55); margin-top: 2px; }
+
+    /* ── Avisos — timeline ── */
+    .lista-avisos { display: flex; flex-direction: column; gap: 16px; }
+    .aviso {
+        position: relative;
+        background: rgba(255, 255, 255, 0.4);
+        -webkit-backdrop-filter: blur(25px); backdrop-filter: blur(25px);
+        border: 1px solid rgba(255,255,255,0.6); border-radius: 18px; padding: 24px;
+    }
+    .aviso .data { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(0,0,0,0.5); }
+    .aviso h3 { font-size: 18px; font-weight: 600; color: #1D1D1F; margin-top: 6px; padding-right: 90px; }
+    .aviso .corpo { font-size: 14px; color: rgba(0,0,0,0.7); line-height: 1.6; margin-top: 8px; }
+    .aviso .pill-cat { position: absolute; top: 24px; right: 24px; }
+
+    /* ── Store — grid 3 col ── */
+    .grid-store { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .s-card {
+        background: rgba(255, 255, 255, 0.4);
+        -webkit-backdrop-filter: blur(25px); backdrop-filter: blur(25px);
+        border: 1px solid rgba(255,255,255,0.6); border-radius: 20px; overflow: hidden;
+        display: flex; flex-direction: column;
+        transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    .s-card:hover { transform: translateY(-3px); box-shadow: 0 18px 44px rgba(0,0,0,0.14); }
+    .s-thumb { position: relative; height: 150px; }
+    .s-thumb .badge { position: absolute; top: 12px; right: 12px; }
+    .s-corpo { padding: 18px; display: flex; flex-direction: column; flex: 1; }
+    .s-corpo h3 { font-size: 16px; font-weight: 600; color: #1D1D1F; line-height: 1.25; }
+    .s-corpo .desc { font-size: 13px; color: rgba(0,0,0,0.55); margin-top: 6px; }
+    .s-rodape { margin-top: auto; padding-top: 16px; display: flex; align-items: center; justify-content: space-between; }
+
+    /* ── Perfil ── */
+    .perfil-box {
+        background: rgba(255, 255, 255, 0.4);
+        -webkit-backdrop-filter: blur(30px); backdrop-filter: blur(30px);
+        border: 1px solid rgba(255,255,255,0.6);
+        border-radius: 24px; padding: 40px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+    }
+    .avatar {
+        width: 96px; height: 96px; border-radius: 50%;
+        background: linear-gradient(135deg, #E8C4B8, #F0D6C4);
+        display: grid; place-items: center;
+        font-size: 32px; font-weight: 600; color: rgba(0,0,0,0.55);
+    }
+    .perfil-box .nome { font-size: 24px; font-weight: 600; color: #1D1D1F; margin-top: 20px; }
+    .perfil-box .email { font-size: 14px; color: rgba(0,0,0,0.55); margin-top: 4px; }
+    .perfil-lista { margin-top: 32px; display: flex; flex-direction: column; }
+    .perfil-op {
+        display: flex; align-items: center; gap: 14px;
+        padding: 16px 8px; font-size: 16px; font-weight: 500; color: #1D1D1F;
+        border: none; background: none; font-family: inherit; text-align: left; cursor: pointer;
+        border-top: 1px solid rgba(0,0,0,0.06);
+        transition: transform 200ms ease;
+    }
+    .perfil-op:first-child { border-top: none; }
+    .perfil-op:hover { transform: translateX(4px); }
+    .perfil-op .ico { width: 18px; height: 18px; display: grid; place-items: center; color: rgba(0,0,0,0.6); }
+    .perfil-op .ico svg { width: 18px; height: 18px; }
+    .perfil-op .chev { margin-left: auto; color: rgba(0,0,0,0.3); }
+    .perfil-op .chev svg { width: 18px; height: 18px; }
+    .perfil-op.sair { color: rgba(200, 68, 26, 0.9); }
+    .perfil-op.sair .ico { color: rgba(200, 68, 26, 0.9); }
+
+    /* ── Rodapé ── */
+    .rodape { padding: 60px 0; text-align: center; font-size: 13px; color: rgba(0,0,0,0.4); }
+
+    /* ── RESPONSIVO ── */
+    @media (max-width: 768px) {
+        .lane { padding-left: 0; padding-bottom: 84px; }
+        .conteudo { padding: 0 20px; }
+
+        /* Menu vira bottom navigation */
+        .menu {
+            top: auto; left: 12px; right: 12px; bottom: 12px; transform: none;
+            width: auto; height: 56px; padding: 0 8px;
+            flex-direction: row; justify-content: space-around; gap: 4px;
+            border-radius: 32px;
         }
-        .cartao-prompt .conta { font-size: 14.5px; color: var(--tinta-media); margin-bottom: 4px; }
-        .cartao-prompt .credito { font-size: 12px; color: var(--tinta-fraca); }
+        .menu a::after { display: none; }         /* sem tooltip no mobile */
+        .menu .sep { margin-top: 0; }
+        .menu .so-desktop { display: none; }        /* Avisos e Store escondem */
+        .menu .mais-tip { display: grid; }          /* botão "mais" aparece */
 
-        /* ── Materiais, avisos, galeria ── */
-        .material {
-            display: flex; align-items: center; gap: 16px;
-            padding: 22px; margin-bottom: 12px;
-            transition: transform var(--transicao), border-color var(--transicao), box-shadow var(--transicao);
-        }
-        .material:hover { transform: translateY(-2px); border-color: var(--champanhe); box-shadow: var(--sombra-alta); }
-        .material .emoji { font-size: 24px; }
-        .material h3 { font-size: 18px; margin-bottom: 3px; }
-        .material p { font-size: 13.5px; color: var(--tinta-media); }
-        .material .seta { margin-left: auto; color: var(--terracota); font-size: 18px; }
+        .h-sec, .destaque-titulo { font-size: 26px; }
+        .saudacao h1 { font-size: 30px; }
 
-        .aviso { padding: 24px; margin-bottom: 14px; border-left: 3px solid var(--fio-tinta); }
-        .aviso.fixado { border-left-color: var(--champanhe); }
-        .aviso h3 { font-size: 20px; margin-bottom: 4px; }
-        .aviso .data { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-fraca); display: block; margin-bottom: 12px; }
-        .aviso .texto { font-size: 15px; white-space: pre-wrap; }
-        .pin { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #9A7A46; }
+        /* Carrossel menor */
+        .carrossel { height: 440px; }
+        .c-card { width: 260px; height: 380px; margin: -190px 0 0 -130px; }
+        .c-thumb { height: 170px; }
+        .seta.esq { left: -4px; }
+        .seta.dir { right: -4px; }
 
-        /* ── Publicar o próprio portfólio ── */
-        .meu-portfolio { padding: 22px 24px; margin-bottom: 26px; }
-        .dizeres-portfolio { margin-bottom: 14px; }
-        .dizeres-portfolio b {
-            display: block;
-            font-family: 'Fraunces', serif;
-            font-weight: 400;
-            font-size: 19px;
-            color: var(--tinta);
-            margin-bottom: 2px;
-        }
-        .dizeres-portfolio span { font-size: 13.5px; color: var(--tinta-media); }
-        .linha-portfolio { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .linha-portfolio input { flex: 1; min-width: 220px; }
+        /* Grids 1 coluna */
+        .masonry { column-count: 1; }
+        .grid-prompts { grid-template-columns: 1fr; }
+        .grid-store { grid-template-columns: 1fr; }
+        .perfil-box { padding: 28px 22px; }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .masonry { column-count: 2; }
+        .grid-store { grid-template-columns: repeat(2, 1fr); }
+    }
 
-        .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)); gap: 16px; }
-        .vitrine {
-            padding: 26px 20px; text-align: center;
-            transition: transform var(--transicao), border-color var(--transicao), box-shadow var(--transicao);
-        }
-        .vitrine:hover { transform: translateY(-3px); border-color: var(--champanhe); box-shadow: var(--sombra-alta); }
-        .vitrine .avatar { width: 60px; height: 60px; font-size: 18px; margin: 0 auto 14px; }
-        .vitrine b { display: block; font-size: 15.5px; font-weight: 600; color: var(--tinta); }
-        .vitrine .arroba { font-size: 12.5px; color: var(--tinta-fraca); }
-        .vitrine .bio { font-size: 13px; color: var(--tinta-media); margin: 10px 0 16px; min-height: 20px; }
-
-        /* ── Caixas de formulário ── */
-        .caixa { padding: 28px; margin-bottom: 20px; }
-        .caixa h3 { font-size: 21px; margin-bottom: 20px; }
-        .caixa .campo { margin-bottom: 16px; }
-        .linha-avatar { display: flex; align-items: center; gap: 18px; margin-bottom: 24px; }
-        .linha-avatar .avatar { width: 68px; height: 68px; font-size: 20px; }
-
-        /* ── Modal ── */
-        .veu-modal {
-            position: fixed; inset: 0; z-index: 40;
-            background: rgba(226, 216, 205, .6);
-            backdrop-filter: blur(10px);
-            display: none;
-            place-items: center;
-            padding: 20px;
-        }
-        .veu-modal.show { display: grid; }
-        .modal {
-            width: 100%; max-width: 500px;
-            background: rgba(255, 255, 255, .82);
-            border: 1px solid var(--fio);
-            border-radius: 26px;
-            backdrop-filter: blur(30px) saturate(130%);
-            -webkit-backdrop-filter: blur(30px) saturate(130%);
-            box-shadow: var(--sombra-alta);
-            padding: 30px;
-            animation: entra 260ms ease both;
-        }
-        .modal h3 { font-size: 23px; margin-bottom: 6px; }
-        .modal .aviso-modal { font-size: 13.5px; color: var(--tinta-media); margin-bottom: 22px; }
-        .modal .campo { margin-bottom: 16px; }
-        .botoes-modal { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
-
-        /* ── Mobile ── */
-        .abre-menu { display: none; }
-        .veu { display: none; }
-        @media (max-width: 900px) {
-            .casca { grid-template-columns: 1fr; }
-            .lateral {
-                position: fixed; inset: 8px auto 8px 8px; width: 268px; z-index: 30;
-                height: auto;
-                transform: translateX(-110%);
-                transition: transform var(--transicao);
-            }
-            .lateral.aberta { transform: none; }
-            .veu { position: fixed; inset: 0; background: rgba(226, 216, 205, .55); backdrop-filter: blur(6px); z-index: 20; }
-            .veu.show { display: block; }
-            .abre-menu {
-                display: flex; align-items: center; gap: 10px;
-                position: sticky; top: 0; z-index: 10;
-                background: var(--vidro-forte);
-                backdrop-filter: blur(20px);
-                border-bottom: 1px solid var(--fio);
-                padding: 16px 18px; width: 100%;
-                font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
-                color: var(--tinta-media);
-            }
-            .palco { padding: 26px 16px 70px; }
-            .titulo-tela { font-size: 28px; }
-        }
-    </style>
-    </style>
+    /* menu "mais" — folha inferior no mobile */
+    .folha-mais {
+        position: fixed; left: 12px; right: 12px; bottom: 76px; z-index: 99;
+        background: rgba(30, 30, 30, 0.55);
+        -webkit-backdrop-filter: blur(30px) saturate(1.5); backdrop-filter: blur(30px) saturate(1.5);
+        border: 1px solid rgba(255,255,255,0.12); border-radius: 24px; padding: 10px;
+        display: none; gap: 6px;
+    }
+    .folha-mais.aberta { display: flex; }
+    .folha-mais a {
+        flex: 1; display: flex; align-items: center; gap: 10px; justify-content: center;
+        color: rgba(255,255,255,0.85); text-decoration: none; font-size: 14px; font-weight: 500;
+        padding: 12px; border-radius: 16px;
+    }
+    .folha-mais a:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .folha-mais a svg { width: 18px; height: 18px; }
+</style>
 </head>
 <body>
-    <div class="cena" id="palcoCerebro" data-passivo><canvas id="cerebro"></canvas></div>
-    <div class="veu" id="veu"></div>
+    <!-- Fundo idêntico ao login: blobs + starburst, fixos -->
+    <div class="blobs">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
+        <div class="blob b4"></div>
+    </div>
+    <div id="cena"></div>
 
-    <div class="casca">
-        <nav class="lateral" id="lateral">
-            <div class="marca"><small>lara.dam</small><b>Comunidade</b></div>
+    <!-- Menu lateral flutuante -->
+    <nav class="menu" id="menu">
+        <a data-target="inicio"    data-tip="Home"><i data-lucide="home"></i></a>
+        <a data-target="mural"     data-tip="Mural dos Alunos"><i data-lucide="layout-grid"></i></a>
+        <a data-target="prompts"   data-tip="Prompts"><i data-lucide="sparkles"></i></a>
+        <a data-target="materiais" data-tip="Materiais"><i data-lucide="folder"></i></a>
+        <a data-target="avisos"    data-tip="Avisos" class="so-desktop"><i data-lucide="bell"></i></a>
+        <a data-target="store"     data-tip="Store" class="so-desktop"><i data-lucide="shopping-bag"></i></a>
+        <a class="mais-tip" id="btnMais" data-tip="Mais"><i data-lucide="menu"></i></a>
+        <a data-target="perfil"    data-tip="Meu Perfil" class="sep"><i data-lucide="user"></i></a>
+    </nav>
 
-            <button class="item ativo" data-tela="mural"><span class="ico">◇</span> Mural</button>
-            <button class="item" data-tela="prompts"><span class="ico">⌘</span> Prompts</button>
-            <button class="item" data-tela="materiais"><span class="ico">▤</span> Materiais</button>
-            <button class="item" data-tela="avisos"><span class="ico">✦</span> Avisos</button>
-            <button class="item" data-tela="galeria"><span class="ico">◉</span> Portfólios</button>
-            <button class="item" data-tela="perfil"><span class="ico">☺</span> Meu perfil</button>
-            <button class="item" data-tela="admin" id="itemAdmin" style="display:none"><span class="ico">⚙</span> Admin</button>
+    <!-- Folha "mais" (mobile) -->
+    <div class="folha-mais" id="folhaMais">
+        <a data-target="avisos"><i data-lucide="bell"></i> Avisos</a>
+        <a data-target="store"><i data-lucide="shopping-bag"></i> Store</a>
+    </div>
 
-            <div class="rodape-lateral">
-                <div class="eu">
-                    <div class="avatar" id="meuAvatar">?</div>
-                    <strong id="meuNome">...</strong>
+    <div class="lane">
+        <div class="conteudo">
+
+            <!-- ── SEÇÃO 1 — INÍCIO ── -->
+            <section id="inicio">
+                <div class="saudacao">
+                    <h1>Bem-vinda, <span id="nomeUsuaria">Lara</span></h1>
+                    <p>O que você quer construir hoje?</p>
                 </div>
-                <button class="sair" id="btnSair">Sair da comunidade</button>
-            </div>
-        </nav>
+                <div class="destaque-titulo">Em destaque</div>
+                <div class="carrossel">
+                    <div class="seta esq" id="setaEsq"><i data-lucide="chevron-left"></i></div>
+                    <div class="palco" id="palco"></div>
+                    <div class="seta dir" id="setaDir"><i data-lucide="chevron-right"></i></div>
+                </div>
+            </section>
 
-        <main>
-            <button class="abre-menu" id="abreMenu">☰ <span>Comunidade Imersão</span></button>
-            <div class="palco">
+            <!-- ── SEÇÃO 2 — MURAL DOS ALUNOS ── -->
+            <section id="mural">
+                <div class="cabeca">
+                    <div class="h-sec">Mural dos alunos</div>
+                    <div class="sub-sec">Os portfólios e projetos que a comunidade está construindo</div>
+                </div>
+                <div class="masonry" id="mural-grid"></div>
+            </section>
 
-                <!-- MURAL -->
-                <section class="tela show" id="telaMural">
-                    <h1 class="titulo-tela">Mural da turma</h1>
-                    <p class="sub-tela">Mostre o que você construiu, compartilhe o prompt que funcionou, peça ajuda.</p>
+            <!-- ── SEÇÃO 3 — PROMPTS ── -->
+            <section id="prompts">
+                <div class="cabeca">
+                    <div class="h-sec">Biblioteca de prompts</div>
+                    <div class="sub-sec">Prompts prontos para você adaptar</div>
+                </div>
+                <div class="grid-prompts" id="prompts-grid"></div>
+            </section>
 
-                    <form class="publicar" id="publicar">
-                        <textarea id="txtPost" placeholder="O que você quer mostrar pra turma hoje?" rows="1"></textarea>
+            <!-- ── SEÇÃO 4 — MATERIAIS ── -->
+            <section id="materiais">
+                <div class="cabeca">
+                    <div class="h-sec">Materiais de apoio</div>
+                    <div class="sub-sec">PDFs, planilhas e templates para download</div>
+                </div>
+                <div class="lista-mat" id="materiais-lista"></div>
+            </section>
 
-                        <div class="extras">
-                            <div class="tipos" id="tipos">
-                                <button type="button" class="chip on" data-tipo="resultado">Resultado</button>
-                                <button type="button" class="chip" data-tipo="prompt">Prompt</button>
-                                <button type="button" class="chip" data-tipo="duvida">Dúvida</button>
-                            </div>
-                            <textarea id="txtPrompt" placeholder="Cole aqui o prompt que você usou (opcional)"></textarea>
-                            <input type="url" id="txtLink" placeholder="Link do seu site ou referência (opcional)">
-                            <div class="previa" id="previa">
-                                <img id="imgPrevia" alt="Prévia da imagem escolhida">
-                                <button type="button" class="tira-previa" id="tiraPrevia" aria-label="Remover imagem">×</button>
-                            </div>
-                            <div class="barra-publicar">
-                                <label class="anexo" for="arquivo">Print ou imagem</label>
-                                <input type="file" id="arquivo" accept="image/*" hidden>
-                                <button type="submit" class="btn btn-pequeno" id="btnPublicar">Publicar</button>
-                            </div>
-                        </div>
-                    </form>
+            <!-- ── SEÇÃO 5 — AVISOS ── -->
+            <section id="avisos">
+                <div class="cabeca">
+                    <div class="h-sec">Avisos e novidades</div>
+                    <div class="sub-sec">Fique por dentro do que rola na comunidade</div>
+                </div>
+                <div class="lista-avisos" id="avisos-lista"></div>
+            </section>
 
-                    <div class="recado erro" id="recadoMural"></div>
-                    <div id="feed"><p class="vazio">Carregando o mural...</p></div>
-                </section>
+            <!-- ── SEÇÃO 6 — STORE ── -->
+            <section id="store">
+                <div class="cabeca">
+                    <div class="h-sec">Store</div>
+                    <div class="sub-sec">Aulas avulsas, mentorias e produtos da Lara</div>
+                </div>
+                <div class="grid-store" id="store-grid"></div>
+            </section>
 
-                <!-- PROMPTS -->
-                <section class="tela" id="telaPrompts">
-                    <h1 class="titulo-tela">Biblioteca de prompts</h1>
-                    <p class="sub-tela">Os prompts que deram certo, separados por tema. Copie, adapte, use.</p>
-                    <div class="filtros" id="filtrosPrompts"></div>
-                    <div id="listaPrompts"><p class="vazio">Carregando...</p></div>
-                </section>
+            <!-- ── SEÇÃO 7 — MEU PERFIL ── -->
+            <section id="perfil">
+                <div class="cabeca">
+                    <div class="h-sec">Meu perfil</div>
+                </div>
+                <div class="perfil-box">
+                    <div class="avatar" id="avatar">L</div>
+                    <div class="nome" id="perfilNome">Lara Dam</div>
+                    <div class="email" id="perfilEmail">lara@claudeimersao.com</div>
+                    <div class="perfil-lista">
+                        <button class="perfil-op"><span class="ico"><i data-lucide="user"></i></span> Dados da conta <span class="chev"><i data-lucide="chevron-right"></i></span></button>
+                        <button class="perfil-op"><span class="ico"><i data-lucide="receipt"></i></span> Minhas compras <span class="chev"><i data-lucide="chevron-right"></i></span></button>
+                        <button class="perfil-op"><span class="ico"><i data-lucide="bell"></i></span> Preferências de notificação <span class="chev"><i data-lucide="chevron-right"></i></span></button>
+                        <button class="perfil-op"><span class="ico"><i data-lucide="help-circle"></i></span> Suporte <span class="chev"><i data-lucide="chevron-right"></i></span></button>
+                        <button class="perfil-op sair" id="btnSair"><span class="ico"><i data-lucide="log-out"></i></span> Sair <span class="chev"><i data-lucide="chevron-right"></i></span></button>
+                    </div>
+                </div>
+            </section>
 
-                <!-- MATERIAIS -->
-                <section class="tela" id="telaMateriais">
-                    <h1 class="titulo-tela">Materiais</h1>
-                    <p class="sub-tela">Tudo que você precisa pra seguir construindo depois da aula.</p>
-                    <div id="listaMateriais"><p class="vazio">Carregando...</p></div>
-                </section>
-
-                <!-- AVISOS -->
-                <section class="tela" id="telaAvisos">
-                    <h1 class="titulo-tela">Avisos</h1>
-                    <p class="sub-tela">Recados da Lara pra turma.</p>
-                    <div id="listaAvisos"><p class="vazio">Carregando...</p></div>
-                </section>
-
-                <!-- GALERIA -->
-                <section class="tela larga" id="telaGaleria">
-                    <h1 class="titulo-tela">Portfólios da turma</h1>
-                    <p class="sub-tela">Os sites que saíram da imersão.</p>
-
-                    <form class="meu-portfolio" id="formPortfolio">
-                        <div class="dizeres-portfolio">
-                            <b id="tituloPortfolio">Publique o seu</b>
-                            <span id="subPortfolio">Cole o link do site que você colocou no ar e ele entra na galeria.</span>
-                        </div>
-                        <div class="linha-portfolio">
-                            <input type="url" id="meuPortfolio" placeholder="https://seusite.com">
-                            <button type="submit" class="btn btn-pequeno" id="btnPortfolio">Publicar</button>
-                            <button type="button" class="btn btn-fantasma btn-pequeno" id="btnTirarPortfolio" style="display:none">Tirar da galeria</button>
-                        </div>
-                        <div class="recado" id="recadoPortfolio"></div>
-                    </form>
-
-                    <div class="grade" id="listaGaleria"><p class="vazio">Carregando...</p></div>
-                </section>
-
-                <!-- PERFIL -->
-                <section class="tela" id="telaPerfil">
-                    <h1 class="titulo-tela">Meu perfil</h1>
-                    <p class="sub-tela">É assim que a turma te vê no mural e na galeria.</p>
-
-                    <form class="caixa" id="formPerfil">
-                        <div class="linha-avatar">
-                            <div class="avatar" id="avatarPerfil">?</div>
-                            <div>
-                                <label class="anexo" for="arquivoAvatar">Trocar foto</label>
-                                <input type="file" id="arquivoAvatar" accept="image/*" hidden>
-                            </div>
-                        </div>
-                        <div class="campo">
-                            <label for="pfNome">Nome</label>
-                            <input type="text" id="pfNome" required>
-                        </div>
-                        <div class="campo">
-                            <label for="pfInsta">Instagram</label>
-                            <input type="text" id="pfInsta" placeholder="@seuarroba">
-                        </div>
-                        <div class="campo">
-                            <label for="pfBio">Uma linha sobre você</label>
-                            <input type="text" id="pfBio" placeholder="Conte em uma linha o que você cria">
-                        </div>
-                        <button type="submit" class="btn" id="btnPerfil">Salvar perfil</button>
-                        <div class="recado" id="recadoPerfil"></div>
-                    </form>
-                </section>
-
-                <!-- ADMIN -->
-                <section class="tela" id="telaAdmin">
-                    <h1 class="titulo-tela">Admin</h1>
-                    <p class="sub-tela">Só você vê essa aba.</p>
-
-                    <form class="caixa" id="formAviso">
-                        <h3>Publicar um aviso</h3>
-                        <div class="campo">
-                            <label for="avTitulo">Título</label>
-                            <input type="text" id="avTitulo" required>
-                        </div>
-                        <div class="campo">
-                            <label for="avCorpo">Recado</label>
-                            <textarea id="avCorpo" rows="4" required></textarea>
-                        </div>
-                        <div class="campo">
-                            <label style="display:flex; gap:9px; align-items:center; cursor:pointer; text-transform:none; letter-spacing:0; font-size:14px; color:var(--neblina)">
-                                <input type="checkbox" id="avFixado" style="width:auto">
-                                Fixar no topo
-                            </label>
-                        </div>
-                        <button type="submit" class="btn">Publicar aviso</button>
-                        <div class="recado" id="recadoAviso"></div>
-                    </form>
-
-                    <form class="caixa" id="formMaterial">
-                        <h3>Adicionar um material</h3>
-                        <div class="campo">
-                            <label for="mtTitulo">Título</label>
-                            <input type="text" id="mtTitulo" required>
-                        </div>
-                        <div class="campo">
-                            <label for="mtDesc">Descrição</label>
-                            <input type="text" id="mtDesc">
-                        </div>
-                        <div class="campo">
-                            <label for="mtUrl">Link</label>
-                            <input type="url" id="mtUrl" placeholder="https://..." required>
-                        </div>
-                        <div class="campo">
-                            <label for="mtEmoji">Emoji</label>
-                            <input type="text" id="mtEmoji" value="📄" maxlength="4">
-                        </div>
-                        <button type="submit" class="btn">Adicionar material</button>
-                        <div class="recado" id="recadoMaterial"></div>
-                    </form>
-
-                    <form class="caixa" id="formPrompt">
-                        <h3>Adicionar um prompt na biblioteca</h3>
-                        <div class="campo">
-                            <label for="prTitulo">Título</label>
-                            <input type="text" id="prTitulo" placeholder="Portfólio em uma página" required>
-                        </div>
-                        <div class="campo">
-                            <label for="prTema">Tema</label>
-                            <select id="prTema"></select>
-                        </div>
-                        <div class="campo">
-                            <label for="prDesc">Pra que serve</label>
-                            <input type="text" id="prDesc" placeholder="Uma linha explicando o que ele faz">
-                        </div>
-                        <div class="campo">
-                            <label for="prTexto">O prompt</label>
-                            <textarea id="prTexto" rows="6" required style="font-family: ui-monospace, Menlo, monospace; font-size:13px"></textarea>
-                        </div>
-                        <button type="submit" class="btn">Adicionar prompt</button>
-                        <div class="recado" id="recadoPrompt"></div>
-                    </form>
-                </section>
-
-            </div>
-        </main>
+            <div class="rodape">Comunidade Imersão · feita com Claude Code por Lara Dam</div>
+        </div>
     </div>
 
-    <!-- Modal: fixar um prompt do mural na biblioteca -->
-    <div class="veu-modal" id="veuModal">
-        <form class="modal" id="formFixar">
-            <h3>Fixar na biblioteca</h3>
-            <p class="aviso-modal">Esse prompt vai pra biblioteca, com o crédito de quem publicou.</p>
-            <div class="campo">
-                <label for="fxTitulo">Título</label>
-                <input type="text" id="fxTitulo" required>
-            </div>
-            <div class="campo">
-                <label for="fxTema">Tema</label>
-                <select id="fxTema"></select>
-            </div>
-            <div class="campo">
-                <label for="fxDesc">Pra que serve</label>
-                <input type="text" id="fxDesc" placeholder="Uma linha explicando">
-            </div>
-            <div class="botoes-modal">
-                <button type="button" class="btn btn-fantasma btn-pequeno" id="fecharModal">Cancelar</button>
-                <button type="submit" class="btn btn-pequeno">Fixar</button>
-            </div>
-            <div class="recado" id="recadoFixar"></div>
-        </form>
-    </div>
+    <!-- Fundo 3D: starburst de partículas (mesmo do login) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/starburst.js?v=14"></script>
 
+    <!-- Ícones -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Guard de sessão (Supabase) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/sb.js?v=13"></script>
-    <script src="js/agua.js?v=13"></script>
+    <script src="js/sb.js?v=14"></script>
+
     <script>
     (function () {
         'use strict';
-        const { sb, esc, urlSegura, iniciais, quando } = window.C;
 
-        const TEMAS = ['Portfólio', 'Mídia kit', 'Copy e legenda', 'Design', 'Vídeo', 'Instagram', 'Proposta pra marca', 'Geral'];
-
-        let usuario = null;
-        let perfil = null;
-        let souAdmin = false;
-        let tipoEscolhido = 'resultado';
-        let arquivoPost = null;
-        let temaFiltro = 'todos';
-        let promptParaFixar = null;
-        const jaCarregou = {};
-
-        /* ══ Entrada: precisa estar logada E estar na lista da turma ══ */
-        (async function abrir() {
-            const { data: { session } } = await sb.auth.getSession();
-            if (!session) return window.location.replace('index.html');
-            usuario = session.user;
-
-            const { data: podeEntrar } = await sb.rpc('is_aluna_imersao');
-            if (!podeEntrar) {
-                await sb.auth.signOut();
-                alert('Esse acesso não está liberado. Fale com a Lara.');
-                return window.location.replace('index.html');
-            }
-
-            const { data: adm } = await sb.rpc('is_admin');
-            souAdmin = !!adm;
-            if (souAdmin) document.getElementById('itemAdmin').style.display = 'flex';
-
-            montarTemas();
-            await carregarPerfil();
-            carregarMural();
-        })();
-
-        function montarTemas() {
-            const opcoes = TEMAS.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
-            document.getElementById('prTema').innerHTML = opcoes;
-            document.getElementById('fxTema').innerHTML = opcoes;
-        }
-
-        async function carregarPerfil() {
-            const { data } = await sb.from('imersao_perfis').select('*').eq('usuario_id', usuario.id).maybeSingle();
-            if (data) {
-                perfil = data;
-            } else {
-                const nome = usuario.user_metadata?.nome || (usuario.email || '').split('@')[0];
-                const { data: novo } = await sb.from('imersao_perfis')
-                    .insert({ usuario_id: usuario.id, nome }).select().maybeSingle();
-                perfil = novo || { usuario_id: usuario.id, nome };
-            }
-            pintarPerfil();
-        }
-
-        function pintarPerfil() {
-            const nome = perfil?.nome || 'Aluna';
-            document.getElementById('meuNome').textContent = nome.split(' ')[0];
-            [document.getElementById('meuAvatar'), document.getElementById('avatarPerfil')].forEach(el => {
-                el.innerHTML = perfil?.avatar_url
-                    ? `<img src="${esc(perfil.avatar_url)}" alt="">`
-                    : esc(iniciais(nome));
-            });
-            document.getElementById('pfNome').value = nome;
-            document.getElementById('pfInsta').value = perfil?.instagram || '';
-            document.getElementById('pfBio').value = perfil?.bio || '';
-            pintarMeuPortfolio();
-        }
-
-        /* A caixa "publique o seu" muda de cara depois que a aluna já publicou. */
-        function pintarMeuPortfolio() {
-            const link = perfil?.portfolio_url || '';
-            const jaTem = !!link;
-
-            document.getElementById('meuPortfolio').value = link;
-            document.getElementById('btnPortfolio').textContent = jaTem ? 'Atualizar' : 'Publicar';
-            document.getElementById('btnTirarPortfolio').style.display = jaTem ? 'inline-flex' : 'none';
-            document.getElementById('tituloPortfolio').textContent = jaTem ? 'Seu portfólio está na galeria' : 'Publique o seu';
-            document.getElementById('subPortfolio').textContent = jaTem
-                ? 'Trocou de link ou mudou o site? É só atualizar aqui.'
-                : 'Cole o link do site que você colocou no ar e ele entra na galeria.';
-        }
-
-        /* ══ Navegação ══ */
-        const carregadores = {
-            mural: carregarMural,
-            prompts: carregarPrompts,
-            materiais: carregarMateriais,
-            avisos: carregarAvisos,
-            galeria: carregarGaleria,
-            perfil: () => {},
-            admin: () => {}
+        /* ── Tons dos blobs (placeholders de thumbnail) ── */
+        const tom = {
+            lavanda:      'linear-gradient(135deg, #C8B8E0, #B8C6E8)',
+            lavandaClara: 'linear-gradient(135deg, #D8CEEE, #CBD5F2)',
+            menta:        'linear-gradient(135deg, #B8E0D0, #CBEBDE)',
+            pessego:      'linear-gradient(135deg, #E8C4B8, #F1D8C6)'
         };
 
-        document.querySelectorAll('.item[data-tela]').forEach(botao => {
-            botao.addEventListener('click', () => {
-                const alvo = botao.dataset.tela;
-                document.querySelectorAll('.item').forEach(i => i.classList.remove('ativo'));
-                botao.classList.add('ativo');
-                document.querySelectorAll('.tela').forEach(t => t.classList.remove('show'));
-                document.getElementById('tela' + alvo[0].toUpperCase() + alvo.slice(1)).classList.add('show');
-                fecharMenu();
-                if (!jaCarregou[alvo] || alvo === 'mural') { carregadores[alvo](); jaCarregou[alvo] = true; }
+        /* ─────────────── CARROSSEL 3D (destaque) ─────────────── */
+        const destaques = [
+            { titulo: 'Landing pages com Claude Code', desc: 'Aula gravada', preco: 'R$ 197', cat: 'GRAVADA', tom: tom.pessego },
+            { titulo: 'Boas-vindas da Comunidade',     desc: 'Vídeo da Lara', preco: null,    cat: 'GRATUITA', tom: tom.lavanda },
+            { titulo: 'Prompts que convertem: UGC',    desc: 'Aula gravada', preco: 'R$ 147', cat: 'GRAVADA', tom: tom.menta },
+            { titulo: 'Encontro ao vivo desta semana', desc: 'Quinta 20h',   preco: null,    cat: 'AO VIVO',  tom: tom.lavandaClara },
+            { titulo: 'Imersão Portfólio Claude v2',   desc: 'Nova turma',   preco: 'R$ 397', cat: 'IMERSÃO',  tom: tom.pessego }
+        ];
+
+        const palco = document.getElementById('palco');
+        let ativo = Math.floor(destaques.length / 2);
+
+        destaques.forEach((d, i) => {
+            const card = document.createElement('div');
+            card.className = 'c-card';
+            card.innerHTML = `
+                <div class="c-thumb" style="background:${d.tom}">
+                    <span class="badge">${d.cat}</span>
+                </div>
+                <div class="c-corpo">
+                    <h3>${d.titulo}</h3>
+                    <div class="desc">${d.desc}</div>
+                    <div class="c-rodape">
+                        ${d.preco ? `<span class="preco">${d.preco}</span>` : `<span class="preco gratis">Gratuita</span>`}
+                        <button class="acessar">Acessar <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
+                    </div>
+                </div>`;
+            card.addEventListener('click', () => {
+                if (i !== ativo) { ativo = i; posicionar(); }
             });
+            palco.appendChild(card);
         });
+        const cards = Array.from(palco.children);
 
-        const lateral = document.getElementById('lateral');
-        const veu = document.getElementById('veu');
-        function fecharMenu() { lateral.classList.remove('aberta'); veu.classList.remove('show'); }
-        document.getElementById('abreMenu').addEventListener('click', () => {
-            lateral.classList.add('aberta'); veu.classList.add('show');
-        });
-        veu.addEventListener('click', fecharMenu);
-
-        document.getElementById('btnSair').addEventListener('click', async () => {
-            await sb.auth.signOut();
-            window.location.replace('index.html');
-        });
-
-        function recado(id, texto, tipo) {
-            const el = document.getElementById(id);
-            el.textContent = texto;
-            el.className = 'recado ' + (tipo || 'erro') + (texto ? ' show' : '');
-            if (texto && tipo === 'ok') setTimeout(() => { el.className = 'recado'; }, 3500);
+        function posicionar() {
+            cards.forEach((card, i) => {
+                const off = i - ativo;
+                const abs = Math.abs(off);
+                const escala = off === 0 ? 1.15 : abs === 1 ? 0.9 : 0.75;
+                const tx = off * 250;
+                const ry = off === 0 ? 0 : -off * 12;
+                const op = off === 0 ? 1 : abs === 1 ? 0.85 : 0.5;
+                card.style.transform = `translateX(${tx}px) scale(${escala}) rotateY(${ry}deg)`;
+                card.style.opacity = op;
+                card.style.zIndex = 50 - abs;
+                card.style.pointerEvents = abs > 2 ? 'none' : 'auto';
+            });
         }
-
-        /* ══ Publicar ══ */
-        const caixaPublicar = document.getElementById('publicar');
-        const txtPost = document.getElementById('txtPost');
-
-        txtPost.addEventListener('focus', () => caixaPublicar.classList.add('aberto'));
-        txtPost.addEventListener('input', () => {
-            txtPost.style.height = 'auto';
-            txtPost.style.height = txtPost.scrollHeight + 'px';
-        });
-
-        document.getElementById('tipos').addEventListener('click', (ev) => {
-            const chip = ev.target.closest('.chip');
-            if (!chip) return;
-            document.querySelectorAll('#tipos .chip').forEach(c => c.classList.remove('on'));
-            chip.classList.add('on');
-            tipoEscolhido = chip.dataset.tipo;
-        });
-
-        document.getElementById('arquivo').addEventListener('change', (ev) => {
-            const f = ev.target.files[0];
-            if (!f) return;
-            if (f.size > 5 * 1024 * 1024) {
-                recado('recadoMural', 'A imagem precisa ter menos de 5 MB.');
-                ev.target.value = '';
-                return;
-            }
-            arquivoPost = f;
-            document.getElementById('imgPrevia').src = URL.createObjectURL(f);
-            document.getElementById('previa').classList.add('show');
-        });
-
-        document.getElementById('tiraPrevia').addEventListener('click', () => {
-            arquivoPost = null;
-            document.getElementById('arquivo').value = '';
-            document.getElementById('previa').classList.remove('show');
-        });
-
-        async function subirImagem(arquivo) {
-            const ext = (arquivo.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
-            const caminho = `${usuario.id}/${Date.now()}.${ext}`;
-            const { error } = await sb.storage.from('imersao').upload(caminho, arquivo, { upsert: false });
-            if (error) throw error;
-            return sb.storage.from('imersao').getPublicUrl(caminho).data.publicUrl;
+        function mover(dir) {
+            ativo = Math.max(0, Math.min(destaques.length - 1, ativo + dir));
+            posicionar();
         }
+        document.getElementById('setaEsq').addEventListener('click', () => mover(-1));
+        document.getElementById('setaDir').addEventListener('click', () => mover(1));
+        posicionar();
 
-        caixaPublicar.addEventListener('submit', async (ev) => {
-            ev.preventDefault();
-            const btn = document.getElementById('btnPublicar');
-            const texto = txtPost.value.trim();
-            const prompt = document.getElementById('txtPrompt').value.trim();
-            const link = document.getElementById('txtLink').value.trim();
+        /* Swipe no mobile */
+        let x0 = null;
+        palco.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+        palco.addEventListener('touchend', e => {
+            if (x0 === null) return;
+            const dx = e.changedTouches[0].clientX - x0;
+            if (Math.abs(dx) > 40) mover(dx < 0 ? 1 : -1);
+            x0 = null;
+        }, { passive: true });
 
-            if (!texto) return recado('recadoMural', 'Escreva alguma coisa antes de publicar.');
+        /* ─────────────── MURAL ─────────────── */
+        const mural = [
+            { aluno: 'Ana Silva',        proj: 'Portfólio UGC beauty',            alt: 300, tom: tom.pessego },
+            { aluno: 'João Santos',      proj: 'Landing de mentoria',             alt: 220, tom: tom.lavanda },
+            { aluno: 'Marina Costa',     proj: 'Site de receitas com Claude',     alt: 260, tom: tom.menta },
+            { aluno: 'Rafael Oliveira',  proj: 'Portfólio de fotografia',         alt: 320, tom: tom.lavandaClara },
+            { aluno: 'Beatriz Lima',     proj: 'Loja de artesanato',              alt: 210, tom: tom.pessego },
+            { aluno: 'Pedro Almeida',    proj: 'Landing para curso de violão',    alt: 280, tom: tom.menta }
+        ];
+        document.getElementById('mural-grid').innerHTML = mural.map(m => `
+            <div class="m-card">
+                <div class="m-thumb" style="height:${m.alt}px;background:${m.tom}"></div>
+                <div class="m-corpo">
+                    <div class="aluno">${m.aluno}</div>
+                    <div class="proj">${m.proj}</div>
+                    <a class="ver" href="#">Ver projeto ↗</a>
+                </div>
+            </div>`).join('');
 
-            recado('recadoMural', '');
-            btn.disabled = true;
-            btn.textContent = 'Publicando...';
-            try {
-                let imagem_url = null;
-                if (arquivoPost) imagem_url = await subirImagem(arquivoPost);
-
-                const { error } = await sb.from('imersao_posts').insert({
-                    autor_id: usuario.id,
-                    tipo: tipoEscolhido,
-                    texto,
-                    prompt: prompt || null,
-                    link: urlSegura(link) || null,
-                    imagem_url
+        /* ─────────────── PROMPTS ─────────────── */
+        const prompts = [
+            { cat: 'ROTEIRO UGC', titulo: 'Roteiro UGC em 5 cenas', texto: 'Você é uma criadora de conteúdo UGC. Crie um roteiro de vídeo em 5 cenas para o produto [PRODUTO], com gancho nos primeiros 3 segundos, demonstração de uso e chamada para ação natural.' },
+            { cat: 'ANÁLISE',     titulo: 'Análise de concorrente', texto: 'Analise o perfil do concorrente [LINK]. Liste seus 3 principais formatos de conteúdo, tom de voz, frequência de postagem e as lacunas que eu poderia explorar no meu nicho.' },
+            { cat: 'COPY',        titulo: 'Copy para stories de venda', texto: 'Escreva uma sequência de 5 stories para vender [OFERTA]. Cada story com uma ideia só: dor, prova, oferta, urgência e CTA. Tom próximo e direto, sem parecer anúncio.' },
+            { cat: 'LANDING PAGE', titulo: 'Landing page em 30 min', texto: 'Gere a estrutura completa de uma landing page para [PRODUTO]: headline, subheadline, 3 blocos de benefício, prova social, FAQ e CTA. Me devolva pronto para colar no Claude Code.' },
+            { cat: 'COPY',        titulo: 'Legenda que gera comentário', texto: 'Crie 3 opções de legenda para um post sobre [TEMA] que terminem com uma pergunta que estimule comentários genuínos, sem clickbait.' },
+            { cat: 'ROTEIRO UGC', titulo: 'Depoimento em vídeo autêntico', texto: 'Transforme esse depoimento cru [TEXTO] em um roteiro falado de 30 segundos, mantendo naturalidade, com pausas marcadas e ênfase nas palavras-chave.' }
+        ];
+        document.getElementById('prompts-grid').innerHTML = prompts.map((p, i) => `
+            <div class="p-card">
+                <div><span class="pill-cat">${p.cat}</span></div>
+                <h3>${p.titulo}</h3>
+                <div class="preview">${p.texto}</div>
+                <div class="p-rodape">
+                    <button class="btn-preto" data-copiar="${i}">Copiar prompt</button>
+                </div>
+            </div>`).join('');
+        document.querySelectorAll('[data-copiar]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const p = prompts[+btn.getAttribute('data-copiar')];
+                navigator.clipboard.writeText(p.texto).then(() => {
+                    const orig = btn.textContent;
+                    btn.textContent = 'Copiado!';
+                    setTimeout(() => { btn.textContent = orig; }, 1500);
                 });
-                if (error) throw error;
-
-                caixaPublicar.reset();
-                caixaPublicar.classList.remove('aberto');
-                txtPost.style.height = 'auto';
-                arquivoPost = null;
-                document.getElementById('previa').classList.remove('show');
-                await carregarMural();
-            } catch (e) {
-                recado('recadoMural', 'Não consegui publicar agora. Tente de novo em instantes.');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Publicar';
-            }
+            });
         });
 
-        /* ══ Feed ══ */
-        async function carregarMural() {
-            const feed = document.getElementById('feed');
-            const { data, error } = await sb.rpc('imersao_feed', { p_limit: 40, p_offset: 0 });
-            if (error) {
-                feed.innerHTML = '<p class="vazio">Não consegui carregar o mural agora.</p>';
-                return;
-            }
-            const posts = data || [];
-            if (!posts.length) {
-                feed.innerHTML = '<p class="vazio"><strong>O mural está esperando por você</strong>Seja a primeira a mostrar o que construiu na imersão.</p>';
-                return;
-            }
-            feed.innerHTML = posts.map(desenharPost).join('');
-        }
+        /* ─────────────── MATERIAIS ─────────────── */
+        const materiais = [
+            { titulo: 'Checklist de portfólio',         tipo: 'PDF · 2.3 MB',  ico: 'check-square', tom: tom.lavanda },
+            { titulo: 'Planilha de precificação UGC',   tipo: 'XLSX · 480 KB', ico: 'table',        tom: tom.menta },
+            { titulo: 'Template de proposta comercial', tipo: 'PDF · 1.1 MB',  ico: 'file-text',    tom: tom.pessego },
+            { titulo: 'Guia de prompts para Claude',    tipo: 'PDF · 3.7 MB',  ico: 'sparkles',     tom: tom.lavandaClara },
+            { titulo: 'Kit de posts para lançamento',   tipo: 'ZIP · 8.2 MB',  ico: 'image',        tom: tom.pessego }
+        ];
+        document.getElementById('materiais-lista').innerHTML = materiais.map(m => `
+            <div class="mat-item">
+                <div class="mat-ico" style="background:${m.tom}"><i data-lucide="${m.ico}"></i></div>
+                <div class="mat-meio">
+                    <h3>${m.titulo}</h3>
+                    <div class="tipo">${m.tipo}</div>
+                </div>
+                <button class="btn-glass"><i data-lucide="download"></i> Baixar</button>
+            </div>`).join('');
 
-        const rotulo = { resultado: 'Resultado', prompt: 'Prompt', duvida: 'Dúvida' };
+        /* ─────────────── AVISOS ─────────────── */
+        const avisos = [
+            { data: '12 JUL 2026', tipo: 'EVENTO',     titulo: 'Encontro ao vivo nesta quinta, 20h', corpo: 'Nosso encontro semanal vai ser sobre landing pages que convertem. Traga seu projeto para receber feedback ao vivo. O link entra aqui no mural 10 minutos antes.' },
+            { data: '09 JUL 2026', tipo: 'NOVIDADE',   titulo: 'Nova biblioteca de prompts liberada', corpo: 'Adicionamos 6 prompts novos de copy e roteiro UGC na aba Prompts. É só copiar e adaptar para o seu nicho. Me conta nos comentários qual funcionou melhor.' },
+            { data: '05 JUL 2026', tipo: 'IMPORTANTE', titulo: 'Atualize seu portfólio no Mural',      corpo: 'Quem terminou o projeto da semana pode subir no Mural dos Alunos. Os melhores vão ser destacados na home da comunidade e nas redes da Lara.' },
+            { data: '01 JUL 2026', tipo: 'NOVIDADE',   titulo: 'Abrimos a Store da comunidade',        corpo: 'Agora você encontra aulas avulsas, mentorias 1:1 e packs de prompts direto aqui dentro, com preço de comunidade. Confere a aba Store.' }
+        ];
+        document.getElementById('avisos-lista').innerHTML = avisos.map(a => `
+            <div class="aviso">
+                <span class="pill-cat">${a.tipo}</span>
+                <div class="data">${a.data}</div>
+                <h3>${a.titulo}</h3>
+                <div class="corpo">${a.corpo}</div>
+            </div>`).join('');
 
-        function desenharPost(p) {
-            const link = urlSegura(p.link);
-            const avatar = p.autor_avatar
-                ? `<img src="${esc(p.autor_avatar)}" alt="">`
-                : esc(iniciais(p.autor_nome));
-            const nComents = p.comentarios.length;
-
-            return `
-            <article class="post" data-post="${p.id}">
-                <header class="topo-post">
-                    <div class="avatar">${avatar}</div>
-                    <div class="quem">
-                        <b>${esc(p.autor_nome)}</b>
-                        <span>${esc(quando(p.created_at))}${p.autor_instagram ? ' · ' + esc(p.autor_instagram) : ''}</span>
+        /* ─────────────── STORE ─────────────── */
+        const store = [
+            { titulo: 'Aula: Landing em 1 hora',       desc: 'Aula gravada',        preco: 'R$ 97',  cat: 'GRAVADA',  tom: tom.pessego },
+            { titulo: 'Mentoria 1:1 com a Lara',       desc: '60 min ao vivo',      preco: 'R$ 997', cat: 'MENTORIA', tom: tom.lavanda },
+            { titulo: 'Pack 50 prompts de UGC',        desc: 'Download imediato',   preco: 'R$ 47',  cat: 'PACK',     tom: tom.menta },
+            { titulo: 'Aula: Prompts que vendem',      desc: 'Aula gravada',        preco: 'R$ 147', cat: 'GRAVADA',  tom: tom.lavandaClara },
+            { titulo: 'Imersão Portfólio v2',          desc: 'Turma de agosto',     preco: 'R$ 397', cat: 'IMERSÃO',  tom: tom.pessego },
+            { titulo: 'Pack templates de proposta',    desc: 'Editáveis no Canva',  preco: 'R$ 67',  cat: 'PACK',     tom: tom.menta }
+        ];
+        document.getElementById('store-grid').innerHTML = store.map(s => `
+            <div class="s-card">
+                <div class="s-thumb" style="background:${s.tom}">
+                    <span class="badge">${s.cat}</span>
+                </div>
+                <div class="s-corpo">
+                    <h3>${s.titulo}</h3>
+                    <div class="desc">${s.desc}</div>
+                    <div class="s-rodape">
+                        <span class="preco">${s.preco}</span>
+                        <button class="btn-preto">Comprar</button>
                     </div>
-                    <span class="selo ${esc(p.tipo)}">${esc(rotulo[p.tipo] || p.tipo)}</span>
-                </header>
-
-                <div class="corpo-post">${esc(p.texto)}</div>
-
-                ${link ? `<p style="margin-top:10px"><a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(link)}</a></p>` : ''}
-                ${p.imagem_url ? `<img class="foto-post" src="${esc(p.imagem_url)}" alt="Imagem publicada por ${esc(p.autor_nome)}" loading="lazy">` : ''}
-                ${p.prompt ? `
-                    <div class="caixa-prompt">
-                        <div class="ferramentas-prompt">
-                            ${souAdmin ? `<button class="mini" data-fixar="${p.id}">Fixar na biblioteca</button>` : ''}
-                            <button class="mini" data-copiar="${p.id}">Copiar</button>
-                        </div>
-                        <pre id="prompt-${p.id}">${esc(p.prompt)}</pre>
-                    </div>` : ''}
-
-                <footer class="acoes">
-                    <button class="acao ${p.eu_curti ? 'curtido' : ''}" data-curtir="${p.id}">
-                        <span class="coracao">${p.eu_curti ? '♥' : '♡'}</span>
-                        <span data-contagem="${p.id}">${p.n_curtidas || 0}</span>
-                    </button>
-                    <button class="acao" data-comentar="${p.id}">${nComents ? nComents + (nComents > 1 ? ' comentários' : ' comentário') : 'Comentar'}</button>
-                    ${(p.sou_autor || souAdmin) ? `<button class="acao apagar" data-apagar="${p.id}">Apagar</button>` : ''}
-                </footer>
-
-                <div class="comentarios" id="coments-${p.id}">
-                    ${p.comentarios.map(desenharComentario).join('')}
-                    <form class="escrever" data-form-coment="${p.id}">
-                        <input type="text" placeholder="Escreva um comentário" maxlength="2000" required>
-                        <button type="submit" class="btn btn-pequeno">Enviar</button>
-                    </form>
                 </div>
-            </article>`;
+            </div>`).join('');
+
+        /* ─────────────── ÍCONES ─────────────── */
+        if (window.lucide) lucide.createIcons();
+
+        /* ─────────────── NAVEGAÇÃO / SCROLL ─────────────── */
+        const itens = Array.from(document.querySelectorAll('.menu a[data-target]'));
+        const folhaLinks = Array.from(document.querySelectorAll('.folha-mais a[data-target]'));
+        const folha = document.getElementById('folhaMais');
+
+        function irPara(id) {
+            const alvo = document.getElementById(id);
+            if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            folha.classList.remove('aberta');
         }
+        itens.forEach(a => a.addEventListener('click', () => irPara(a.getAttribute('data-target'))));
+        folhaLinks.forEach(a => a.addEventListener('click', () => irPara(a.getAttribute('data-target'))));
 
-        function desenharComentario(c) {
-            const avatar = c.autor_avatar ? `<img src="${esc(c.autor_avatar)}" alt="">` : esc(iniciais(c.autor_nome));
-            return `
-            <div class="coment">
-                <div class="avatar">${avatar}</div>
-                <div class="balao">
-                    <b>${esc(c.autor_nome)}</b><time>${esc(quando(c.created_at))}</time>
-                    <p>${esc(c.texto)}</p>
-                </div>
-            </div>`;
-        }
+        const btnMais = document.getElementById('btnMais');
+        if (btnMais) btnMais.addEventListener('click', () => folha.classList.toggle('aberta'));
 
-        /* Cliques dentro do feed (delegação). */
-        document.getElementById('feed').addEventListener('click', async (ev) => {
-            const curtir = ev.target.closest('[data-curtir]');
-            const comentar = ev.target.closest('[data-comentar]');
-            const copiar = ev.target.closest('[data-copiar]');
-            const apagar = ev.target.closest('[data-apagar]');
-            const fixar = ev.target.closest('[data-fixar]');
-
-            if (curtir) {
-                const id = Number(curtir.dataset.curtir);
-                const estavaCurtido = curtir.classList.contains('curtido');
-                const contagem = curtir.querySelector(`[data-contagem="${id}"]`);
-
-                curtir.classList.toggle('curtido');
-                curtir.querySelector('.coracao').textContent = estavaCurtido ? '♡' : '♥';
-                contagem.textContent = Math.max(0, Number(contagem.textContent) + (estavaCurtido ? -1 : 1));
-
-                const { error } = estavaCurtido
-                    ? await sb.from('imersao_curtidas').delete().eq('post_id', id).eq('usuario_id', usuario.id)
-                    : await sb.from('imersao_curtidas').insert({ post_id: id, usuario_id: usuario.id });
-
-                if (error) {
-                    curtir.classList.toggle('curtido');
-                    curtir.querySelector('.coracao').textContent = estavaCurtido ? '♥' : '♡';
-                    contagem.textContent = Number(contagem.textContent) + (estavaCurtido ? 1 : -1);
+        /* IntersectionObserver marca item ativo */
+        const secoes = ['inicio','mural','prompts','materiais','avisos','store','perfil'];
+        const mapa = {};
+        itens.forEach(a => mapa[a.getAttribute('data-target')] = a);
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(en => {
+                if (en.isIntersecting) {
+                    itens.forEach(a => a.classList.remove('ativo'));
+                    const a = mapa[en.target.id];
+                    if (a) a.classList.add('ativo');
                 }
-                return;
-            }
-
-            if (comentar) {
-                const caixa = document.getElementById('coments-' + comentar.dataset.comentar);
-                caixa.classList.toggle('show');
-                if (caixa.classList.contains('show')) caixa.querySelector('input').focus();
-                return;
-            }
-
-            if (copiar) {
-                const pre = document.getElementById('prompt-' + copiar.dataset.copiar);
-                try {
-                    await navigator.clipboard.writeText(pre.textContent);
-                    copiar.textContent = 'Copiado';
-                    setTimeout(() => { copiar.textContent = 'Copiar'; }, 1600);
-                } catch (e) { /* navegador sem permissão de área de transferência */ }
-                return;
-            }
-
-            if (fixar) {
-                const id = Number(fixar.dataset.fixar);
-                const post = document.querySelector(`[data-post="${id}"]`);
-                promptParaFixar = {
-                    post_id: id,
-                    prompt: document.getElementById('prompt-' + id).textContent,
-                    autor_nome: post.querySelector('.quem b').textContent
-                };
-                document.getElementById('fxTitulo').value = '';
-                document.getElementById('fxDesc').value = '';
-                recado('recadoFixar', '');
-                document.getElementById('veuModal').classList.add('show');
-                document.getElementById('fxTitulo').focus();
-                return;
-            }
-
-            if (apagar) {
-                if (!confirm('Apagar essa publicação?')) return;
-                const id = Number(apagar.dataset.apagar);
-                const { error } = await sb.from('imersao_posts').delete().eq('id', id);
-                if (error) return recado('recadoMural', 'Não consegui apagar agora.');
-                document.querySelector(`[data-post="${id}"]`)?.remove();
-            }
-        });
-
-        document.getElementById('feed').addEventListener('submit', async (ev) => {
-            const form = ev.target.closest('[data-form-coment]');
-            if (!form) return;
-            ev.preventDefault();
-
-            const id = Number(form.dataset.formComent);
-            const campo = form.querySelector('input');
-            const texto = campo.value.trim();
-            if (!texto) return;
-
-            const btn = form.querySelector('button');
-            btn.disabled = true;
-            const { error } = await sb.from('imersao_comentarios').insert({
-                post_id: id, autor_id: usuario.id, texto
             });
-            btn.disabled = false;
-            if (error) return recado('recadoMural', 'Não consegui comentar agora.');
+        }, { threshold: 0.4 });
+        secoes.forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
 
-            campo.value = '';
-            const novo = document.createElement('div');
-            novo.innerHTML = desenharComentario({
-                texto,
-                created_at: new Date().toISOString(),
-                autor_nome: perfil?.nome || 'Você',
-                autor_avatar: perfil?.avatar_url
-            });
-            form.parentElement.insertBefore(novo.firstElementChild, form);
-        });
-
-        /* ══ Modal: fixar prompt na biblioteca ══ */
-        document.getElementById('fecharModal').addEventListener('click', () => {
-            document.getElementById('veuModal').classList.remove('show');
-            promptParaFixar = null;
-        });
-        document.getElementById('veuModal').addEventListener('click', (ev) => {
-            if (ev.target.id === 'veuModal') {
-                document.getElementById('veuModal').classList.remove('show');
-                promptParaFixar = null;
-            }
-        });
-
-        document.getElementById('formFixar').addEventListener('submit', async (ev) => {
-            ev.preventDefault();
-            if (!promptParaFixar) return;
-
-            const { error } = await sb.from('imersao_prompts').insert({
-                titulo: document.getElementById('fxTitulo').value.trim(),
-                tema: document.getElementById('fxTema').value,
-                descricao: document.getElementById('fxDesc').value.trim() || null,
-                prompt: promptParaFixar.prompt,
-                autor_nome: promptParaFixar.autor_nome,
-                post_id: promptParaFixar.post_id
-            });
-
-            if (error) return recado('recadoFixar', 'Não consegui fixar agora.');
-
-            document.getElementById('veuModal').classList.remove('show');
-            promptParaFixar = null;
-            jaCarregou.prompts = false;
-            recado('recadoMural', 'Prompt fixado na biblioteca.', 'ok');
-        });
-
-        /* ══ Biblioteca de prompts ══ */
-        let prompts = [];
-
-        async function carregarPrompts() {
-            const alvo = document.getElementById('listaPrompts');
-            const { data, error } = await sb.from('imersao_prompts')
-                .select('*').eq('publicado', true)
-                .order('destaque', { ascending: false })
-                .order('created_at', { ascending: false });
-
-            if (error) { alvo.innerHTML = '<p class="vazio">Não consegui carregar agora.</p>'; return; }
-            prompts = data || [];
-
-            if (!prompts.length) {
-                document.getElementById('filtrosPrompts').innerHTML = '';
-                alvo.innerHTML = '<p class="vazio"><strong>A biblioteca está começando</strong>Os prompts que funcionarem no mural vão parar aqui, organizados por tema.</p>';
-                return;
-            }
-
-            const temas = [...new Set(prompts.map(p => p.tema))];
-            document.getElementById('filtrosPrompts').innerHTML = [
-                `<button class="chip ${temaFiltro === 'todos' ? 'on' : ''}" data-tema="todos">Todos</button>`,
-                ...temas.map(t => `<button class="chip ${temaFiltro === t ? 'on' : ''}" data-tema="${esc(t)}">${esc(t)}</button>`)
-            ].join('');
-
-            pintarPrompts();
-        }
-
-        function pintarPrompts() {
-            const alvo = document.getElementById('listaPrompts');
-            const lista = temaFiltro === 'todos' ? prompts : prompts.filter(p => p.tema === temaFiltro);
-
-            if (!lista.length) {
-                alvo.innerHTML = '<p class="vazio">Nenhum prompt nesse tema ainda.</p>';
-                return;
-            }
-
-            alvo.innerHTML = lista.map(p => `
-                <article class="cartao-prompt ${p.destaque ? 'destaque' : ''}">
-                    <div class="topo-cartao">
-                        <h3>${esc(p.titulo)}</h3>
-                        <span class="tema">${esc(p.tema)}</span>
-                    </div>
-                    ${p.descricao ? `<p class="conta">${esc(p.descricao)}</p>` : ''}
-                    ${p.autor_nome ? `<p class="credito">Compartilhado por ${esc(p.autor_nome)}</p>` : ''}
-                    <div class="caixa-prompt">
-                        <div class="ferramentas-prompt">
-                            ${souAdmin ? `<button class="mini" data-apagar-prompt="${p.id}">Remover</button>` : ''}
-                            <button class="mini" data-copiar-prompt="${p.id}">Copiar</button>
-                        </div>
-                        <pre id="pb-${p.id}">${esc(p.prompt)}</pre>
-                    </div>
-                </article>`).join('');
-        }
-
-        document.getElementById('filtrosPrompts').addEventListener('click', (ev) => {
-            const chip = ev.target.closest('[data-tema]');
-            if (!chip) return;
-            temaFiltro = chip.dataset.tema;
-            document.querySelectorAll('#filtrosPrompts .chip').forEach(c => c.classList.remove('on'));
-            chip.classList.add('on');
-            pintarPrompts();
-        });
-
-        document.getElementById('listaPrompts').addEventListener('click', async (ev) => {
-            const copiar = ev.target.closest('[data-copiar-prompt]');
-            const apagar = ev.target.closest('[data-apagar-prompt]');
-
-            if (copiar) {
-                const pre = document.getElementById('pb-' + copiar.dataset.copiarPrompt);
-                try {
-                    await navigator.clipboard.writeText(pre.textContent);
-                    copiar.textContent = 'Copiado';
-                    setTimeout(() => { copiar.textContent = 'Copiar'; }, 1600);
-                } catch (e) { /* sem permissão */ }
-                return;
-            }
-
-            if (apagar) {
-                if (!confirm('Remover esse prompt da biblioteca?')) return;
-                const id = Number(apagar.dataset.apagarPrompt);
-                const { error } = await sb.from('imersao_prompts').delete().eq('id', id);
-                if (error) return;
-                prompts = prompts.filter(p => p.id !== id);
-                pintarPrompts();
-            }
-        });
-
-        /* ══ Materiais ══ */
-        async function carregarMateriais() {
-            const alvo = document.getElementById('listaMateriais');
-            const { data, error } = await sb.from('imersao_materiais')
-                .select('*').eq('publicado', true).order('ordem', { ascending: true });
-
-            if (error) { alvo.innerHTML = '<p class="vazio">Não consegui carregar agora.</p>'; return; }
-            if (!data.length) { alvo.innerHTML = '<p class="vazio"><strong>Ainda não tem material aqui</strong>A Lara vai postar em breve.</p>'; return; }
-
-            alvo.innerHTML = data.map(m => {
-                const url = urlSegura(m.url);
-                if (!url) return '';
-                return `
-                <a class="material" href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="border-bottom:1px solid var(--fio)">
-                    <span class="emoji">${esc(m.emoji)}</span>
-                    <div>
-                        <h3>${esc(m.titulo)}</h3>
-                        ${m.descricao ? `<p>${esc(m.descricao)}</p>` : ''}
-                    </div>
-                    <span class="seta">→</span>
-                </a>`;
-            }).join('');
-        }
-
-        /* ══ Avisos ══ */
-        async function carregarAvisos() {
-            const alvo = document.getElementById('listaAvisos');
-            const { data, error } = await sb.from('imersao_avisos')
-                .select('*').eq('publicado', true)
-                .order('fixado', { ascending: false })
-                .order('created_at', { ascending: false });
-
-            if (error) { alvo.innerHTML = '<p class="vazio">Não consegui carregar agora.</p>'; return; }
-            if (!data.length) { alvo.innerHTML = '<p class="vazio"><strong>Nenhum aviso por enquanto</strong>Quando a Lara postar um recado, ele aparece aqui.</p>'; return; }
-
-            alvo.innerHTML = data.map(a => `
-                <article class="aviso ${a.fixado ? 'fixado' : ''}">
-                    ${a.fixado ? '<span class="pin">Fixado</span>' : ''}
-                    <h3>${esc(a.titulo)}</h3>
-                    <span class="data">${esc(quando(a.created_at))}</span>
-                    <div class="texto">${esc(a.corpo)}</div>
-                </article>`).join('');
-        }
-
-        /* ══ Galeria ══ */
-        async function carregarGaleria() {
-            const alvo = document.getElementById('listaGaleria');
-            const { data, error } = await sb.rpc('imersao_galeria');
-
-            if (error) { alvo.innerHTML = '<p class="vazio">Não consegui carregar agora.</p>'; return; }
-            const perfis = data || [];
-            if (!perfis.length) {
-                alvo.innerHTML = '<p class="vazio"><strong>Nenhum portfólio publicado ainda</strong>Coloque o link do seu em "Meu perfil" e seja a primeira da galeria.</p>';
-                return;
-            }
-
-            alvo.innerHTML = perfis.map(p => {
-                const url = urlSegura(p.portfolio_url);
-                const avatar = p.avatar_url ? `<img src="${esc(p.avatar_url)}" alt="">` : esc(iniciais(p.nome));
-                return `
-                <article class="vitrine">
-                    <div class="avatar">${avatar}</div>
-                    <b>${esc(p.nome)}</b>
-                    ${p.instagram ? `<span class="arroba">${esc(p.instagram)}</span>` : ''}
-                    <p class="bio">${p.bio ? esc(p.bio) : ''}</p>
-                    ${url ? `<a class="btn btn-pequeno" href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="border:none">Ver portfólio</a>` : ''}
-                </article>`;
-            }).join('');
-        }
-
-        /* ══ Perfil ══ */
-        document.getElementById('arquivoAvatar').addEventListener('change', async (ev) => {
-            const f = ev.target.files[0];
-            if (!f) return;
-            if (f.size > 5 * 1024 * 1024) return recado('recadoPerfil', 'A imagem precisa ter menos de 5 MB.');
+        /* ─────────────── GUARD DE SESSÃO + PERFIL ─────────────── */
+        (async function () {
             try {
-                const url = await subirImagem(f);
-                const { error } = await sb.from('imersao_perfis')
-                    .update({ avatar_url: url }).eq('usuario_id', usuario.id);
-                if (error) throw error;
-                perfil.avatar_url = url;
-                pintarPerfil();
-                recado('recadoPerfil', 'Foto atualizada.', 'ok');
+                const { sb } = window.C;
+                const { data: { session } } = await sb.auth.getSession();
+                if (!session) { window.location.replace('index.html'); return; }
+
+                const user = session.user;
+                let nome = '', email = user.email || '';
+                try {
+                    const { data } = await sb.from('imersao_perfis').select('nome').eq('usuario_id', user.id).maybeSingle();
+                    if (data && data.nome) nome = data.nome;
+                } catch (e) {}
+                if (!nome) nome = (email.split('@')[0] || 'Lara');
+
+                const primeiro = nome.split(' ')[0];
+                document.getElementById('nomeUsuaria').textContent = primeiro;
+                document.getElementById('perfilNome').textContent = nome;
+                document.getElementById('perfilEmail').textContent = email;
+                const ini = window.C.iniciais ? window.C.iniciais(nome) : (primeiro[0] || 'L');
+                document.getElementById('avatar').textContent = ini.toUpperCase();
+
+                document.getElementById('btnSair').addEventListener('click', async () => {
+                    await sb.auth.signOut();
+                    window.location.replace('index.html');
+                });
             } catch (e) {
-                recado('recadoPerfil', 'Não consegui subir a foto agora.');
+                /* Sem backend disponível: mantém os placeholders visuais. */
             }
-        });
-
-        document.getElementById('formPerfil').addEventListener('submit', async (ev) => {
-            ev.preventDefault();
-            const btn = document.getElementById('btnPerfil');
-            const nome = document.getElementById('pfNome').value.trim();
-            if (!nome) return recado('recadoPerfil', 'Coloque seu nome.');
-
-            let insta = document.getElementById('pfInsta').value.trim();
-            if (insta && !insta.startsWith('@')) insta = '@' + insta.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/$/, '');
-
-            btn.disabled = true;
-            const { error } = await sb.from('imersao_perfis').update({
-                nome,
-                instagram: insta || null,
-                bio: document.getElementById('pfBio').value.trim() || null
-            }).eq('usuario_id', usuario.id);
-            btn.disabled = false;
-
-            if (error) return recado('recadoPerfil', 'Não consegui salvar agora.');
-
-            perfil.nome = nome;
-            perfil.instagram = insta || null;
-            perfil.bio = document.getElementById('pfBio').value.trim() || null;
-            pintarPerfil();
-            jaCarregou.galeria = false;
-            recado('recadoPerfil', 'Perfil salvo.', 'ok');
-        });
-
-        /* ══ Publicar o próprio portfólio (na aba Portfólios) ══ */
-        document.getElementById('formPortfolio').addEventListener('submit', async (ev) => {
-            ev.preventDefault();
-            const btn = document.getElementById('btnPortfolio');
-            const link = urlSegura(document.getElementById('meuPortfolio').value.trim());
-
-            if (!link) return recado('recadoPortfolio', 'Cole um link que comece com https://');
-
-            btn.disabled = true;
-            const { error } = await sb.from('imersao_perfis')
-                .update({ portfolio_url: link }).eq('usuario_id', usuario.id);
-            btn.disabled = false;
-
-            if (error) return recado('recadoPortfolio', 'Não consegui publicar agora.');
-
-            perfil.portfolio_url = link;
-            pintarMeuPortfolio();
-            recado('recadoPortfolio', 'Pronto, seu portfólio está na galeria.', 'ok');
-            carregarGaleria();
-        });
-
-        document.getElementById('btnTirarPortfolio').addEventListener('click', async () => {
-            if (!confirm('Tirar seu portfólio da galeria?')) return;
-
-            const { error } = await sb.from('imersao_perfis')
-                .update({ portfolio_url: null }).eq('usuario_id', usuario.id);
-            if (error) return recado('recadoPortfolio', 'Não consegui tirar agora.');
-
-            perfil.portfolio_url = null;
-            document.getElementById('meuPortfolio').value = '';
-            pintarMeuPortfolio();
-            recado('recadoPortfolio', 'Seu portfólio saiu da galeria.', 'ok');
-            carregarGaleria();
-        });
-
-        /* ══ Admin ══ */
-        document.getElementById('formAviso').addEventListener('submit', async (ev) => {
-            ev.preventDefault();
-            const { error } = await sb.from('imersao_avisos').insert({
-                titulo: document.getElementById('avTitulo').value.trim(),
-                corpo: document.getElementById('avCorpo').value.trim(),
-                fixado: document.getElementById('avFixado').checked
-            });
-            if (error) return recado('recadoAviso', 'Não consegui publicar o aviso.');
-            document.getElementById('formAviso').reset();
-            jaCarregou.avisos = false;
-            recado('recadoAviso', 'Aviso publicado.', 'ok');
-        });
-
-        document.getElementById('formMaterial').addEventListener('submit', async (ev) => {
-            ev.preventDefault();
-            const url = urlSegura(document.getElementById('mtUrl').value.trim());
-            if (!url) return recado('recadoMaterial', 'Coloque um link que comece com https://');
-
-            const { error } = await sb.from('imersao_materiais').insert({
-                titulo: document.getElementById('mtTitulo').value.trim(),
-                descricao: document.getElementById('mtDesc').value.trim() || null,
-                url,
-                emoji: document.getElementById('mtEmoji').value.trim() || '📄',
-                ordem: 99
-            });
-            if (error) return recado('recadoMaterial', 'Não consegui adicionar o material.');
-            document.getElementById('formMaterial').reset();
-            document.getElementById('mtEmoji').value = '📄';
-            jaCarregou.materiais = false;
-            recado('recadoMaterial', 'Material adicionado.', 'ok');
-        });
-
-        document.getElementById('formPrompt').addEventListener('submit', async (ev) => {
-            ev.preventDefault();
-            const { error } = await sb.from('imersao_prompts').insert({
-                titulo: document.getElementById('prTitulo').value.trim(),
-                tema: document.getElementById('prTema').value,
-                descricao: document.getElementById('prDesc').value.trim() || null,
-                prompt: document.getElementById('prTexto').value.trim()
-            });
-            if (error) return recado('recadoPrompt', 'Não consegui adicionar o prompt.');
-            document.getElementById('formPrompt').reset();
-            montarTemas();
-            jaCarregou.prompts = false;
-            recado('recadoPrompt', 'Prompt adicionado na biblioteca.', 'ok');
-        });
+        })();
     })();
     </script>
 </body>
