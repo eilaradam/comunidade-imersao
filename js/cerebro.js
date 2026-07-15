@@ -21,14 +21,14 @@
     let alvoY = 0, alvoX = 0;
     let tempo = 0;
 
-    /* Sobre o cinza do neumorphism, a rede é ardósia: um traço a lápis, mais escuro
-       que o fundo pra aparecer, com uma leve variação fria-para-quente ao respirar. */
+    /* Sobre a areia clara, a rede é dourada: champanhe nas pontas, terracota no miolo.
+       Um branco puro sumiria no fundo, então a luz aqui é tinta, não brilho. */
     function corDoVidro(t) {
         const onda = Math.sin(t * Math.PI * 2);
         return [
-            Math.round(132 + onda * 12),
-            Math.round(144 + onda * 8),
-            Math.round(168 + onda * 6)
+            Math.round(178 + onda * 14),
+            Math.round(140 + onda * 10),
+            Math.round(96 + onda * 8)
         ];
     }
 
@@ -181,11 +181,11 @@
             centroX - raio * 0.55, centroY + raio * 0.30,
             centroX + raio * 0.55, centroY - raio * 0.30
         );
-        g.addColorStop(0.00, 'rgba(217, 185, 138, 0)');
-        g.addColorStop(0.30, 'rgba(217, 185, 138, .12)');   /* um sopro de champanhe */
-        g.addColorStop(0.50, 'rgba(255, 255, 255, .34)');   /* o brilho do relevo */
-        g.addColorStop(0.70, 'rgba(198, 208, 226, .16)');   /* e a sombra fria do outro lado */
-        g.addColorStop(1.00, 'rgba(198, 208, 226, 0)');
+        g.addColorStop(0.00, 'rgba(227, 177, 149, 0)');
+        g.addColorStop(0.30, 'rgba(227, 177, 149, .16)');
+        g.addColorStop(0.50, 'rgba(239, 220, 192, .22)');
+        g.addColorStop(0.70, 'rgba(217, 185, 138, .16)');
+        g.addColorStop(1.00, 'rgba(217, 185, 138, 0)');
 
         ctx.save();
         ctx.filter = 'blur(52px)';
@@ -197,9 +197,9 @@
 
         /* Um respiro de luz no miolo, de onde a estrutura nasce. */
         const halo = ctx.createRadialGradient(centroX, centroY, 0, centroX, centroY, Math.min(L, A) * 0.46);
-        halo.addColorStop(0, 'rgba(255, 255, 255, .55)');
-        halo.addColorStop(0.55, 'rgba(233, 237, 243, .18)');
-        halo.addColorStop(1, 'rgba(219, 225, 234, 0)');
+        halo.addColorStop(0, 'rgba(255, 252, 246, .5)');
+        halo.addColorStop(0.55, 'rgba(247, 242, 236, .18)');
+        halo.addColorStop(1, 'rgba(239, 231, 223, 0)');
         ctx.fillStyle = halo;
         ctx.fillRect(0, 0, L, A);
     }
@@ -277,7 +277,7 @@
             if (alfa <= 0.01) continue;
 
             const [r, v, az] = corDoVidro((p.matiz + q.matiz) / 2 + tempo * 0.00004);
-            ctx.strokeStyle = `rgba(${r}, ${v}, ${az}, ${alfa * 0.58})`;
+            ctx.strokeStyle = `rgba(${r}, ${v}, ${az}, ${alfa * 0.42})`;
             ctx.lineWidth = 0.5 + 0.55 * frente;
             ctx.beginPath();
             ctx.moveTo(p.px, p.py);
@@ -292,7 +292,7 @@
             const claro = Math.max(0.1, Math.min(1, f)) * p.brilho;
             const [r, v, az] = corDoVidro(p.matiz + tempo * 0.00004);
 
-            ctx.fillStyle = `rgba(${r}, ${v}, ${az}, ${0.13 * claro})`;
+            ctx.fillStyle = `rgba(${r}, ${v}, ${az}, ${0.10 * claro})`;
             ctx.beginPath();
             ctx.arc(p.px, p.py, 7 * p.perto * (0.5 + claro * 0.6), 0, Math.PI * 2);
             ctx.fill();
