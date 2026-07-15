@@ -1374,6 +1374,11 @@
                 await carregarMural();
                 await carregarSeusPosts();
             } catch (err) {
+                console.error('[imersao_posts insert] erro completo:', err);
+                console.error('  message:', err && err.message);
+                console.error('  details:', err && err.details);
+                console.error('  hint:', err && err.hint);
+                console.error('  code:', err && err.code);
                 recadoMural('Não consegui publicar agora. Tente de novo.');
             } finally {
                 btn.disabled = false; btn.textContent = 'Publicar';

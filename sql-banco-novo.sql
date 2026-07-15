@@ -99,11 +99,13 @@ create policy "perfis: edita o proprio" on imersao_perfis
 
 
 -- ── 4. Mural
+-- Schema REAL confirmado por introspecção da API (projeto ykypgdzihgxibeplvrjj):
+-- imersao_posts = id, autor_id, tipo, texto, prompt, link, imagem_url, created_at.
 create table if not exists imersao_posts (
   id         bigint generated always as identity primary key,
   autor_id   uuid not null references auth.users(id) on delete cascade,
-  tipo       text not null default 'resultado' check (tipo in ('resultado', 'prompt', 'duvida')),
-  texto      text not null check (length(texto) between 1 and 5000),
+  tipo       text not null default 'resultado' check (tipo in ('resultado', 'prompt', 'duvida', 'video')),
+  texto      text not null check (length(texto) between 0 and 5000),
   prompt     text check (prompt is null or length(prompt) <= 8000),
   link       text,
   imagem_url text,
