@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Admin · Comunidade Imersão</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=4">
+<link rel="stylesheet" href="css/comunidade.css?v=5">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -168,11 +168,6 @@
                         <div class="local"><i data-lucide="user"></i> ${esc(r.subtitulo || '')}</div>
                         <div class="desc-label">Descrição</div>
                         <p class="desc-text">${esc(r.descricao || '')}</p>
-                        <div class="stats">
-                            <div class="stat"><span class="stat-label">Aulas</span><span class="stat-val">${esc(r.aulas || '—')}</span></div>
-                            <div class="stat"><span class="stat-label">Duração</span><span class="stat-val">${esc(r.duracao || '—')}</span></div>
-                            <div class="stat"><span class="stat-label">Nota</span><span class="stat-val">${esc(r.nota || '—')}</span></div>
-                        </div>
                         <div class="c-rodape">
                             <div class="preco-bloco"><span class="preco-label">Valor</span>
                                 <span class="preco-linha">${r.preco_antigo ? `<s class="antes">${esc(r.preco_antigo)}</s>` : ''}<span class="preco${gratis ? ' gratis' : ''}">${esc(r.preco || '')}</span></span>
@@ -229,9 +224,6 @@
                     { n: 'categoria', l: 'Categoria (badge)', t: 'text' },
                     { n: 'imagem_url', l: 'Imagem do card', t: 'imagem' },
                     { n: 'descricao', l: 'Descrição', t: 'textarea' },
-                    { n: 'aulas', l: 'Aulas (ex: 8 aulas)', t: 'text' },
-                    { n: 'duracao', l: 'Duração (ex: 2h10)', t: 'text' },
-                    { n: 'nota', l: 'Nota (ex: 4.9)', t: 'text' },
                     { n: 'preco', l: 'Preço (ex: R$ 197 ou Gratuita)', t: 'text' },
                     { n: 'preco_antigo', l: 'Preço antigo (riscado)', t: 'text' },
                     { n: 'off', l: 'Desconto (ex: 20%)', t: 'text' },
@@ -420,7 +412,12 @@
                     hid.value = publicUrl; mostrar(publicUrl);
                 } catch (e) {
                     console.error('Erro no upload:', e);
-                    erro.textContent = 'Não consegui enviar a imagem. Tente de novo.'; erro.classList.add('show');
+                    const msg = (e && (e.message || e.error || e.statusCode)) ? String(e.message || e.error || e.statusCode) : '';
+                    let amiga = 'Não consegui enviar a imagem. Tente de novo.';
+                    if (/bucket not found/i.test(msg)) amiga = 'O bucket "produtos" não existe no Supabase. Rode o SQL de configuração primeiro.';
+                    else if (/row-level security|violates|not authorized|permission|policy/i.test(msg)) amiga = 'Sem permissão pra subir no bucket. Falta a policy de upload (rode o SQL).';
+                    else if (msg) amiga = 'Não consegui enviar: ' + msg;
+                    erro.textContent = amiga; erro.classList.add('show');
                 } finally {
                     if (btn) { btn.disabled = false; btn.textContent = btn.dataset.orig || 'Salvar'; }
                 }

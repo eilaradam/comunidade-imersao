@@ -70,11 +70,6 @@
                     <div class="local"><i data-lucide="user"></i> ${esc(d.autor || '')}</div>
                     <div class="desc-label">Descrição</div>
                     <p class="desc-text">${esc(d.desc || '')}</p>
-                    <div class="stats">
-                        <div class="stat"><span class="stat-label">Aulas</span><span class="stat-val">${esc(d.aulas || '—')}</span></div>
-                        <div class="stat"><span class="stat-label">Duração</span><span class="stat-val">${esc(d.duracao || '—')}</span></div>
-                        <div class="stat"><span class="stat-label">Nota</span><span class="stat-val">${esc(d.nota || '—')}</span></div>
-                    </div>
                     <div class="c-rodape">
                         <div class="preco-bloco">
                             <span class="preco-label">Valor</span>
@@ -97,11 +92,11 @@
 
         async function carregarDestaques() {
             if (!palco) return;
-            let itens = destaques.map(d => ({ tom: d.tom, imagem: null, off: d.off, cat: d.cat, titulo: d.titulo, autor: d.autor, desc: d.desc, aulas: d.aulas, duracao: d.duracao, nota: d.nota, antes: d.antes, preco: d.preco }));
+            let itens = destaques.map(d => ({ tom: d.tom, imagem: null, off: d.off, cat: d.cat, titulo: d.titulo, autor: d.autor, desc: d.desc, antes: d.antes, preco: d.preco }));
             if (sb) {
                 try {
                     const { data } = await sb.from('imersao_destaques').select('*').eq('publicado', true).order('ordem', { ascending: true }).order('created_at', { ascending: false });
-                    if (data && data.length) itens = data.map(r => ({ tom: tom[r.tom] || tom.lavanda, imagem: r.imagem_url, off: r.off, cat: r.categoria, titulo: r.titulo, autor: r.subtitulo, desc: r.descricao, aulas: r.aulas, duracao: r.duracao, nota: r.nota, antes: r.preco_antigo, preco: r.preco }));
+                    if (data && data.length) itens = data.map(r => ({ tom: tom[r.tom] || tom.lavanda, imagem: r.imagem_url, off: r.off, cat: r.categoria, titulo: r.titulo, autor: r.subtitulo, desc: r.descricao, antes: r.preco_antigo, preco: r.preco }));
                 } catch (e) {}
             }
             montarCarrossel(itens);
