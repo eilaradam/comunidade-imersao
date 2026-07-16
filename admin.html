@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Admin · Comunidade Imersão</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=10">
+<link rel="stylesheet" href="css/comunidade.css?v=11">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -187,7 +187,7 @@
                 return `<div class="s-card">
                     <div class="s-thumb${r.imagem_url ? ' has-img' : ''}" style="background:${cor}">${r.imagem_url ? `<img class="s-img" src="${esc(r.imagem_url)}" alt="" onerror="this.style.display='none'">` : ''}${r.tag ? `<span class="badge">${esc(r.tag)}</span>` : ''}</div>
                     <div class="s-corpo"><h3>${esc(r.nome || '')}</h3><div class="desc">${esc(r.descricao || '')}</div>
-                        <div class="s-rodape"><div class="s-preco">${precoHTML}</div><button class="s-comprar">Comprar <span>→</span></button></div></div>
+                        <div class="s-rodape"><div class="s-preco">${precoHTML}</div><button class="s-comprar">${preco ? 'Comprar' : 'Acessar'} <span>→</span></button></div></div>
                 </div>`;
             },
             materiais: (r, i) => `<div class="mat-item">
@@ -215,29 +215,12 @@
                     { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
                 ]
             },
-            destaques: {
-                tabela: 'imersao_destaques', nome: 'Destaques', ordena: 'ordem', asc: true,
-                titulo: r => r.titulo, sub: r => r.categoria || '—',
-                campos: [
-                    { n: 'titulo', l: 'Título', t: 'text', req: true },
-                    { n: 'subtitulo', l: 'Subtítulo (autor/turma)', t: 'text' },
-                    { n: 'categoria', l: 'Categoria (badge)', t: 'text' },
-                    { n: 'imagem_url', l: 'Imagem do card', t: 'imagem' },
-                    { n: 'descricao', l: 'Descrição', t: 'textarea' },
-                    { n: 'preco', l: 'Preço (ex: R$ 197 ou Gratuita)', t: 'text' },
-                    { n: 'preco_antigo', l: 'Preço antigo (riscado)', t: 'text' },
-                    { n: 'off', l: 'Desconto (calculado automaticamente)', t: 'off' },
-                    { n: 'link', l: 'Link do botão Acessar', t: 'text' },
-                    { n: 'tom', l: 'Cor do card', t: 'tom' },
-                    { n: 'ordem', l: 'Ordem', t: 'num' },
-                    { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
-                ]
-            },
             store: {
                 tabela: 'produtos', nome: 'Store', ordena: 'ordem', asc: true, flag: 'ativo',
                 titulo: r => r.nome, sub: r => (r.preco != null ? 'R$ ' + r.preco : '—'),
                 campos: [
                     { n: 'nome', l: 'Nome', t: 'text', req: true },
+                    { n: 'subtitulo', l: 'Autor/turma (opcional, aparece no card em destaque)', t: 'text' },
                     { n: 'descricao', l: 'Descrição', t: 'textarea' },
                     { n: 'preco', l: 'Preço (ex: 197 ou 47.90)', t: 'dec' },
                     { n: 'preco_de', l: 'Preço "de" (riscado, opcional)', t: 'dec' },
@@ -246,6 +229,7 @@
                     { n: 'imagem_url', l: 'Imagem do card', t: 'imagem' },
                     { n: 'cor', l: 'Cor do card (fallback sem imagem)', t: 'select', opts: ['lavanda', 'menta', 'pessego'] },
                     { n: 'ordem', l: 'Ordem', t: 'num' },
+                    { n: 'destaque', l: '❤️ Destacar no início (aparece no carrossel "Em destaque")', t: 'bool' },
                     { n: 'ativo', l: 'Ativo (aparece na Store)', t: 'bool', def: true }
                 ]
             },
@@ -319,7 +303,7 @@
                 el('lista').innerHTML = data.map((r, i) => `
                     <div class="admin-card">
                         <div class="admin-barra">
-                            <span class="nome">${flagField ? (r[flagField] ? '● no ar' : '○ oculto') : ''}</span>
+                            <span class="nome">${flagField ? (r[flagField] ? '● no ar' : '○ oculto') : ''}${r.destaque ? ' · ❤️ em destaque' : ''}</span>
                             ${ferramentas(r)}
                         </div>
                         <div class="admin-prev">${prev(r, i)}</div>

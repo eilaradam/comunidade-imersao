@@ -76,7 +76,7 @@
                 </div>
                 <div class="c-corpo">
                     <h3>${esc(d.titulo || '')}</h3>
-                    <div class="local"><i data-lucide="user"></i> ${esc(d.autor || '')}</div>
+                    ${d.autor ? `<div class="local"><i data-lucide="user"></i> ${esc(d.autor)}</div>` : ''}
                     <div class="desc-label">Descrição</div>
                     <p class="desc-text">${esc(d.desc || '')}</p>
                     <div class="c-rodape">
@@ -111,8 +111,20 @@
             let itens = destaques.map(d => ({ tom: d.tom, imagem: null, off: d.off, cat: d.cat, titulo: d.titulo, autor: d.autor, desc: d.desc, antes: d.antes, preco: d.preco, link: d.link || null }));
             if (sb) {
                 try {
-                    const { data } = await sb.from('imersao_destaques').select('*').eq('publicado', true).order('ordem', { ascending: true }).order('created_at', { ascending: false });
-                    if (data && data.length) itens = data.map(r => ({ tom: tom[r.tom] || tom.lavanda, imagem: r.imagem_url, off: r.off, cat: r.categoria, titulo: r.titulo, autor: r.subtitulo, desc: r.descricao, antes: r.preco_antigo, preco: r.preco, link: r.link }));
+                    // Carrossel "Em destaque" = produtos da Store marcados com o coração (destaque)
+                    const { data } = await sb.from('produtos').select('*').eq('ativo', true).eq('destaque', true).order('ordem', { ascending: true });
+                    if (data && data.length) itens = data.map(p => {
+                        const preco = p.preco == null ? 0 : Number(p.preco);
+                        const de = p.preco_de == null ? null : Number(p.preco_de);
+                        const off = (de && de > preco && preco > 0) ? Math.round((de - preco) / de * 100) + '%' : null;
+                        return {
+                            tom: corStore(p.cor), imagem: p.imagem_url, off, cat: p.tag,
+                            titulo: p.nome, autor: p.subtitulo || '', desc: p.descricao,
+                            antes: (de && de > preco) ? fmtReal(de) : null,
+                            preco: preco ? fmtReal(preco) : 'Gratuito',
+                            link: p.checkout_url
+                        };
+                    });
                 } catch (e) {}
             }
             montarCarrossel(itens);
@@ -915,7 +927,7 @@
                     <div class="desc">${esc(p.descricao || '')}</div>
                     <div class="s-rodape">
                         <div class="s-preco">${precoProdutoHTML(p)}</div>
-                        <button class="s-comprar" data-checkout="${esc(p.checkout_url || '')}">Comprar <span aria-hidden="true">→</span></button>
+                        <button class="s-comprar" data-checkout="${esc(p.checkout_url || '')}">${Number(p.preco) ? 'Comprar' : 'Acessar'} <span aria-hidden="true">→</span></button>
                     </div>
                 </div>
             </div>`;
