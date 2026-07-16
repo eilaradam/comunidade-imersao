@@ -571,6 +571,13 @@
     .perfil-op .chev svg { width: 18px; height: 18px; }
     .perfil-op.sair { color: rgba(200, 68, 26, 0.9); }
     .perfil-op.sair .ico { color: rgba(200, 68, 26, 0.9); }
+    .perfil-dados { padding: 4px 8px 14px; display: flex; flex-direction: column; gap: 10px; }
+    .perfil-dados .dado { display: flex; flex-direction: column; gap: 2px; }
+    .perfil-dados .dado span { font-size: 12px; color: rgba(0,0,0,0.45); }
+    .perfil-dados .dado b { font-size: 15px; font-weight: 500; color: #1D1D1F; word-break: break-word; }
+    .perfil-dados .dado a { color: #1D1D1F; }
+    .perfil-aviso { max-height: 0; overflow: hidden; opacity: 0; transition: all 250ms ease; font-size: 14px; color: rgba(0,0,0,0.55); text-align: center; }
+    .perfil-aviso.show { max-height: 40px; opacity: 1; margin-top: 12px; }
 
     /* ── Rodapé ── */
     .rodape { padding: 60px 0; text-align: center; font-size: 13px; color: rgba(0,0,0,0.4); }

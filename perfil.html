@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=18">
+<link rel="stylesheet" href="css/comunidade.css?v=19">
 </head>
 <body data-pagina="perfil">
     <!-- Fundo idêntico ao login: blobs + starburst, fixos -->
@@ -60,13 +60,15 @@
                     <div class="nome" id="perfilNome">Lara Dam</div>
                     <div class="email" id="perfilEmail">lara@claudeimersao.com</div>
                     <div class="perfil-lista">
-                        <button class="perfil-op"><span class="ico"><i data-lucide="user"></i></span> Dados da conta <span class="chev"><i data-lucide="chevron-right"></i></span></button>
-                        <button class="perfil-op"><span class="ico"><i data-lucide="receipt"></i></span> Minhas compras <span class="chev"><i data-lucide="chevron-right"></i></span></button>
-                        <button class="perfil-op"><span class="ico"><i data-lucide="bell"></i></span> Preferências de notificação <span class="chev"><i data-lucide="chevron-right"></i></span></button>
+                        <button class="perfil-op" id="btnDados"><span class="ico"><i data-lucide="user"></i></span> Dados da conta <span class="chev"><i data-lucide="chevron-right"></i></span></button>
+                        <div class="perfil-dados" id="painelDados" style="display:none"></div>
+                        <button class="perfil-op em-breve"><span class="ico"><i data-lucide="receipt"></i></span> Minhas compras <span class="chev"><i data-lucide="chevron-right"></i></span></button>
+                        <button class="perfil-op em-breve"><span class="ico"><i data-lucide="bell"></i></span> Preferências de notificação <span class="chev"><i data-lucide="chevron-right"></i></span></button>
                         <a class="perfil-op" href="mailto:laradam.ugc@gmail.com?subject=Suporte%20-%20Comunidade%20Imers%C3%A3o" style="text-decoration:none"><span class="ico"><i data-lucide="help-circle"></i></span> Suporte <span class="chev"><i data-lucide="chevron-right"></i></span></a>
                         <a class="perfil-op" id="linkAdmin" href="admin.html" style="display:none; text-decoration:none"><span class="ico"><i data-lucide="shield"></i></span> Admin <span class="chev"><i data-lucide="chevron-right"></i></span></a>
                         <button class="perfil-op sair" id="btnSair"><span class="ico"><i data-lucide="log-out"></i></span> Sair <span class="chev"><i data-lucide="chevron-right"></i></span></button>
                     </div>
+                    <div class="perfil-aviso" id="perfilAviso"></div>
                 </div>
 
                 <div class="perfil-box" id="seusPostsBox" style="margin-top:20px">
@@ -91,6 +93,6 @@
     <script src="js/sb.js?v=14"></script>
 
     <!-- Lógica compartilhada -->
-    <script src="js/comunidade.js?v=18"></script>
+    <script src="js/comunidade.js?v=19"></script>
 </body>
 </html>

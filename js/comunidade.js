@@ -1129,6 +1129,30 @@
                     window.location.replace('index.html');
                 });
 
+                /* Botões do perfil (só existem na perfil.html) */
+                const btnDados = document.getElementById('btnDados');
+                const painelDados = document.getElementById('painelDados');
+                if (btnDados && painelDados) {
+                    const iga = perfil.instagram ? String(perfil.instagram).replace(/^@/, '') : '';
+                    painelDados.innerHTML =
+                        `<div class="dado"><span>Nome</span><b>${esc(nome)}</b></div>` +
+                        `<div class="dado"><span>E-mail</span><b>${esc(email)}</b></div>` +
+                        (iga ? `<div class="dado"><span>Instagram</span><b>@${esc(iga)}</b></div>` : '') +
+                        (perfil.bio ? `<div class="dado"><span>Bio</span><b>${esc(perfil.bio)}</b></div>` : '') +
+                        (perfil.portfolio_url ? `<div class="dado"><span>Portfólio</span><b><a href="${esc(urlSegura ? urlSegura(perfil.portfolio_url) : perfil.portfolio_url)}" target="_blank" rel="noopener">${esc(perfil.portfolio_url)}</a></b></div>` : '');
+                    btnDados.addEventListener('click', () => {
+                        painelDados.style.display = painelDados.style.display === 'none' ? 'block' : 'none';
+                    });
+                }
+                const avisoPerfil = document.getElementById('perfilAviso');
+                document.querySelectorAll('.perfil-op.em-breve').forEach(b => b.addEventListener('click', () => {
+                    if (!avisoPerfil) return;
+                    avisoPerfil.textContent = 'Em breve 💜';
+                    avisoPerfil.classList.add('show');
+                    clearTimeout(window._avisoPerfil);
+                    window._avisoPerfil = setTimeout(() => avisoPerfil.classList.remove('show'), 1800);
+                });
+
                 /* Link de Admin no perfil (só para admins) */
                 try {
                     const { data: adm } = await sb.rpc('is_admin');
