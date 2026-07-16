@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Admin · Comunidade Imersão</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=27">
+<link rel="stylesheet" href="css/comunidade.css?v=28">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -542,7 +542,7 @@
             if (!sb) return;
             // 1) Sem login → manda pro login (não mostra nada do admin)
             const { data: { session } } = await sb.auth.getSession();
-            if (!session) { window.location.replace('index.html'); return; }
+            if (!session) { window.location.replace('/'); return; }
             // 2) Logada, mas não é um dos e-mails autorizados → sai pra comunidade
             const email = ((session.user && session.user.email) || '').toLowerCase();
             if (!ADMINS.includes(email)) { window.location.replace('app.html'); return; }

@@ -1211,7 +1211,7 @@
             if (!sb) return;
             try {
                 const { data: { session } } = await sb.auth.getSession();
-                if (!session) { window.location.replace('index.html'); return; }
+                if (!session) { window.location.replace('/'); return; }
                 usuario = session.user;
                 const email = usuario.email || '';
 
@@ -1293,7 +1293,7 @@
                 const elSair = document.getElementById('btnSair');
                 if (elSair) elSair.addEventListener('click', async () => {
                     await sb.auth.signOut();
-                    window.location.replace('index.html');
+                    window.location.replace('/');
                 });
 
                 /* Botões do perfil (só existem na perfil.html) */
