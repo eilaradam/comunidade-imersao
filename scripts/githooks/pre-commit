@@ -1,0 +1,4 @@
+#!/bin/bash
+# Trava de segurança: valida a sintaxe do JS antes de cada commit.
+# Se houver erro de sintaxe, o commit é bloqueado.
+exec "$(git rev-parse --show-toplevel)/scripts/validar-sintaxe.sh"
