@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Admin · Comunidade Imersão</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=5">
+<link rel="stylesheet" href="css/comunidade.css?v=6">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -226,7 +226,7 @@
                     { n: 'descricao', l: 'Descrição', t: 'textarea' },
                     { n: 'preco', l: 'Preço (ex: R$ 197 ou Gratuita)', t: 'text' },
                     { n: 'preco_antigo', l: 'Preço antigo (riscado)', t: 'text' },
-                    { n: 'off', l: 'Desconto (ex: 20%)', t: 'text' },
+                    { n: 'off', l: 'Desconto (calculado automaticamente)', t: 'off' },
                     { n: 'link', l: 'Link do botão Acessar', t: 'text' },
                     { n: 'tom', l: 'Cor do card', t: 'tom' },
                     { n: 'ordem', l: 'Ordem', t: 'num' },
@@ -357,6 +357,9 @@
                     <input type="hidden" id="f_${c.n}" value="${esc(String(v))}">
                 </div>`;
             }
+            if (c.t === 'off') {
+                return `<div class="campo"><label for="f_${c.n}">${c.l}</label><input type="text" id="f_${c.n}" value="${esc(String(v))}" readonly placeholder="—" style="background:rgba(0,0,0,0.04); color:rgba(0,0,0,0.55); cursor:default"></div>`;
+            }
             if (c.t === 'bool') {
                 const marcado = valor == null ? !!c.def : !!valor;
                 return `<div class="campo check"><input type="checkbox" id="f_${c.n}" ${marcado ? 'checked' : ''}><label for="f_${c.n}">${c.l}</label></div>`;
@@ -384,6 +387,7 @@
             el('btnSalvar').addEventListener('click', salvar);
             el('btnCancelar').addEventListener('click', fecharForm);
             cfg.campos.filter(c => c.t === 'imagem').forEach(wireImagem);
+            if (cfg.campos.some(c => c.t === 'off')) wireDesconto();
             el('formCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
@@ -423,6 +427,27 @@
                 }
             });
         }
+        function parsePreco(s) {
+            if (s == null) return null;
+            let t = String(s).replace(/[R$\s]/gi, '').trim();
+            if (!t) return null;
+            if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+            else if (/\.\d{3}(\.|$)/.test(t)) t = t.replace(/\./g, '');
+            const n = parseFloat(t);
+            return isNaN(n) ? null : n;
+        }
+        function wireDesconto() {
+            const fp = el('f_preco'), fpa = el('f_preco_antigo'), foff = el('f_off');
+            if (!fp || !fpa || !foff) return;
+            const calc = () => {
+                const p = parsePreco(fp.value), pa = parsePreco(fpa.value);
+                foff.value = (p != null && pa != null && pa > p && pa > 0) ? Math.round((pa - p) / pa * 100) + '%' : '';
+            };
+            fp.addEventListener('input', calc);
+            fpa.addEventListener('input', calc);
+            calc();
+        }
+
         function fecharForm() { el('formCard').classList.remove('aberto'); el('formCard').innerHTML = ''; editando = null; }
 
         async function salvar() {
