@@ -60,7 +60,8 @@
                 card.className = 'c-card';
                 const gratis = /gratu/i.test(d.preco || '');
                 card.innerHTML = `
-                <div class="c-thumb" style="background:${d.tom}">
+                <div class="c-thumb${d.imagem ? ' has-img' : ''}" style="background:${d.tom}">
+                    ${d.imagem ? `<img class="c-img" src="${esc(d.imagem)}" alt="" onerror="this.style.display='none'">` : ''}
                     ${d.off ? `<span class="off">${esc(d.off)} OFF</span>` : ''}
                     <span class="badge">${esc(d.cat || '')}</span>
                 </div>
@@ -96,11 +97,11 @@
 
         async function carregarDestaques() {
             if (!palco) return;
-            let itens = destaques.map(d => ({ tom: d.tom, off: d.off, cat: d.cat, titulo: d.titulo, autor: d.autor, desc: d.desc, aulas: d.aulas, duracao: d.duracao, nota: d.nota, antes: d.antes, preco: d.preco }));
+            let itens = destaques.map(d => ({ tom: d.tom, imagem: null, off: d.off, cat: d.cat, titulo: d.titulo, autor: d.autor, desc: d.desc, aulas: d.aulas, duracao: d.duracao, nota: d.nota, antes: d.antes, preco: d.preco }));
             if (sb) {
                 try {
                     const { data } = await sb.from('imersao_destaques').select('*').eq('publicado', true).order('ordem', { ascending: true }).order('created_at', { ascending: false });
-                    if (data && data.length) itens = data.map(r => ({ tom: tom[r.tom] || tom.lavanda, off: r.off, cat: r.categoria, titulo: r.titulo, autor: r.subtitulo, desc: r.descricao, aulas: r.aulas, duracao: r.duracao, nota: r.nota, antes: r.preco_antigo, preco: r.preco }));
+                    if (data && data.length) itens = data.map(r => ({ tom: tom[r.tom] || tom.lavanda, imagem: r.imagem_url, off: r.off, cat: r.categoria, titulo: r.titulo, autor: r.subtitulo, desc: r.descricao, aulas: r.aulas, duracao: r.duracao, nota: r.nota, antes: r.preco_antigo, preco: r.preco }));
                 } catch (e) {}
             }
             montarCarrossel(itens);
@@ -894,7 +895,8 @@
         }
         function cardProduto(p) {
             return `<div class="s-card">
-                <div class="s-thumb" style="background:${corStore(p.cor)}">
+                <div class="s-thumb${p.imagem_url ? ' has-img' : ''}" style="background:${corStore(p.cor)}">
+                    ${p.imagem_url ? `<img class="s-img" src="${esc(p.imagem_url)}" alt="" onerror="this.style.display='none'">` : ''}
                     ${p.tag ? `<span class="badge">${esc(p.tag)}</span>` : ''}
                 </div>
                 <div class="s-corpo">

@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Admin · Comunidade Imersão</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=3">
+<link rel="stylesheet" href="css/comunidade.css?v=4">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -82,6 +82,16 @@
     #bloqueio h2 { font-size: 20px; margin-bottom: 8px; }
     #bloqueio p { color: rgba(0,0,0,0.55); }
 
+    /* ── Campo de imagem (upload) ── */
+    .img-erro { display: none; font-size: 13px; color: rgba(200,68,26,0.9); margin-top: 6px; }
+    .img-erro.show { display: block; }
+    .img-preview { display: none; align-items: center; gap: 14px; margin-top: 10px; }
+    .img-preview.show { display: flex; }
+    .img-box { width: 200px; height: 120px; border-radius: 12px; overflow: hidden; flex-shrink: 0; background: rgba(0,0,0,0.05); }
+    .img-box img { width: 100%; height: 120px; object-fit: cover; display: block; }
+    .rm-img { background: none; border: none; font-family: inherit; font-size: 13px; color: rgba(200,68,26,0.9); cursor: pointer; padding: 0; }
+    .rm-img:hover { text-decoration: underline; }
+
     /* ── Preview dos cards (igual à comunidade) ── */
     .admin-lista { padding: 22px; border-radius: 20px; background: linear-gradient(140deg, #ECE9F4, #F4EEF0 55%, #EAF1EE); }
     .admin-lista.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-items: start; }
@@ -148,7 +158,8 @@
             destaques: r => {
                 const gratis = /gratu/i.test(r.preco || '');
                 return `<div class="c-card">
-                    <div class="c-thumb" style="background:${gtom(r.tom)}">
+                    <div class="c-thumb${r.imagem_url ? ' has-img' : ''}" style="background:${gtom(r.tom)}">
+                        ${r.imagem_url ? `<img class="c-img" src="${esc(r.imagem_url)}" alt="" onerror="this.style.display='none'">` : ''}
                         ${r.off ? `<span class="off">${esc(r.off)} OFF</span>` : ''}
                         <span class="badge">${esc(r.categoria || '')}</span>
                     </div>
@@ -179,7 +190,7 @@
                 const precoHTML = !preco ? '<span class="gratis">Gratuito</span>'
                     : (de && de > preco ? `<s class="antes">${fmt(de)}</s><span class="agora">${fmt(preco)}</span>` : `<span class="agora">${fmt(preco)}</span>`);
                 return `<div class="s-card">
-                    <div class="s-thumb" style="background:${cor}">${r.tag ? `<span class="badge">${esc(r.tag)}</span>` : ''}</div>
+                    <div class="s-thumb${r.imagem_url ? ' has-img' : ''}" style="background:${cor}">${r.imagem_url ? `<img class="s-img" src="${esc(r.imagem_url)}" alt="" onerror="this.style.display='none'">` : ''}${r.tag ? `<span class="badge">${esc(r.tag)}</span>` : ''}</div>
                     <div class="s-corpo"><h3>${esc(r.nome || '')}</h3><div class="desc">${esc(r.descricao || '')}</div>
                         <div class="s-rodape"><div class="s-preco">${precoHTML}</div><button class="s-comprar">Comprar <span>→</span></button></div></div>
                 </div>`;
@@ -216,6 +227,7 @@
                     { n: 'titulo', l: 'Título', t: 'text', req: true },
                     { n: 'subtitulo', l: 'Subtítulo (autor/turma)', t: 'text' },
                     { n: 'categoria', l: 'Categoria (badge)', t: 'text' },
+                    { n: 'imagem_url', l: 'Imagem do card', t: 'imagem' },
                     { n: 'descricao', l: 'Descrição', t: 'textarea' },
                     { n: 'aulas', l: 'Aulas (ex: 8 aulas)', t: 'text' },
                     { n: 'duracao', l: 'Duração (ex: 2h10)', t: 'text' },
@@ -239,7 +251,8 @@
                     { n: 'preco_de', l: 'Preço "de" (riscado, opcional)', t: 'dec' },
                     { n: 'checkout_url', l: 'Link de checkout (Kiwify)', t: 'text' },
                     { n: 'tag', l: 'Tag (badge, opcional)', t: 'text' },
-                    { n: 'cor', l: 'Cor do card', t: 'select', opts: ['lavanda', 'menta', 'pessego'] },
+                    { n: 'imagem_url', l: 'Imagem do card', t: 'imagem' },
+                    { n: 'cor', l: 'Cor do card (fallback sem imagem)', t: 'select', opts: ['lavanda', 'menta', 'pessego'] },
                     { n: 'ordem', l: 'Ordem', t: 'num' },
                     { n: 'ativo', l: 'Ativo (aparece na Store)', t: 'bool', def: true }
                 ]
@@ -340,6 +353,18 @@
 
         function campoHTML(c, valor) {
             const v = valor == null ? '' : valor;
+            if (c.t === 'imagem') {
+                return `<div class="campo">
+                    <label>${c.l}</label>
+                    <input type="file" id="file_${c.n}" accept="image/jpeg,image/png,image/webp">
+                    <div class="img-erro" id="erro_${c.n}"></div>
+                    <div class="img-preview" id="prev_${c.n}">
+                        <div class="img-box"><img id="img_${c.n}" src="${esc(String(v))}" alt=""></div>
+                        <button type="button" class="rm-img" id="rm_${c.n}">Remover imagem</button>
+                    </div>
+                    <input type="hidden" id="f_${c.n}" value="${esc(String(v))}">
+                </div>`;
+            }
             if (c.t === 'bool') {
                 const marcado = valor == null ? !!c.def : !!valor;
                 return `<div class="campo check"><input type="checkbox" id="f_${c.n}" ${marcado ? 'checked' : ''}><label for="f_${c.n}">${c.l}</label></div>`;
@@ -366,7 +391,40 @@
             el('formCard').classList.add('aberto');
             el('btnSalvar').addEventListener('click', salvar);
             el('btnCancelar').addEventListener('click', fecharForm);
+            cfg.campos.filter(c => c.t === 'imagem').forEach(wireImagem);
             el('formCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function wireImagem(c) {
+            const file = el('file_' + c.n), hid = el('f_' + c.n), prev = el('prev_' + c.n),
+                  img = el('img_' + c.n), erro = el('erro_' + c.n), rm = el('rm_' + c.n);
+            if (!file || !hid) return;
+            const mostrar = (url) => {
+                if (url) { img.src = url; prev.classList.add('show'); }
+                else { img.src = ''; prev.classList.remove('show'); }
+            };
+            mostrar(hid.value);
+            rm.addEventListener('click', () => { hid.value = ''; file.value = ''; erro.classList.remove('show'); mostrar(''); });
+            file.addEventListener('change', async () => {
+                const f = file.files[0]; if (!f) return;
+                erro.classList.remove('show');
+                if (f.size > 2 * 1024 * 1024) { erro.textContent = 'Imagem muito grande. Máximo 2MB.'; erro.classList.add('show'); file.value = ''; return; }
+                const btn = el('btnSalvar');
+                if (btn) { btn.disabled = true; btn.dataset.orig = btn.textContent; btn.textContent = 'Enviando...'; }
+                try {
+                    const ext = (f.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const nome = crypto.randomUUID() + '.' + ext;
+                    const up = await sb.storage.from('produtos').upload(nome, f, { cacheControl: '3600', upsert: false });
+                    if (up.error) throw up.error;
+                    const { data: { publicUrl } } = sb.storage.from('produtos').getPublicUrl(nome);
+                    hid.value = publicUrl; mostrar(publicUrl);
+                } catch (e) {
+                    console.error('Erro no upload:', e);
+                    erro.textContent = 'Não consegui enviar a imagem. Tente de novo.'; erro.classList.add('show');
+                } finally {
+                    if (btn) { btn.disabled = false; btn.textContent = btn.dataset.orig || 'Salvar'; }
+                }
+            });
         }
         function fecharForm() { el('formCard').classList.remove('aberto'); el('formCard').innerHTML = ''; editando = null; }
 
