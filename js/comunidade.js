@@ -78,10 +78,18 @@
                                 <span class="preco${gratis ? ' gratis' : ''}">${esc(d.preco || '')}</span>
                             </span>
                         </div>
-                        <button class="acao" aria-label="Acessar"><i data-lucide="${gratis ? 'play' : 'arrow-right'}"></i></button>
+                        <button class="acao${d.link ? ' tem-link' : ''}" aria-label="Acessar"><i data-lucide="${gratis ? 'play' : 'arrow-right'}"></i></button>
                     </div>
                 </div>`;
+                // Clicar/passar o cursor no card → traz pra frente (não navega)
                 card.addEventListener('click', () => { if (i !== ativoC) { ativoC = i; posicionar(); } });
+                card.addEventListener('mouseenter', () => { if (i !== ativoC) { ativoC = i; posicionar(); } });
+                // Só a setinha "Acessar" abre o link que você colocou no admin
+                const btnAcao = card.querySelector('.acao');
+                btnAcao.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (d.link) window.open(d.link, '_blank', 'noopener,noreferrer');
+                });
                 palco.appendChild(card);
             });
             cardsC = Array.from(palco.children);
@@ -92,11 +100,11 @@
 
         async function carregarDestaques() {
             if (!palco) return;
-            let itens = destaques.map(d => ({ tom: d.tom, imagem: null, off: d.off, cat: d.cat, titulo: d.titulo, autor: d.autor, desc: d.desc, antes: d.antes, preco: d.preco }));
+            let itens = destaques.map(d => ({ tom: d.tom, imagem: null, off: d.off, cat: d.cat, titulo: d.titulo, autor: d.autor, desc: d.desc, antes: d.antes, preco: d.preco, link: d.link || null }));
             if (sb) {
                 try {
                     const { data } = await sb.from('imersao_destaques').select('*').eq('publicado', true).order('ordem', { ascending: true }).order('created_at', { ascending: false });
-                    if (data && data.length) itens = data.map(r => ({ tom: tom[r.tom] || tom.lavanda, imagem: r.imagem_url, off: r.off, cat: r.categoria, titulo: r.titulo, autor: r.subtitulo, desc: r.descricao, antes: r.preco_antigo, preco: r.preco }));
+                    if (data && data.length) itens = data.map(r => ({ tom: tom[r.tom] || tom.lavanda, imagem: r.imagem_url, off: r.off, cat: r.categoria, titulo: r.titulo, autor: r.subtitulo, desc: r.descricao, antes: r.preco_antigo, preco: r.preco, link: r.link }));
                 } catch (e) {}
             }
             montarCarrossel(itens);
