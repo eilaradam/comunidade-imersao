@@ -101,15 +101,34 @@ Deno.serve(async (req) => {
     return new Response('ok', { status: 200 });
   }
 
+  const aprovou = APROVA.has(evento) || APROVA.has(status);
+  const removeu = REMOVE.has(evento) || REMOVE.has(status);
+
+  // ── Registro de compra, de QUALQUER produto dela.
+  // Serve pros materiais que ficam fora da comunidade (ex: a página do
+  // prompt, que confere o e-mail aqui). Isso é separado do acesso à
+  // comunidade, que continua sendo só a Imersão, logo abaixo.
+  if (aprovou || removeu) {
+    // O e-mail já vem em minúsculas do garimpar(), e a tabela conta com isso.
+    const { error: erroAcesso } = await admin.from('kiwify_acessos').upsert({
+      email,
+      produto_id: produtoId || '',
+      produto_nome: produtoNome || null,
+      nome: nome || null,
+      ativo: aprovou,
+      origem: 'kiwify',
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'email,produto_id' });
+
+    if (erroAcesso) console.error('nao consegui gravar em kiwify_acessos:', erroAcesso.message);
+  }
+
   // Se a Lara vender mais de um produto na Kiwify, só o da Imersão libera a comunidade.
   const soEsteProduto = (Deno.env.get('KIWIFY_PRODUTO_ID') || '').trim();
   if (soEsteProduto && produtoId && produtoId !== soEsteProduto) {
-    await registrar(`ignorado: outro produto (${produtoNome || produtoId})`);
+    await registrar(`ignorado pra comunidade: outro produto (${produtoNome || produtoId})`);
     return new Response('ok', { status: 200 });
   }
-
-  const aprovou = APROVA.has(evento) || APROVA.has(status);
-  const removeu = REMOVE.has(evento) || REMOVE.has(status);
 
   if (aprovou) {
     // Já está na lista? Então só religa o acesso. Senão, entra agora.
