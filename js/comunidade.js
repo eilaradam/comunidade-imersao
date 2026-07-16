@@ -4,7 +4,8 @@
         const { sb, esc, urlSegura, iniciais, quando } = window.C || {};
         let usuario = null, perfil = null;
         const PAGINA = document.body.getAttribute('data-pagina') || 'home';
-        const ehHome = PAGINA !== 'mural';
+        const ehLoja = PAGINA === 'loja';
+        const ehHome = PAGINA !== 'mural' && !ehLoja;
 
         /* ── Tons dos blobs (placeholders de thumbnail) ── */
         const tom = {
@@ -931,7 +932,10 @@
                     if (!error && data) produtos = data;
                 } catch (e) {}
             }
-            if (!produtos.length) { secStore.style.display = 'none'; return; }
+            if (!produtos.length) {
+                if (ehLoja) { secStore.style.display = ''; stEl.innerHTML = '<div class="loja-vazia">Nenhum produto disponível ainda. Volte em breve! 💜</div>'; return; }
+                secStore.style.display = 'none'; return;
+            }
             secStore.style.display = '';
             stEl.innerHTML = produtos.map(cardProduto).join('');
             if (!stEl.dataset.bound) {
@@ -1067,8 +1071,10 @@
                     if (adm && la) la.style.display = 'flex';
                 } catch (e) {}
 
-                await carregarMural();
-                await carregarSeusPosts();
+                if (!ehLoja) {
+                    await carregarMural();
+                    await carregarSeusPosts();
+                }
                 if (ehHome) {
                     carregarContador();
                     carregarDestaques();
@@ -1077,6 +1083,7 @@
                     carregarAvisosSecao();
                     carregarStoreSecao();
                 }
+                if (ehLoja) carregarStoreSecao();
             } catch (e) {
                 /* Sem backend disponível: mantém os placeholders visuais. */
             }

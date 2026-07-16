@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Store · Comunidade Imersão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/comunidade.css?v=10">
+</head>
+<body data-pagina="loja">
+    <!-- Fundo idêntico ao login: blobs + starburst, fixos -->
+    <div class="blobs">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
+        <div class="blob b4"></div>
+    </div>
+    <div id="cena"></div>
+
+    <!-- Menu lateral compacto (esconde no scroll → vira FAB) -->
+    <nav class="menu" id="mainMenu">
+        <a href="app.html#inicio"    data-tip="Início"><i data-lucide="home"></i></a>
+        <a href="mural.html"         data-tip="Mural dos alunos"><i data-lucide="layout-grid"></i></a>
+        <a href="app.html#prompts"   data-tip="Prompts"><i data-lucide="sparkles"></i></a>
+        <a href="app.html#materiais" data-tip="Materiais"><i data-lucide="folder"></i></a>
+        <a href="app.html#avisos"    data-tip="Avisos" class="so-desktop"><i data-lucide="bell"></i></a>
+        <a href="loja.html"          data-tip="Store" class="so-desktop ativo"><i data-lucide="shopping-bag"></i></a>
+        <span class="sep-menu"></span>
+        <a href="app.html#perfil"    data-tip="Meu perfil"><i data-lucide="user"></i></a>
+    </nav>
+
+    <!-- FAB (aparece após rolar) -->
+    <button class="fab" id="fab" aria-label="Abrir menu"><i data-lucide="menu"></i></button>
+
+    <!-- Popup do FAB -->
+    <div class="fab-menu" id="fabMenu">
+        <a href="app.html#inicio"><i data-lucide="home"></i><span>Início</span></a>
+        <a href="mural.html"><i data-lucide="layout-grid"></i><span>Mural dos alunos</span></a>
+        <a href="app.html#prompts"><i data-lucide="sparkles"></i><span>Prompts</span></a>
+        <a href="app.html#materiais"><i data-lucide="folder"></i><span>Materiais</span></a>
+        <a href="app.html#avisos"><i data-lucide="bell"></i><span>Avisos</span></a>
+        <a href="loja.html" class="ativo"><i data-lucide="shopping-bag"></i><span>Store</span></a>
+        <span class="sep-pop"></span>
+        <a href="app.html#perfil"><i data-lucide="user"></i><span>Meu perfil</span></a>
+    </div>
+
+    <div class="lane">
+        <div class="conteudo">
+            <div class="mural-header" style="padding-top:80px">
+                <h1>Store</h1>
+                <p>Aulas avulsas, mentorias e materiais com preço de comunidade</p>
+            </div>
+
+            <section id="store">
+                <div class="grid-store" id="store-grid"></div>
+            </section>
+
+            <div class="rodape">Comunidade Imersão · feita com Claude Code por Lara Dam</div>
+        </div>
+    </div>
+
+    <!-- Fundo 3D: starburst de partículas (mesmo do login) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/starburst.js?v=14"></script>
+
+    <!-- Ícones -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Guard de sessão (Supabase) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/sb.js?v=14"></script>
+
+    <!-- Lógica compartilhada -->
+    <script src="js/comunidade.js?v=10"></script>
+</body>
+</html>
