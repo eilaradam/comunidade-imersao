@@ -109,9 +109,8 @@
 
         async function carregarDestaques() {
             if (!palco) return;
-            let itens = destaques.map(d => ({ tom: d.tom, imagem: null, off: d.off, cat: d.cat, titulo: d.titulo, autor: d.autor, desc: d.desc, antes: d.antes, preco: d.preco, link: d.link || null }));
+            const lista = [];
             if (sb) {
-                const lista = [];
                 // 1) Cards da aba Destaques (imersao_destaques)
                 try {
                     const { data } = await sb.from('imersao_destaques').select('*').eq('publicado', true).order('ordem', { ascending: true }).order('created_at', { ascending: false });
@@ -155,9 +154,20 @@
                         antes: null, preco: null, link: null, ordem: 950
                     }));
                 } catch (e) {}
-                if (lista.length) { lista.sort((a, b) => a.ordem - b.ordem); itens = lista; }
             }
-            montarCarrossel(itens);
+            // Reflete o admin: sem destaques/produtos no banco → esconde "Em destaque".
+            const tituloEl = document.querySelector('#inicio .destaque-titulo');
+            const carrosselEl = document.querySelector('#inicio .carrossel');
+            if (!lista.length) {
+                palco.innerHTML = '';
+                if (tituloEl) tituloEl.style.display = 'none';
+                if (carrosselEl) carrosselEl.style.display = 'none';
+                return;
+            }
+            if (tituloEl) tituloEl.style.display = '';
+            if (carrosselEl) carrosselEl.style.display = '';
+            lista.sort((a, b) => a.ordem - b.ordem);
+            montarCarrossel(lista);
         }
 
         if (palco) {
@@ -834,14 +844,16 @@
         const promptsGrid = document.getElementById('prompts-grid');
         async function carregarPromptsSecao() {
             if (!promptsGrid) return;
-            let itens = prompts.map(p => ({ cat: p.cat, titulo: p.titulo, texto: p.texto, copia: p.texto }));
+            let itens = null;
             if (sb) {
                 try {
-                    const { data } = await sb.from('imersao_prompts').select('*').eq('publicado', true)
+                    const { data, error } = await sb.from('imersao_prompts').select('*').eq('publicado', true)
                         .order('destaque', { ascending: false }).order('created_at', { ascending: false });
-                    if (data && data.length) itens = data.map(r => ({ cat: r.tema, titulo: r.titulo, texto: r.descricao || r.prompt, copia: r.prompt }));
+                    if (!error) itens = data.map(r => ({ cat: r.tema, titulo: r.titulo, texto: r.descricao || r.prompt, copia: r.prompt }));
                 } catch (e) {}
             }
+            if (itens === null) itens = prompts.map(p => ({ cat: p.cat, titulo: p.titulo, texto: p.texto, copia: p.texto }));
+            if (!itens.length) { promptsGrid.innerHTML = '<div class="secao-vazia">Nenhum prompt publicado ainda.</div>'; return; }
             promptsGrid.innerHTML = itens.map((p, i) => `
                 <div class="p-card">
                     <div><span class="pill-cat">${esc(p.cat || '')}</span></div>
@@ -873,14 +885,16 @@
         async function carregarMateriaisSecao() {
             const matEl = document.getElementById('materiais-lista');
             if (!matEl) return;
-            let itens = materiais.map(m => ({ titulo: m.titulo, sub: m.tipo, url: '#', ico: m.ico, tom: m.tom }));
+            let itens = null;
             if (sb) {
                 try {
-                    const { data } = await sb.from('imersao_materiais').select('*').eq('publicado', true)
+                    const { data, error } = await sb.from('imersao_materiais').select('*').eq('publicado', true)
                         .order('ordem', { ascending: true }).order('created_at', { ascending: false });
-                    if (data && data.length) itens = data.map((r, i) => ({ titulo: r.titulo, sub: r.descricao, url: r.url || '#', ico: 'file-text', tom: tomLista[i % 4] }));
+                    if (!error) itens = data.map((r, i) => ({ titulo: r.titulo, sub: r.descricao, url: r.url || '#', ico: 'file-text', tom: tomLista[i % 4] }));
                 } catch (e) {}
             }
+            if (itens === null) itens = materiais.map(m => ({ titulo: m.titulo, sub: m.tipo, url: '#', ico: m.ico, tom: m.tom }));
+            if (!itens.length) { matEl.innerHTML = '<div class="secao-vazia">Nenhum material disponível ainda.</div>'; return; }
             matEl.innerHTML = itens.map(m => `
                 <div class="mat-item">
                     <div class="mat-ico" style="background:${m.tom}"><i data-lucide="${m.ico || 'file-text'}"></i></div>
@@ -903,13 +917,15 @@
         async function carregarAvisosSecao() {
             const avEl = document.getElementById('avisos-lista');
             if (!avEl) return;
-            let itens = avisos.map(a => ({ data: a.data, tipo: a.tipo, titulo: a.titulo, corpo: a.corpo }));
+            let itens = null;
             if (sb) {
                 try {
-                    const { data } = await sb.from('imersao_avisos').select('*').eq('publicado', true).order('created_at', { ascending: false });
-                    if (data && data.length) itens = data.map(r => ({ data: quando ? quando(r.created_at) : '', tipo: null, titulo: r.titulo, corpo: r.corpo }));
+                    const { data, error } = await sb.from('imersao_avisos').select('*').eq('publicado', true).order('created_at', { ascending: false });
+                    if (!error) itens = data.map(r => ({ data: quando ? quando(r.created_at) : '', tipo: null, titulo: r.titulo, corpo: r.corpo }));
                 } catch (e) {}
             }
+            if (itens === null) itens = avisos.map(a => ({ data: a.data, tipo: a.tipo, titulo: a.titulo, corpo: a.corpo }));
+            if (!itens.length) { avEl.innerHTML = '<div class="secao-vazia">Nenhum aviso por aqui ainda.</div>'; return; }
             avEl.innerHTML = itens.map(a => `
                 <div class="aviso">
                     ${a.tipo ? `<span class="pill-cat">${esc(a.tipo)}</span>` : ''}
