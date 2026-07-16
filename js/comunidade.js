@@ -900,20 +900,28 @@
                 try {
                     const { data, error } = await sb.from('imersao_materiais').select('*').eq('publicado', true)
                         .order('ordem', { ascending: true }).order('created_at', { ascending: false });
-                    if (!error) itens = data.map((r, i) => ({ titulo: r.titulo, sub: r.descricao, url: r.url || '#', ico: 'file-text', tom: tomLista[i % 4] }));
+                    if (!error) itens = data.map((r, i) => ({ titulo: r.titulo, sub: r.descricao, url: r.url || null, link: r.link || null, ico: 'file-text', tom: tomLista[i % 4] }));
                 } catch (e) {}
             }
-            if (itens === null) itens = materiais.map(m => ({ titulo: m.titulo, sub: m.tipo, url: '#', ico: m.ico, tom: m.tom }));
+            if (itens === null) itens = materiais.map(m => ({ titulo: m.titulo, sub: m.tipo, url: '#', link: null, ico: m.ico, tom: m.tom }));
             if (!itens.length) { matEl.innerHTML = '<div class="secao-vazia">Nenhum material disponível ainda.</div>'; return; }
-            matEl.innerHTML = itens.map(m => `
+            const comHttps = (u) => /^https?:\/\//i.test(u) ? u : 'https://' + u;
+            matEl.innerHTML = itens.map(m => {
+                const temUrl = !!(m.url && String(m.url).trim());
+                const temLink = !!(m.link && String(m.link).trim());
+                const acoes =
+                    (temUrl ? `<a class="btn-glass" href="${esc(m.url)}" target="_blank" rel="noopener" download><i data-lucide="download"></i> Baixar</a>` : '') +
+                    (temLink ? `<a class="btn-glass" href="${esc(comHttps(String(m.link).trim()))}" target="_blank" rel="noopener"><i data-lucide="external-link"></i> Acessar</a>` : '');
+                return `
                 <div class="mat-item">
                     <div class="mat-ico" style="background:${m.tom}"><i data-lucide="${m.ico || 'file-text'}"></i></div>
                     <div class="mat-meio">
                         <h3>${esc(m.titulo || '')}</h3>
                         <div class="tipo">${esc(m.sub || '')}</div>
                     </div>
-                    <a class="btn-glass" href="${esc(m.url || '#')}" target="_blank" rel="noopener"><i data-lucide="download"></i> Baixar</a>
-                </div>`).join('');
+                    <div class="mat-acoes">${acoes}</div>
+                </div>`;
+            }).join('');
             if (window.lucide) lucide.createIcons();
         }
 

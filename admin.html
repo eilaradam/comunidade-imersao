@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Admin · Comunidade Imersão</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=22">
+<link rel="stylesheet" href="css/comunidade.css?v=23">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -197,7 +197,7 @@
             materiais: (r, i) => `<div class="mat-item">
                 <div class="mat-ico" style="background:${TOMLIST[i % 4]}"><i data-lucide="file-text"></i></div>
                 <div class="mat-meio"><h3>${esc(r.titulo || '')}</h3><div class="tipo">${esc(r.descricao || '')}</div></div>
-                <a class="btn-glass"><i data-lucide="download"></i> Baixar</a>
+                <div class="mat-acoes">${(r.url && String(r.url).trim()) ? '<a class="btn-glass"><i data-lucide="download"></i> Baixar</a>' : ''}${(r.link && String(r.link).trim()) ? '<a class="btn-glass"><i data-lucide="external-link"></i> Acessar</a>' : ''}</div>
             </div>`,
             avisos: r => `<div class="aviso">
                 <div class="data">${esc(quando ? quando(r.created_at) : '')}</div>
@@ -261,7 +261,8 @@
                 campos: [
                     { n: 'titulo', l: 'Título', t: 'text', req: true },
                     { n: 'descricao', l: 'Descrição (ex: PDF · 2.3 MB)', t: 'text' },
-                    { n: 'url', l: 'Link do arquivo', t: 'text' },
+                    { n: 'url', l: 'Arquivo para download (link do PDF/planilha/ZIP) — opcional', t: 'text' },
+                    { n: 'link', l: 'Link para abrir um site (opcional)', t: 'text' },
                     { n: 'ordem', l: 'Ordem', t: 'num' },
                     { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
                 ]

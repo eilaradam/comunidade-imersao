@@ -481,6 +481,7 @@
     .mat-meio { flex: 1; min-width: 0; }
     .mat-meio h3 { font-size: 16px; font-weight: 600; color: #1D1D1F; }
     .mat-meio .tipo { font-size: 13px; color: rgba(0,0,0,0.55); margin-top: 2px; }
+    .mat-acoes { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 
     /* ── Avisos — timeline ── */
     .lista-avisos { display: flex; flex-direction: column; gap: 16px; }
