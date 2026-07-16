@@ -342,7 +342,7 @@
                 </div>
                 <div class="video-rodape">
                     <div class="video-topo">
-                        <div class="avatar-sm">${avatarHTML(p.autor_nome, p.autor_avatar)}</div>
+                        <div class="avatar-sm avatar-clic" data-perfilpost="${p.id}" title="Ver perfil">${avatarHTML(p.autor_nome, p.autor_avatar)}</div>
                         <b>${esc(p.autor_nome)}</b>
                         <span class="badge-plat">${rotuloPlat[info.plat]}</span>
                     </div>
@@ -507,7 +507,7 @@
             return `
             <article class="post" data-post="${p.id}">
                 <header class="topo-post">
-                    <div class="avatar-sm">${avatarHTML(p.autor_nome, p.autor_avatar)}</div>
+                    <div class="avatar-sm avatar-clic" data-perfilpost="${p.id}" title="Ver perfil">${avatarHTML(p.autor_nome, p.autor_avatar)}</div>
                     <div class="quem">
                         <b>${esc(p.autor_nome)}</b>
                         <span>${esc(quando(p.created_at))}${p.autor_instagram ? ' · ' + esc(p.autor_instagram) : ''}</span>
@@ -769,8 +769,89 @@
             }
         });
 
+        /* ─────────────── MINI-PERFIL (seguir + curtidas) ─────────────── */
+        let modalPerfil = null;
+        function garantirModalPerfil() {
+            if (modalPerfil) return;
+            modalPerfil = document.createElement('div');
+            modalPerfil.className = 'perfil-modal';
+            modalPerfil.innerHTML = '<div class="perfil-modal-bg"></div><div class="perfil-modal-card" id="perfilModalCard"></div>';
+            document.body.appendChild(modalPerfil);
+            modalPerfil.querySelector('.perfil-modal-bg').addEventListener('click', fecharPerfilModal);
+        }
+        function fecharPerfilModal() { if (modalPerfil) modalPerfil.classList.remove('aberto'); }
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharPerfilModal(); });
+
+        async function abrirPerfilPost(postId) {
+            if (!sb) return;
+            garantirModalPerfil();
+            const card = document.getElementById('perfilModalCard');
+            card.innerHTML = '<div class="perfil-modal-load">Carregando…</div>';
+            modalPerfil.classList.add('aberto');
+            try {
+                const { data: post } = await sb.from('imersao_posts').select('autor_id').eq('id', postId).maybeSingle();
+                if (!post) throw new Error('sem autor');
+                const { data: r, error } = await sb.rpc('imersao_perfil_resumo', { p_usuario: post.autor_id });
+                const resumo = Array.isArray(r) ? r[0] : r;
+                if (error || !resumo) throw error || new Error('sem perfil');
+                renderPerfilModal(resumo);
+            } catch (e) {
+                console.error('Erro ao abrir perfil:', e);
+                card.innerHTML = '<button class="pm-fechar" aria-label="Fechar">&times;</button><div class="perfil-modal-load">Não consegui carregar o perfil agora.</div>';
+                const f = card.querySelector('.pm-fechar'); if (f) f.addEventListener('click', fecharPerfilModal);
+            }
+        }
+
+        function renderPerfilModal(r) {
+            const card = document.getElementById('perfilModalCard');
+            const nome = r.nome || 'Aluna';
+            const souEu = usuario && r.usuario_id === usuario.id;
+            const foto = r.avatar_url
+                ? `<img src="${esc(r.avatar_url)}" alt="">`
+                : `<span class="pm-ini">${esc(iniciais(nome))}</span>`;
+            const legenda = r.bio ? esc(r.bio)
+                : (r.instagram ? '@' + esc(String(r.instagram).replace(/^@/, '')) : '');
+            card.innerHTML = `
+                <button class="pm-fechar" aria-label="Fechar">&times;</button>
+                <div class="pm-foto">${foto}</div>
+                <div class="pm-info">
+                    <h3>${esc(nome)} <span class="verificado"><i data-lucide="badge-check"></i></span></h3>
+                    ${legenda ? `<p class="pm-bio">${legenda}</p>` : ''}
+                    <div class="pm-rodape">
+                        <div class="pm-stats">
+                            <span title="Seguidores"><i data-lucide="users"></i> <b data-seg>${r.n_seguidores || 0}</b></span>
+                            <span title="Curtidas recebidas"><i data-lucide="heart"></i> <b>${r.n_curtidas || 0}</b></span>
+                        </div>
+                        ${souEu ? '' : `<button class="pm-seguir${r.eu_sigo ? ' seguindo' : ''}" data-seguir="${esc(r.usuario_id)}">${r.eu_sigo ? 'Seguindo' : 'Seguir +'}</button>`}
+                    </div>
+                </div>`;
+            card.querySelector('.pm-fechar').addEventListener('click', fecharPerfilModal);
+            const btn = card.querySelector('[data-seguir]');
+            if (btn) btn.addEventListener('click', () => alternarSeguir(btn, r));
+            if (window.lucide) lucide.createIcons();
+        }
+
+        async function alternarSeguir(btn, r) {
+            if (!usuario) return;
+            const seguindo = btn.classList.contains('seguindo');
+            const segEl = btn.closest('.pm-rodape').querySelector('[data-seg]');
+            btn.disabled = true;
+            const { error } = seguindo
+                ? await sb.from('imersao_seguidores').delete().eq('seguidor_id', usuario.id).eq('seguido_id', r.usuario_id)
+                : await sb.from('imersao_seguidores').insert({ seguidor_id: usuario.id, seguido_id: r.usuario_id });
+            btn.disabled = false;
+            if (error) { console.error(error); return; }
+            const agora = !seguindo;
+            btn.classList.toggle('seguindo', agora);
+            btn.textContent = agora ? 'Seguindo' : 'Seguir +';
+            if (segEl) segEl.textContent = Math.max(0, Number(segEl.textContent) + (agora ? 1 : -1));
+            r.eu_sigo = agora;
+        }
+
         /* Cliques no feed (delegação) */
         if (feedEl) feedEl.addEventListener('click', async (e) => {
+            const verPerfil = e.target.closest('[data-perfilpost]');
+            if (verPerfil) { abrirPerfilPost(Number(verPerfil.dataset.perfilpost)); return; }
             const curtir = e.target.closest('[data-curtir]');
             const comentar = e.target.closest('[data-comentar]');
             const copiar = e.target.closest('[data-copiar]');
