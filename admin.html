@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Admin · Comunidade Imersão</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=15">
+<link rel="stylesheet" href="css/comunidade.css?v=16">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -311,7 +311,15 @@
             el('lista').innerHTML = '<div class="vazio">Carregando…</div>';
             const { data, error } = await sb.from(cfg.tabela).select('*').order(cfg.ordena, { ascending: cfg.asc });
             if (error) { el('lista').className = ''; el('lista').innerHTML = '<div class="vazio">Erro ao carregar.</div>'; return; }
-            if (!data || !data.length) { el('lista').className = ''; el('lista').innerHTML = '<div class="vazio">Nada aqui ainda. Clique em “+ Novo”.</div>'; return; }
+            // Na aba Store, também traz os Destaques marcados "Mostrar também na Store" (sem duplicar cadastro)
+            let extras = [];
+            if (atual === 'store') {
+                try {
+                    const r = await sb.from('imersao_destaques').select('*').eq('publicado', true).eq('na_store', true).order('ordem', { ascending: true });
+                    if (r.data) extras = r.data;
+                } catch (e) {}
+            }
+            if ((!data || !data.length) && !extras.length) { el('lista').className = ''; el('lista').innerHTML = '<div class="vazio">Nada aqui ainda. Clique em “+ Novo”.</div>'; return; }
             const chave = cfg.chave || 'id';
             const flagField = cfg.flag || (cfg.campos.some(c => c.n === 'publicado') ? 'publicado' : null);
             const prev = PREVIEWS[atual];
@@ -320,16 +328,31 @@
                 <button class="btn ghost mini" data-acao="editar" data-k="${esc(String(r[chave]))}">Editar</button>
                 <button class="btn perigo mini" data-acao="apagar" data-k="${esc(String(r[chave]))}">Apagar</button>
             </span>`;
+            // Card "emprestado" de Destaques (read-only aqui; edita na aba Destaques)
+            const mapExtra = (r) => ({
+                id: r.id, nome: r.titulo, descricao: r.descricao,
+                preco: parsePreco(r.preco), preco_de: parsePreco(r.preco_antigo),
+                tag: r.categoria, imagem_url: r.imagem_url,
+                cor: ['lavanda', 'menta', 'pessego'].includes(r.tom) ? r.tom : 'lavanda'
+            });
+            const cardExtra = (r) => `
+                <div class="admin-card">
+                    <div class="admin-barra">
+                        <span class="nome">↩ vem de Destaques</span>
+                        <span class="dir"><button class="btn ghost mini" data-acao="ir-destaque" data-k="${esc(String(r.id))}">Editar em Destaques</button></span>
+                    </div>
+                    <div class="admin-prev">${PREVIEWS.store(mapExtra(r))}</div>
+                </div>`;
             if (prev) {
                 el('lista').className = 'admin-lista ' + (LAYOUTS[atual] || 'grid');
-                el('lista').innerHTML = data.map((r, i) => `
+                el('lista').innerHTML = (data || []).map((r, i) => `
                     <div class="admin-card">
                         <div class="admin-barra">
                             <span class="nome">${flagField ? (r[flagField] ? '● no ar' : '○ oculto') : ''}${r.destaque ? ' · em destaque' : ''}</span>
                             ${ferramentas(r)}
                         </div>
                         <div class="admin-prev">${prev(r, i)}</div>
-                    </div>`).join('');
+                    </div>`).join('') + extras.map(cardExtra).join('');
             } else {
                 el('lista').className = '';
                 el('lista').innerHTML = data.map(r => `
@@ -349,6 +372,13 @@
             el('lista').querySelectorAll('[data-acao="coracao"]').forEach(b => b.addEventListener('click', () => {
                 const r = data.find(x => String(x[chave]) === b.dataset.k);
                 toggleDestaque(b.dataset.k, !r.destaque);
+            }));
+            el('lista').querySelectorAll('[data-acao="ir-destaque"]').forEach(b => b.addEventListener('click', () => {
+                const r = extras.find(x => String(x.id) === b.dataset.k);
+                atual = 'destaques';
+                document.querySelectorAll('.aba').forEach(a => a.classList.toggle('on', a.dataset.ent === 'destaques'));
+                el('tituloSecao').textContent = ENTIDADES.destaques.nome;
+                carregar().then(() => { if (r) abrirForm(r); });
             }));
             if (window.lucide) lucide.createIcons();
         }
