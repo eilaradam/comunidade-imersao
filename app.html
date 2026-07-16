@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=16">
+<link rel="stylesheet" href="css/comunidade.css?v=17">
 </head>
 <body data-pagina="home">
     <!-- Fundo idêntico ao login: blobs + starburst, fixos -->
@@ -29,7 +29,7 @@
         <a data-target="avisos"    data-tip="Avisos" class="so-desktop"><i data-lucide="bell"></i></a>
         <a href="loja.html"        data-tip="Store" class="so-desktop"><i data-lucide="shopping-bag"></i></a>
         <span class="sep-menu"></span>
-        <a data-target="perfil"    data-tip="Meu perfil"><i data-lucide="user"></i></a>
+        <a href="perfil.html"      data-tip="Meu perfil"><i data-lucide="user"></i></a>
     </nav>
 
     <!-- FAB (aparece após rolar) -->
@@ -44,7 +44,7 @@
         <a data-target="avisos"><i data-lucide="bell"></i><span>Avisos</span></a>
         <a href="loja.html"><i data-lucide="shopping-bag"></i><span>Store</span></a>
         <span class="sep-pop"></span>
-        <a data-target="perfil"><i data-lucide="user"></i><span>Meu perfil</span></a>
+        <a href="perfil.html"><i data-lucide="user"></i><span>Meu perfil</span></a>
     </div>
 
     <div class="lane">
@@ -146,31 +146,6 @@
                 <div class="grid-store" id="store-grid"></div>
             </section>
 
-            <!-- ── SEÇÃO 7 — MEU PERFIL ── -->
-            <section id="perfil">
-                <div class="cabeca">
-                    <div class="h-sec">Meu perfil</div>
-                </div>
-                <div class="perfil-box">
-                    <div class="avatar" id="avatar">L</div>
-                    <div class="nome" id="perfilNome">Lara Dam</div>
-                    <div class="email" id="perfilEmail">lara@claudeimersao.com</div>
-                    <div class="perfil-lista">
-                        <button class="perfil-op"><span class="ico"><i data-lucide="user"></i></span> Dados da conta <span class="chev"><i data-lucide="chevron-right"></i></span></button>
-                        <button class="perfil-op"><span class="ico"><i data-lucide="receipt"></i></span> Minhas compras <span class="chev"><i data-lucide="chevron-right"></i></span></button>
-                        <button class="perfil-op"><span class="ico"><i data-lucide="bell"></i></span> Preferências de notificação <span class="chev"><i data-lucide="chevron-right"></i></span></button>
-                        <button class="perfil-op"><span class="ico"><i data-lucide="help-circle"></i></span> Suporte <span class="chev"><i data-lucide="chevron-right"></i></span></button>
-                        <a class="perfil-op" id="linkAdmin" href="admin.html" style="display:none; text-decoration:none"><span class="ico"><i data-lucide="shield"></i></span> Admin <span class="chev"><i data-lucide="chevron-right"></i></span></a>
-                        <button class="perfil-op sair" id="btnSair"><span class="ico"><i data-lucide="log-out"></i></span> Sair <span class="chev"><i data-lucide="chevron-right"></i></span></button>
-                    </div>
-                </div>
-
-                <div class="perfil-box" id="seusPostsBox" style="margin-top:20px">
-                    <div class="perfil-titulo">Seus posts</div>
-                    <div class="seus-posts" id="seusPosts"></div>
-                </div>
-            </section>
-
             <div class="rodape">Comunidade Imersão · feita com Claude Code por Lara Dam</div>
         </div>
     </div>
@@ -186,6 +161,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/sb.js?v=14"></script>
 
-    <script src="js/comunidade.js?v=16"></script>
+    <script src="js/comunidade.js?v=17"></script>
 </body>
 </html>

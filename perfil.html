@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
-<title>Store · Comunidade Imersão</title>
+<title>Meu perfil · Comunidade Imersão</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/comunidade.css?v=17">
 </head>
-<body data-pagina="loja">
+<body data-pagina="perfil">
     <!-- Fundo idêntico ao login: blobs + starburst, fixos -->
     <div class="blobs">
         <div class="blob b1"></div>
@@ -27,9 +27,9 @@
         <a href="app.html#prompts"   data-tip="Prompts"><i data-lucide="sparkles"></i></a>
         <a href="app.html#materiais" data-tip="Materiais"><i data-lucide="folder"></i></a>
         <a href="app.html#avisos"    data-tip="Avisos" class="so-desktop"><i data-lucide="bell"></i></a>
-        <a href="loja.html"          data-tip="Store" class="so-desktop ativo"><i data-lucide="shopping-bag"></i></a>
+        <a href="loja.html"          data-tip="Store" class="so-desktop"><i data-lucide="shopping-bag"></i></a>
         <span class="sep-menu"></span>
-        <a href="perfil.html"    data-tip="Meu perfil"><i data-lucide="user"></i></a>
+        <a href="perfil.html"        data-tip="Meu perfil" class="ativo"><i data-lucide="user"></i></a>
     </nav>
 
     <!-- FAB (aparece após rolar) -->
@@ -42,20 +42,37 @@
         <a href="app.html#prompts"><i data-lucide="sparkles"></i><span>Prompts</span></a>
         <a href="app.html#materiais"><i data-lucide="folder"></i><span>Materiais</span></a>
         <a href="app.html#avisos"><i data-lucide="bell"></i><span>Avisos</span></a>
-        <a href="loja.html" class="ativo"><i data-lucide="shopping-bag"></i><span>Store</span></a>
+        <a href="loja.html"><i data-lucide="shopping-bag"></i><span>Store</span></a>
         <span class="sep-pop"></span>
-        <a href="perfil.html"><i data-lucide="user"></i><span>Meu perfil</span></a>
+        <a href="perfil.html" class="ativo"><i data-lucide="user"></i><span>Meu perfil</span></a>
     </div>
 
     <div class="lane">
         <div class="conteudo">
             <div class="mural-header" style="padding-top:80px">
-                <h1>Store</h1>
-                <p>Aulas avulsas, mentorias e materiais com preço de comunidade</p>
+                <h1>Meu perfil</h1>
+                <p>Sua conta, compras e publicações</p>
             </div>
 
-            <section id="store">
-                <div class="grid-store" id="store-grid"></div>
+            <section id="perfil">
+                <div class="perfil-box">
+                    <div class="avatar" id="avatar">L</div>
+                    <div class="nome" id="perfilNome">Lara Dam</div>
+                    <div class="email" id="perfilEmail">lara@claudeimersao.com</div>
+                    <div class="perfil-lista">
+                        <button class="perfil-op"><span class="ico"><i data-lucide="user"></i></span> Dados da conta <span class="chev"><i data-lucide="chevron-right"></i></span></button>
+                        <button class="perfil-op"><span class="ico"><i data-lucide="receipt"></i></span> Minhas compras <span class="chev"><i data-lucide="chevron-right"></i></span></button>
+                        <button class="perfil-op"><span class="ico"><i data-lucide="bell"></i></span> Preferências de notificação <span class="chev"><i data-lucide="chevron-right"></i></span></button>
+                        <button class="perfil-op"><span class="ico"><i data-lucide="help-circle"></i></span> Suporte <span class="chev"><i data-lucide="chevron-right"></i></span></button>
+                        <a class="perfil-op" id="linkAdmin" href="admin.html" style="display:none; text-decoration:none"><span class="ico"><i data-lucide="shield"></i></span> Admin <span class="chev"><i data-lucide="chevron-right"></i></span></a>
+                        <button class="perfil-op sair" id="btnSair"><span class="ico"><i data-lucide="log-out"></i></span> Sair <span class="chev"><i data-lucide="chevron-right"></i></span></button>
+                    </div>
+                </div>
+
+                <div class="perfil-box" id="seusPostsBox" style="margin-top:20px">
+                    <div class="perfil-titulo">Seus posts</div>
+                    <div class="seus-posts" id="seusPosts"></div>
+                </div>
             </section>
 
             <div class="rodape">Comunidade Imersão · feita com Claude Code por Lara Dam</div>

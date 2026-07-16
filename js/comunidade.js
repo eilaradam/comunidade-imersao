@@ -5,7 +5,8 @@
         let usuario = null, perfil = null;
         const PAGINA = document.body.getAttribute('data-pagina') || 'home';
         const ehLoja = PAGINA === 'loja';
-        const ehHome = PAGINA !== 'mural' && !ehLoja;
+        const ehPerfil = PAGINA === 'perfil';
+        const ehHome = PAGINA !== 'mural' && !ehLoja && !ehPerfil;
 
         /* ── Tons dos blobs (placeholders de thumbnail) ── */
         const tom = {
@@ -1069,7 +1070,7 @@
         applyState();
 
         /* IntersectionObserver marca ativo no menu lateral E no popup */
-        const secoes = ['inicio','prompts','materiais','avisos','store','perfil'];
+        const secoes = ['inicio','prompts','materiais','avisos','store'];
         function marcarAtivo(id) {
             todosLinks.forEach(a => a.classList.toggle('ativo', a.getAttribute('data-target') === id));
         }
