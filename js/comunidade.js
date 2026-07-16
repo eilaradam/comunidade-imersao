@@ -52,6 +52,14 @@
         }
         function mover(dir) { ativoC = Math.max(0, Math.min(cardsC.length - 1, ativoC + dir)); posicionar(); }
 
+        function abrirLink(u) {
+            if (!u) return;
+            let l = String(u).trim();
+            if (!l) return;
+            if (!/^https?:\/\//i.test(l)) l = 'https://' + l;
+            window.open(l, '_blank', 'noopener,noreferrer');
+        }
+
         function montarCarrossel(itens) {
             if (!palco) return;
             palco.innerHTML = '';
@@ -81,15 +89,13 @@
                         <button class="acao${d.link ? ' tem-link' : ''}" aria-label="Acessar"><i data-lucide="${gratis ? 'play' : 'arrow-right'}"></i></button>
                     </div>
                 </div>`;
-                // Clicar/passar o cursor no card → traz pra frente (não navega)
-                card.addEventListener('click', () => { if (i !== ativoC) { ativoC = i; posicionar(); } });
-                card.addEventListener('mouseenter', () => { if (i !== ativoC) { ativoC = i; posicionar(); } });
-                // Só a setinha "Acessar" abre o link que você colocou no admin
-                const btnAcao = card.querySelector('.acao');
-                btnAcao.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (d.link) window.open(d.link, '_blank', 'noopener,noreferrer');
+                if (d.link) card.classList.add('clicavel');
+                // Card lateral: clique/cursor traz pra frente. Card da frente: clique abre o link.
+                card.addEventListener('click', () => {
+                    if (i !== ativoC) { ativoC = i; posicionar(); return; }
+                    abrirLink(d.link);
                 });
+                card.addEventListener('mouseenter', () => { if (i !== ativoC) { ativoC = i; posicionar(); } });
                 palco.appendChild(card);
             });
             cardsC = Array.from(palco.children);
