@@ -1154,7 +1154,7 @@
                 if (elMeu) elMeu.innerHTML = avatarHTML(nome, perfil.avatar_url);
                 if (perfil.avatar_url && elAvatar) {
                     elAvatar.innerHTML =
-                        `<img src="${esc(perfil.avatar_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+                        `<img src="${esc(perfil.avatar_url)}" alt="" style="width:100%;height:100%;object-fit:cover">`;
                 }
 
                 /* Subir/trocar foto de perfil (só existe na perfil.html) */
@@ -1172,7 +1172,7 @@
                             if (error) throw error;
                             perfil.avatar_url = url;
                             const av = document.getElementById('avatar');
-                            if (av) av.innerHTML = `<img src="${esc(url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+                            if (av) av.innerHTML = `<img src="${esc(url)}" alt="" style="width:100%;height:100%;object-fit:cover">`;
                             const meu = document.getElementById('meuAvatar');
                             if (meu) meu.innerHTML = avatarHTML(nome, url);
                             if (fotoStatus) fotoStatus.textContent = 'Foto atualizada! 💜';
