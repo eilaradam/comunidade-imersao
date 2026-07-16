@@ -849,18 +849,25 @@
                 try {
                     const { data, error } = await sb.from('imersao_prompts').select('*').eq('publicado', true)
                         .order('destaque', { ascending: false }).order('created_at', { ascending: false });
-                    if (!error) itens = data.map(r => ({ cat: r.tema, titulo: r.titulo, texto: r.descricao || r.prompt, copia: r.prompt }));
+                    if (!error) itens = data.map(r => ({ cat: r.tema, titulo: r.titulo, texto: r.descricao || r.prompt, copia: r.prompt, link: r.link }));
                 } catch (e) {}
             }
-            if (itens === null) itens = prompts.map(p => ({ cat: p.cat, titulo: p.titulo, texto: p.texto, copia: p.texto }));
+            if (itens === null) itens = prompts.map(p => ({ cat: p.cat, titulo: p.titulo, texto: p.texto, copia: p.texto, link: null }));
             if (!itens.length) { promptsGrid.innerHTML = '<div class="secao-vazia">Nenhum prompt publicado ainda.</div>'; return; }
-            promptsGrid.innerHTML = itens.map((p, i) => `
+            promptsGrid.innerHTML = itens.map((p, i) => {
+                const temCopia = !!(p.copia && String(p.copia).trim());
+                const temLink = !!(p.link && String(p.link).trim());
+                const botoes =
+                    (temCopia ? `<button class="btn-preto" data-copiar="${i}">Copiar prompt</button>` : '') +
+                    (temLink ? `<button class="btn-glass" data-link="${i}">Acessar <span aria-hidden="true">→</span></button>` : '');
+                return `
                 <div class="p-card">
                     <div><span class="pill-cat">${esc(p.cat || '')}</span></div>
                     <h3>${esc(p.titulo || '')}</h3>
                     <div class="preview">${esc(p.texto || '')}</div>
-                    <div class="p-rodape"><button class="btn-preto" data-copiar="${i}">Copiar prompt</button></div>
-                </div>`).join('');
+                    <div class="p-rodape">${botoes}</div>
+                </div>`;
+            }).join('');
             promptsGrid.querySelectorAll('[data-copiar]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const p = itens[+btn.getAttribute('data-copiar')];
@@ -870,6 +877,9 @@
                         setTimeout(() => { btn.textContent = orig; }, 1500);
                     });
                 });
+            });
+            promptsGrid.querySelectorAll('[data-link]').forEach(btn => {
+                btn.addEventListener('click', () => abrirLink(itens[+btn.getAttribute('data-link')].link));
             });
         }
 

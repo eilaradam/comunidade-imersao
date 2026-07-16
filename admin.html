@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Admin · Comunidade Imersão</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=21">
+<link rel="stylesheet" href="css/comunidade.css?v=22">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -157,7 +157,7 @@
                 <div><span class="pill-cat">${esc(r.tema || '')}</span></div>
                 <h3>${esc(r.titulo || '')}</h3>
                 <div class="preview">${esc(r.descricao || r.prompt || '')}</div>
-                <div class="p-rodape"><button class="btn-preto">Copiar prompt</button></div>
+                <div class="p-rodape">${(r.prompt && String(r.prompt).trim()) ? '<button class="btn-preto">Copiar prompt</button>' : ''}${(r.link && String(r.link).trim()) ? '<button class="btn-glass">Acessar <span>→</span></button>' : ''}</div>
             </div>`,
             destaques: r => {
                 const gratis = /gratu/i.test(r.preco || '');
@@ -214,7 +214,8 @@
                     { n: 'tema', l: 'Tema (badge do card)', t: 'text' },
                     { n: 'titulo', l: 'Título', t: 'text', req: true },
                     { n: 'descricao', l: 'Descrição curta (aparece no card)', t: 'textarea' },
-                    { n: 'prompt', l: 'Prompt completo (texto que é copiado)', t: 'textarea', req: true },
+                    { n: 'prompt', l: 'Prompt completo (texto que é copiado) — deixe vazio se for só link', t: 'textarea' },
+                    { n: 'link', l: 'Link (opcional — botão "Acessar" que leva o aluno pro site)', t: 'text' },
                     { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
                 ]
             },
