@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Admin · Comunidade Imersão</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=23">
+<link rel="stylesheet" href="css/comunidade.css?v=24">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -536,24 +536,17 @@
 
         el('btnNovo').addEventListener('click', () => abrirForm(null));
 
-        /* ── Entrada: precisa estar logada E ser admin ── */
+        /* ── Entrada: exige login E estar na lista de admins autorizados ── */
+        const ADMINS = ['nataliisabella19@gmail.com', 'laradam.ugc@gmail.com'];
         (async function () {
             if (!sb) return;
+            // 1) Sem login → manda pro login (não mostra nada do admin)
             const { data: { session } } = await sb.auth.getSession();
             if (!session) { window.location.replace('index.html'); return; }
-            const { data: adm } = await sb.rpc('is_admin');
-            if (!adm) {
-                const email = (session.user && session.user.email) || '';
-                const dica = el('dicaAdmin');
-                if (dica && email) {
-                    dica.innerHTML = 'Você está logada como <b>' + esc(email) + '</b>.<br><br>' +
-                        'Para virar admin, rode isto no SQL Editor do Supabase:<br>' +
-                        '<code style="user-select:all; display:inline-block; margin-top:8px; background:rgba(0,0,0,0.05); padding:8px 12px; border-radius:8px">' +
-                        "insert into imersao_admins (email) values ('" + esc(email) + "') on conflict do nothing;</code>";
-                }
-                el('bloqueio').style.display = 'block';
-                return;
-            }
+            // 2) Logada, mas não é um dos e-mails autorizados → sai pra comunidade
+            const email = ((session.user && session.user.email) || '').toLowerCase();
+            if (!ADMINS.includes(email)) { window.location.replace('app.html'); return; }
+            // 3) Autorizada → mostra o painel
             el('painel').style.display = 'block';
             el('tituloSecao').textContent = ENTIDADES[atual].nome;
             montarAbas();

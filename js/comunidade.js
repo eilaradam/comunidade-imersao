@@ -1157,6 +1157,34 @@
                         `<img src="${esc(perfil.avatar_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
                 }
 
+                /* Subir/trocar foto de perfil (só existe na perfil.html) */
+                const fotoInput = document.getElementById('fotoInput');
+                const fotoStatus = document.getElementById('fotoStatus');
+                if (fotoInput) {
+                    fotoInput.addEventListener('change', async () => {
+                        const f = fotoInput.files[0];
+                        if (!f) return;
+                        if (!/^image\//.test(f.type)) { if (fotoStatus) fotoStatus.textContent = 'Selecione um arquivo de imagem.'; return; }
+                        if (fotoStatus) fotoStatus.textContent = 'Enviando foto…';
+                        try {
+                            const url = await subirImagem(f);
+                            const { error } = await sb.from('imersao_perfis').update({ avatar_url: url }).eq('usuario_id', usuario.id);
+                            if (error) throw error;
+                            perfil.avatar_url = url;
+                            const av = document.getElementById('avatar');
+                            if (av) av.innerHTML = `<img src="${esc(url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+                            const meu = document.getElementById('meuAvatar');
+                            if (meu) meu.innerHTML = avatarHTML(nome, url);
+                            if (fotoStatus) fotoStatus.textContent = 'Foto atualizada! 💜';
+                        } catch (e) {
+                            console.error('Erro na foto de perfil:', e);
+                            if (fotoStatus) fotoStatus.textContent = 'Não consegui enviar a foto. Tente de novo.';
+                        } finally {
+                            fotoInput.value = '';
+                        }
+                    });
+                }
+
                 const elSair = document.getElementById('btnSair');
                 if (elSair) elSair.addEventListener('click', async () => {
                     await sb.auth.signOut();
@@ -1187,12 +1215,10 @@
                     window._avisoPerfil = setTimeout(() => avisoPerfil.classList.remove('show'), 1800);
                 }));
 
-                /* Link de Admin no perfil (só para admins) */
-                try {
-                    const { data: adm } = await sb.rpc('is_admin');
-                    const la = document.getElementById('linkAdmin');
-                    if (adm && la) la.style.display = 'flex';
-                } catch (e) {}
+                /* Link de Admin no perfil — SÓ para os e-mails autorizados (nenhuma aluna vê) */
+                const ADMINS = ['nataliisabella19@gmail.com', 'laradam.ugc@gmail.com'];
+                const la = document.getElementById('linkAdmin');
+                if (la && ADMINS.includes(email.toLowerCase())) la.style.display = 'flex';
 
                 if (!ehLoja) {
                     await carregarMural();
