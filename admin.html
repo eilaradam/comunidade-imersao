@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Admin · Comunidade Imersão</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=2">
+<link rel="stylesheet" href="css/comunidade.css?v=3">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -171,11 +171,19 @@
                     </div>
                 </div>`;
             },
-            store: r => `<div class="s-card">
-                <div class="s-thumb" style="background:${gtom(r.tom)}"><span class="badge">${esc(r.categoria || '')}</span></div>
-                <div class="s-corpo"><h3>${esc(r.titulo || '')}</h3><div class="desc">${esc(r.descricao || '')}</div>
-                    <div class="s-rodape"><span class="preco">${esc(r.preco || '')}</span><button class="btn-preto">Comprar</button></div></div>
-            </div>`,
+            store: r => {
+                const cor = { lavanda: 'linear-gradient(135deg, #C8B8E0, #B8C6E8)', menta: 'linear-gradient(135deg, #B8E0D0, #B8C6E8)', pessego: 'linear-gradient(135deg, #E8C4B8, #C8B8E0)' }[r.cor] || 'linear-gradient(135deg, #C8B8E0, #B8C6E8)';
+                const preco = r.preco == null ? 0 : Number(r.preco);
+                const fmt = (v) => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: Number.isInteger(Number(v)) ? 0 : 2, maximumFractionDigits: 2 });
+                const de = r.preco_de == null ? null : Number(r.preco_de);
+                const precoHTML = !preco ? '<span class="gratis">Gratuito</span>'
+                    : (de && de > preco ? `<s class="antes">${fmt(de)}</s><span class="agora">${fmt(preco)}</span>` : `<span class="agora">${fmt(preco)}</span>`);
+                return `<div class="s-card">
+                    <div class="s-thumb" style="background:${cor}">${r.tag ? `<span class="badge">${esc(r.tag)}</span>` : ''}</div>
+                    <div class="s-corpo"><h3>${esc(r.nome || '')}</h3><div class="desc">${esc(r.descricao || '')}</div>
+                        <div class="s-rodape"><div class="s-preco">${precoHTML}</div><button class="s-comprar">Comprar <span>→</span></button></div></div>
+                </div>`;
+            },
             materiais: (r, i) => `<div class="mat-item">
                 <div class="mat-ico" style="background:${TOMLIST[i % 4]}"><i data-lucide="file-text"></i></div>
                 <div class="mat-meio"><h3>${esc(r.titulo || '')}</h3><div class="tipo">${esc(r.descricao || '')}</div></div>
@@ -222,17 +230,18 @@
                 ]
             },
             store: {
-                tabela: 'imersao_store', nome: 'Store', ordena: 'ordem', asc: true,
-                titulo: r => r.titulo, sub: r => r.preco || '—',
+                tabela: 'produtos', nome: 'Store', ordena: 'ordem', asc: true, flag: 'ativo',
+                titulo: r => r.nome, sub: r => (r.preco != null ? 'R$ ' + r.preco : '—'),
                 campos: [
-                    { n: 'titulo', l: 'Título', t: 'text', req: true },
-                    { n: 'descricao', l: 'Descrição', t: 'text' },
-                    { n: 'categoria', l: 'Categoria (badge)', t: 'text' },
-                    { n: 'preco', l: 'Preço (ex: R$ 97)', t: 'text' },
-                    { n: 'link', l: 'Link de checkout', t: 'text' },
-                    { n: 'tom', l: 'Cor do card', t: 'tom' },
+                    { n: 'nome', l: 'Nome', t: 'text', req: true },
+                    { n: 'descricao', l: 'Descrição', t: 'textarea' },
+                    { n: 'preco', l: 'Preço (ex: 197 ou 47.90)', t: 'dec' },
+                    { n: 'preco_de', l: 'Preço "de" (riscado, opcional)', t: 'dec' },
+                    { n: 'checkout_url', l: 'Link de checkout (Kiwify)', t: 'text' },
+                    { n: 'tag', l: 'Tag (badge, opcional)', t: 'text' },
+                    { n: 'cor', l: 'Cor do card', t: 'select', opts: ['lavanda', 'menta', 'pessego'] },
                     { n: 'ordem', l: 'Ordem', t: 'num' },
-                    { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
+                    { n: 'ativo', l: 'Ativo (aparece na Store)', t: 'bool', def: true }
                 ]
             },
             materiais: {
@@ -294,7 +303,7 @@
             if (error) { el('lista').className = ''; el('lista').innerHTML = '<div class="vazio">Erro ao carregar.</div>'; return; }
             if (!data || !data.length) { el('lista').className = ''; el('lista').innerHTML = '<div class="vazio">Nada aqui ainda. Clique em “+ Novo”.</div>'; return; }
             const chave = cfg.chave || 'id';
-            const temPub = cfg.campos.some(c => c.n === 'publicado');
+            const flagField = cfg.flag || (cfg.campos.some(c => c.n === 'publicado') ? 'publicado' : null);
             const prev = PREVIEWS[atual];
             const ferramentas = (r) => `<span class="dir">
                 <button class="btn ghost mini" data-acao="editar" data-k="${esc(String(r[chave]))}">Editar</button>
@@ -305,7 +314,7 @@
                 el('lista').innerHTML = data.map((r, i) => `
                     <div class="admin-card">
                         <div class="admin-barra">
-                            <span class="nome">${temPub ? (r.publicado ? '● publicado' : '○ rascunho') : ''}</span>
+                            <span class="nome">${flagField ? (r[flagField] ? '● no ar' : '○ oculto') : ''}</span>
                             ${ferramentas(r)}
                         </div>
                         <div class="admin-prev">${prev(r, i)}</div>
@@ -338,11 +347,13 @@
             if (c.t === 'textarea') {
                 return `<div class="campo"><label for="f_${c.n}">${c.l}</label><textarea id="f_${c.n}">${esc(String(v))}</textarea></div>`;
             }
-            if (c.t === 'tom') {
-                return `<div class="campo"><label for="f_${c.n}">${c.l}</label><select id="f_${c.n}">${['', ...TONS].map(t => `<option value="${t}"${t === v ? ' selected' : ''}>${t || '(padrão)'}</option>`).join('')}</select></div>`;
+            if (c.t === 'tom' || c.t === 'select') {
+                const opts = c.t === 'tom' ? TONS : (c.opts || []);
+                return `<div class="campo"><label for="f_${c.n}">${c.l}</label><select id="f_${c.n}">${['', ...opts].map(o => `<option value="${o}"${o === v ? ' selected' : ''}>${o || '(padrão)'}</option>`).join('')}</select></div>`;
             }
-            const tipo = c.t === 'num' ? 'number' : 'text';
-            return `<div class="campo"><label for="f_${c.n}">${c.l}</label><input type="${tipo}" id="f_${c.n}" value="${esc(String(v))}"></div>`;
+            const tipo = (c.t === 'num' || c.t === 'dec') ? 'number' : 'text';
+            const step = c.t === 'dec' ? ' step="0.01"' : '';
+            return `<div class="campo"><label for="f_${c.n}">${c.l}</label><input type="${tipo}"${step} id="f_${c.n}" value="${esc(String(v))}"></div>`;
         }
 
         function abrirForm(reg) {
@@ -366,6 +377,7 @@
                 const campo = el('f_' + c.n);
                 if (c.t === 'bool') payload[c.n] = campo.checked;
                 else if (c.t === 'num') payload[c.n] = campo.value === '' ? 0 : parseInt(campo.value, 10) || 0;
+                else if (c.t === 'dec') payload[c.n] = campo.value.trim() === '' ? null : (parseFloat(campo.value) || 0);
                 else payload[c.n] = campo.value.trim() === '' ? null : campo.value.trim();
                 if (c.req && (payload[c.n] === null || payload[c.n] === '')) { recado('Preencha: ' + c.l); return; }
             }

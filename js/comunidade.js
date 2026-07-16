@@ -874,31 +874,61 @@
             { titulo: 'Imersão Portfólio v2',          desc: 'Turma de agosto',     preco: 'R$ 397', cat: 'IMERSÃO',  tom: tom.pessego },
             { titulo: 'Pack templates de proposta',    desc: 'Editáveis no Canva',  preco: 'R$ 67',  cat: 'PACK',     tom: tom.menta }
         ];
+        /* Store — vitrine que abre o checkout da Kiwify (tabela produtos) */
+        const corStore = (k) => ({
+            lavanda: 'linear-gradient(135deg, #C8B8E0, #B8C6E8)',
+            menta:   'linear-gradient(135deg, #B8E0D0, #B8C6E8)',
+            pessego: 'linear-gradient(135deg, #E8C4B8, #C8B8E0)'
+        }[k] || 'linear-gradient(135deg, #C8B8E0, #B8C6E8)');
+
+        function fmtReal(v) {
+            const n = Number(v);
+            return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
+        }
+        function precoProdutoHTML(p) {
+            const preco = p.preco == null ? 0 : Number(p.preco);
+            if (!preco) return '<span class="gratis">Gratuito</span>';
+            const de = p.preco_de == null ? null : Number(p.preco_de);
+            if (de && de > preco) return `<s class="antes">${fmtReal(de)}</s><span class="agora">${fmtReal(preco)}</span>`;
+            return `<span class="agora">${fmtReal(preco)}</span>`;
+        }
+        function cardProduto(p) {
+            return `<div class="s-card">
+                <div class="s-thumb" style="background:${corStore(p.cor)}">
+                    ${p.tag ? `<span class="badge">${esc(p.tag)}</span>` : ''}
+                </div>
+                <div class="s-corpo">
+                    <h3>${esc(p.nome || '')}</h3>
+                    <div class="desc">${esc(p.descricao || '')}</div>
+                    <div class="s-rodape">
+                        <div class="s-preco">${precoProdutoHTML(p)}</div>
+                        <button class="s-comprar" data-checkout="${esc(p.checkout_url || '')}">Comprar <span aria-hidden="true">→</span></button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
         async function carregarStoreSecao() {
             const stEl = document.getElementById('store-grid');
-            if (!stEl) return;
-            let itens = store.map(s => ({ titulo: s.titulo, desc: s.desc, preco: s.preco, cat: s.cat, tom: s.tom, link: null }));
+            const secStore = document.getElementById('store');
+            if (!stEl || !secStore) return;
+            let produtos = [];
             if (sb) {
                 try {
-                    const { data } = await sb.from('imersao_store').select('*').eq('publicado', true)
-                        .order('ordem', { ascending: true }).order('created_at', { ascending: false });
-                    if (data && data.length) itens = data.map(r => ({ titulo: r.titulo, desc: r.descricao, preco: r.preco, cat: r.categoria, tom: tom[r.tom] || tom.pessego, link: r.link }));
+                    const { data, error } = await sb.from('produtos').select('*').eq('ativo', true).order('ordem', { ascending: true });
+                    if (!error && data) produtos = data;
                 } catch (e) {}
             }
-            stEl.innerHTML = itens.map(s => `
-                <div class="s-card">
-                    <div class="s-thumb" style="background:${s.tom}">
-                        <span class="badge">${esc(s.cat || '')}</span>
-                    </div>
-                    <div class="s-corpo">
-                        <h3>${esc(s.titulo || '')}</h3>
-                        <div class="desc">${esc(s.desc || '')}</div>
-                        <div class="s-rodape">
-                            <span class="preco">${esc(s.preco || '')}</span>
-                            ${s.link ? `<a class="btn-preto" href="${esc(s.link)}" target="_blank" rel="noopener">Comprar</a>` : `<button class="btn-preto">Comprar</button>`}
-                        </div>
-                    </div>
-                </div>`).join('');
+            if (!produtos.length) { secStore.style.display = 'none'; return; }
+            secStore.style.display = '';
+            stEl.innerHTML = produtos.map(cardProduto).join('');
+            if (!stEl.dataset.bound) {
+                stEl.addEventListener('click', (e) => {
+                    const b = e.target.closest('[data-checkout]');
+                    if (b && b.dataset.checkout) window.open(b.dataset.checkout, '_blank', 'noopener,noreferrer');
+                });
+                stEl.dataset.bound = '1';
+            }
         }
 
         /* ─────────────── ÍCONES ─────────────── */
