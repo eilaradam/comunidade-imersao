@@ -1151,7 +1151,7 @@
                     avisoPerfil.classList.add('show');
                     clearTimeout(window._avisoPerfil);
                     window._avisoPerfil = setTimeout(() => avisoPerfil.classList.remove('show'), 1800);
-                });
+                }));
 
                 /* Link de Admin no perfil (só para admins) */
                 try {
