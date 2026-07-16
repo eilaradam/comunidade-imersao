@@ -794,6 +794,12 @@
                 const { data: r, error } = await sb.rpc('imersao_perfil_resumo', { p_usuario: post.autor_id });
                 const resumo = Array.isArray(r) ? r[0] : r;
                 if (error || !resumo) throw error || new Error('sem perfil');
+                // Confere direto na tabela se EU já sigo (fonte da verdade pro botão)
+                if (usuario && resumo.usuario_id !== usuario.id) {
+                    const { data: jaSigo } = await sb.from('imersao_seguidores')
+                        .select('seguido_id').eq('seguidor_id', usuario.id).eq('seguido_id', resumo.usuario_id).maybeSingle();
+                    resumo.eu_sigo = !!jaSigo;
+                }
                 renderPerfilModal(resumo);
             } catch (e) {
                 console.error('Erro ao abrir perfil:', e);
@@ -1263,6 +1269,24 @@
                         } finally {
                             fotoInput.value = '';
                         }
+                    });
+                }
+
+                /* Editor de bio (só existe na perfil.html) */
+                const bioInput = document.getElementById('bioInput');
+                const bioStatus = document.getElementById('bioStatus');
+                const salvarBio = document.getElementById('salvarBio');
+                if (bioInput && salvarBio) {
+                    bioInput.value = perfil.bio || '';
+                    salvarBio.addEventListener('click', async () => {
+                        const nova = bioInput.value.trim();
+                        salvarBio.disabled = true;
+                        if (bioStatus) bioStatus.textContent = 'Salvando…';
+                        const { error } = await sb.from('imersao_perfis').update({ bio: nova || null }).eq('usuario_id', usuario.id);
+                        salvarBio.disabled = false;
+                        if (error) { if (bioStatus) bioStatus.textContent = 'Não consegui salvar.'; return; }
+                        perfil.bio = nova || null;
+                        if (bioStatus) { bioStatus.textContent = 'Bio salva! 💜'; setTimeout(() => { bioStatus.textContent = ''; }, 2500); }
                     });
                 }
 

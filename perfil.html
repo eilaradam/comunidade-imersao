@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=26">
+<link rel="stylesheet" href="css/comunidade.css?v=27">
 </head>
 <body data-pagina="perfil">
     <!-- Fundo idêntico ao login: blobs + starburst, fixos -->
@@ -64,6 +64,13 @@
                     <div class="foto-status" id="fotoStatus"></div>
                     <div class="nome"><span id="perfilNome">Lara Dam</span><span class="verificado" title="Membro da comunidade"><i data-lucide="badge-check"></i></span></div>
                     <div class="email" id="perfilEmail">lara@claudeimersao.com</div>
+                    <div class="bio-editor">
+                        <textarea id="bioInput" maxlength="160" placeholder="Escreva uma bio curta — aparece quando alguém abre seu perfil no mural 💜"></textarea>
+                        <div class="bio-linha">
+                            <button class="btn-preto bio-btn" id="salvarBio">Salvar bio</button>
+                            <span class="bio-status" id="bioStatus"></span>
+                        </div>
+                    </div>
                     <div class="perfil-lista">
                         <button class="perfil-op" id="btnDados"><span class="ico"><i data-lucide="user"></i></span> Dados da conta <span class="chev"><i data-lucide="chevron-right"></i></span></button>
                         <div class="perfil-dados" id="painelDados" style="display:none"></div>
@@ -98,6 +105,6 @@
     <script src="js/sb.js?v=14"></script>
 
     <!-- Lógica compartilhada -->
-    <script src="js/comunidade.js?v=26"></script>
+    <script src="js/comunidade.js?v=27"></script>
 </body>
 </html>
