@@ -90,10 +90,11 @@
                     </div>
                 </div>`;
                 if (d.link) card.classList.add('clicavel');
-                // Card lateral: clique/cursor traz pra frente. Card da frente: clique abre o link.
+                // Tem link → clicar em qualquer lugar do card abre, na hora.
+                // Não tem link → clicar só traz o card pra frente (navegação).
                 card.addEventListener('click', () => {
-                    if (i !== ativoC) { ativoC = i; posicionar(); return; }
-                    abrirLink(d.link);
+                    if (d.link) { abrirLink(d.link); return; }
+                    if (i !== ativoC) { ativoC = i; posicionar(); }
                 });
                 card.addEventListener('mouseenter', () => { if (i !== ativoC) { ativoC = i; posicionar(); } });
                 palco.appendChild(card);
