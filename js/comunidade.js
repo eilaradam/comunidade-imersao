@@ -938,6 +938,16 @@
             const n = Number(v);
             return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
         }
+        // Converte preço em texto do Destaque ("R$ 197", "Gratuita", "1.997") pra número
+        function precoTexto2Num(s) {
+            if (s == null) return null;
+            let t = String(s).replace(/[R$\s]/gi, '').trim();
+            if (!t) return null;
+            if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+            else if (/\.\d{3}(\.|$)/.test(t)) t = t.replace(/\./g, '');
+            const n = parseFloat(t);
+            return isNaN(n) ? null : n;
+        }
         function precoProdutoHTML(p) {
             const preco = p.preco == null ? 0 : Number(p.preco);
             if (!preco) return '<span class="gratis">Gratuito</span>';
@@ -966,19 +976,32 @@
             const stEl = document.getElementById('store-grid');
             const secStore = document.getElementById('store');
             if (!stEl || !secStore) return;
-            let produtos = [];
+            let itens = [];
             if (sb) {
+                // 1) Produtos próprios da Store
                 try {
                     const { data, error } = await sb.from('produtos').select('*').eq('ativo', true).order('ordem', { ascending: true });
-                    if (!error && data) produtos = data;
+                    if (!error && data) data.forEach(p => itens.push({ ...p, _ordem: p.ordem == null ? 999 : p.ordem }));
                 } catch (e) {}
+                // 2) Destaques marcados com "Mostrar também na Store" (lê do mesmo registro, sem duplicar)
+                try {
+                    const { data, error } = await sb.from('imersao_destaques').select('*').eq('publicado', true).eq('na_store', true).order('ordem', { ascending: true });
+                    if (!error && data) data.forEach(r => itens.push({
+                        nome: r.titulo, descricao: r.descricao,
+                        preco: precoTexto2Num(r.preco), preco_de: precoTexto2Num(r.preco_antigo),
+                        checkout_url: r.link, tag: r.categoria, imagem_url: r.imagem_url,
+                        cor: ['lavanda', 'menta', 'pessego'].includes(r.tom) ? r.tom : 'lavanda',
+                        _ordem: r.ordem == null ? 999 : r.ordem
+                    }));
+                } catch (e) {}
+                itens.sort((a, b) => a._ordem - b._ordem);
             }
-            if (!produtos.length) {
+            if (!itens.length) {
                 if (ehLoja) { secStore.style.display = ''; stEl.innerHTML = '<div class="loja-vazia">Nenhum produto disponível ainda. Volte em breve! 💜</div>'; return; }
                 secStore.style.display = 'none'; return;
             }
             secStore.style.display = '';
-            stEl.innerHTML = produtos.map(cardProduto).join('');
+            stEl.innerHTML = itens.map(cardProduto).join('');
             if (!stEl.dataset.bound) {
                 stEl.addEventListener('click', (e) => {
                     const b = e.target.closest('[data-checkout]');
