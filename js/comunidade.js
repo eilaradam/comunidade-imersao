@@ -79,16 +79,16 @@
                     ${d.autor ? `<div class="local"><i data-lucide="user"></i> ${esc(d.autor)}</div>` : ''}
                     <div class="desc-label">Descrição</div>
                     <p class="desc-text">${esc(d.desc || '')}</p>
-                    <div class="c-rodape">
-                        <div class="preco-bloco">
+                    ${(d.preco || d.link) ? `<div class="c-rodape">
+                        ${d.preco ? `<div class="preco-bloco">
                             <span class="preco-label">Valor</span>
                             <span class="preco-linha">
                                 ${d.antes ? `<s class="antes">${esc(d.antes)}</s>` : ''}
-                                <span class="preco${gratis ? ' gratis' : ''}">${esc(d.preco || '')}</span>
+                                <span class="preco${gratis ? ' gratis' : ''}">${esc(d.preco)}</span>
                             </span>
-                        </div>
-                        <button class="acao${d.link ? ' tem-link' : ''}" aria-label="Acessar"><i data-lucide="${gratis ? 'play' : 'arrow-right'}"></i></button>
-                    </div>
+                        </div>` : '<div class="preco-bloco"></div>'}
+                        ${d.link ? `<button class="acao tem-link" aria-label="Acessar"><i data-lucide="${gratis ? 'play' : 'arrow-right'}"></i></button>` : ''}
+                    </div>` : ''}
                 </div>`;
                 if (d.link) card.classList.add('clicavel');
                 // Tem link → clicar em qualquer lugar do card abre, na hora.
@@ -135,6 +135,24 @@
                             link: p.checkout_url, ordem: p.ordem == null ? 999 : p.ordem
                         });
                     });
+                } catch (e) {}
+                // 3) Prompts marcados com o coração (destaque)
+                try {
+                    const { data, error } = await sb.from('imersao_prompts').select('*').eq('publicado', true).eq('destaque', true).order('created_at', { ascending: false });
+                    if (!error && data) data.forEach(r => lista.push({
+                        tom: tom.menta, imagem: null, off: null, cat: r.tema || 'PROMPT',
+                        titulo: r.titulo, autor: '', desc: r.descricao || r.prompt || '',
+                        antes: null, preco: null, link: null, ordem: 900
+                    }));
+                } catch (e) {}
+                // 4) Avisos marcados com o coração (destaque)
+                try {
+                    const { data, error } = await sb.from('imersao_avisos').select('*').eq('publicado', true).eq('destaque', true).order('created_at', { ascending: false });
+                    if (!error && data) data.forEach(r => lista.push({
+                        tom: tom.lavandaClara, imagem: null, off: null, cat: 'AVISO',
+                        titulo: r.titulo, autor: '', desc: r.corpo || '',
+                        antes: null, preco: null, link: null, ordem: 950
+                    }));
                 } catch (e) {}
                 if (lista.length) { lista.sort((a, b) => a.ordem - b.ordem); itens = lista; }
             }

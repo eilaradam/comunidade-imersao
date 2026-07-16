@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Admin · Comunidade Imersão</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=13">
+<link rel="stylesheet" href="css/comunidade.css?v=14">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -208,14 +208,13 @@
 
         const ENTIDADES = {
             prompts: {
-                tabela: 'imersao_prompts', nome: 'Prompts', ordena: 'created_at', asc: false,
+                tabela: 'imersao_prompts', nome: 'Prompts', ordena: 'created_at', asc: false, coracao: true,
                 titulo: r => r.titulo, sub: r => r.tema || '—',
                 campos: [
                     { n: 'tema', l: 'Tema (badge do card)', t: 'text' },
                     { n: 'titulo', l: 'Título', t: 'text', req: true },
                     { n: 'descricao', l: 'Descrição curta (aparece no card)', t: 'textarea' },
                     { n: 'prompt', l: 'Prompt completo (texto que é copiado)', t: 'textarea', req: true },
-                    { n: 'destaque', l: 'Destaque (aparece primeiro)', t: 'bool' },
                     { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
                 ]
             },
@@ -266,7 +265,7 @@
                 ]
             },
             avisos: {
-                tabela: 'imersao_avisos', nome: 'Avisos', ordena: 'created_at', asc: false,
+                tabela: 'imersao_avisos', nome: 'Avisos', ordena: 'created_at', asc: false, coracao: true,
                 titulo: r => r.titulo, sub: r => (r.corpo || '').slice(0, 60),
                 campos: [
                     { n: 'titulo', l: 'Título', t: 'text', req: true },
