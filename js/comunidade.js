@@ -110,31 +110,33 @@
             if (!palco) return;
             let itens = destaques.map(d => ({ tom: d.tom, imagem: null, off: d.off, cat: d.cat, titulo: d.titulo, autor: d.autor, desc: d.desc, antes: d.antes, preco: d.preco, link: d.link || null }));
             if (sb) {
-                // 1) Modelo novo: produtos da Store marcados com o coração (destaque)
-                try {
-                    const { data, error } = await sb.from('produtos').select('*').eq('ativo', true).eq('destaque', true).order('ordem', { ascending: true });
-                    if (!error && data && data.length) {
-                        montarCarrossel(data.map(p => {
-                            const preco = p.preco == null ? 0 : Number(p.preco);
-                            const de = p.preco_de == null ? null : Number(p.preco_de);
-                            const off = (de && de > preco && preco > 0) ? Math.round((de - preco) / de * 100) + '%' : null;
-                            return {
-                                tom: corStore(p.cor), imagem: p.imagem_url, off, cat: p.tag,
-                                titulo: p.nome, autor: p.subtitulo || '', desc: p.descricao,
-                                antes: (de && de > preco) ? fmtReal(de) : null,
-                                preco: preco ? fmtReal(preco) : 'Gratuito',
-                                link: p.checkout_url
-                            };
-                        }));
-                        return;
-                    }
-                } catch (e) {}
-                // 2) Fallback (enquanto a coluna "destaque" não existir / sem produtos em destaque):
-                //    mostra os destaques antigos, pra nada sumir.
+                const lista = [];
+                // 1) Cards da aba Destaques (imersao_destaques)
                 try {
                     const { data } = await sb.from('imersao_destaques').select('*').eq('publicado', true).order('ordem', { ascending: true }).order('created_at', { ascending: false });
-                    if (data && data.length) itens = data.map(r => ({ tom: tom[r.tom] || tom.lavanda, imagem: r.imagem_url, off: r.off, cat: r.categoria, titulo: r.titulo, autor: r.subtitulo, desc: r.descricao, antes: r.preco_antigo, preco: r.preco, link: r.link }));
+                    if (data) data.forEach(r => lista.push({
+                        tom: tom[r.tom] || tom.lavanda, imagem: r.imagem_url, off: r.off, cat: r.categoria,
+                        titulo: r.titulo, autor: r.subtitulo, desc: r.descricao, antes: r.preco_antigo,
+                        preco: r.preco, link: r.link, ordem: r.ordem == null ? 999 : r.ordem
+                    }));
                 } catch (e) {}
+                // 2) Produtos da Store marcados com o coração (destaque)
+                try {
+                    const { data, error } = await sb.from('produtos').select('*').eq('ativo', true).eq('destaque', true).order('ordem', { ascending: true });
+                    if (!error && data) data.forEach(p => {
+                        const preco = p.preco == null ? 0 : Number(p.preco);
+                        const de = p.preco_de == null ? null : Number(p.preco_de);
+                        const off = (de && de > preco && preco > 0) ? Math.round((de - preco) / de * 100) + '%' : null;
+                        lista.push({
+                            tom: corStore(p.cor), imagem: p.imagem_url, off, cat: p.tag,
+                            titulo: p.nome, autor: p.subtitulo || '', desc: p.descricao,
+                            antes: (de && de > preco) ? fmtReal(de) : null,
+                            preco: preco ? fmtReal(preco) : 'Gratuito',
+                            link: p.checkout_url, ordem: p.ordem == null ? 999 : p.ordem
+                        });
+                    });
+                } catch (e) {}
+                if (lista.length) { lista.sort((a, b) => a.ordem - b.ordem); itens = lista; }
             }
             montarCarrossel(itens);
         }

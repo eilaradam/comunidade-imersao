@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Admin · Comunidade Imersão</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/comunidade.css?v=12">
+<link rel="stylesheet" href="css/comunidade.css?v=13">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -54,6 +54,10 @@
     .tag-pub.sim { background: rgba(28,124,84,0.12); color: #1c7c54; }
     .tag-pub.nao { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.5); }
     .acoes-item { display: flex; gap: 8px; }
+    .btn-cor { font-size: 16px; line-height: 1; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.08); border-radius: 100px; width: 34px; height: 30px; cursor: pointer; display: grid; place-items: center; padding: 0; transition: transform 120ms ease, background 150ms ease; filter: grayscale(1); opacity: .7; }
+    .btn-cor:hover { background: rgba(0,0,0,0.09); }
+    .btn-cor.on { filter: none; opacity: 1; background: rgba(200,68,26,0.08); border-color: rgba(200,68,26,0.2); }
+    .btn-cor:active { transform: scale(0.9); }
 
     .form-card { background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 18px; padding: 22px; margin-bottom: 20px; display: none; }
     .form-card.aberto { display: block; }
@@ -215,8 +219,26 @@
                     { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
                 ]
             },
+            destaques: {
+                tabela: 'imersao_destaques', nome: 'Destaques', ordena: 'ordem', asc: true,
+                titulo: r => r.titulo, sub: r => r.categoria || '—',
+                campos: [
+                    { n: 'titulo', l: 'Título', t: 'text', req: true },
+                    { n: 'subtitulo', l: 'Subtítulo (autor/turma)', t: 'text' },
+                    { n: 'categoria', l: 'Categoria (badge)', t: 'text' },
+                    { n: 'imagem_url', l: 'Imagem do card', t: 'imagem' },
+                    { n: 'descricao', l: 'Descrição', t: 'textarea' },
+                    { n: 'preco', l: 'Preço (ex: R$ 197 ou Gratuita)', t: 'text' },
+                    { n: 'preco_antigo', l: 'Preço antigo (riscado)', t: 'text' },
+                    { n: 'off', l: 'Desconto (calculado automaticamente)', t: 'off' },
+                    { n: 'link', l: 'Link do botão Acessar', t: 'text' },
+                    { n: 'tom', l: 'Cor do card', t: 'tom' },
+                    { n: 'ordem', l: 'Ordem', t: 'num' },
+                    { n: 'publicado', l: 'Publicado', t: 'bool', def: true }
+                ]
+            },
             store: {
-                tabela: 'produtos', nome: 'Store', ordena: 'ordem', asc: true, flag: 'ativo',
+                tabela: 'produtos', nome: 'Store', ordena: 'ordem', asc: true, flag: 'ativo', coracao: true,
                 titulo: r => r.nome, sub: r => (r.preco != null ? 'R$ ' + r.preco : '—'),
                 campos: [
                     { n: 'nome', l: 'Nome', t: 'text', req: true },
@@ -229,7 +251,6 @@
                     { n: 'imagem_url', l: 'Imagem do card', t: 'imagem' },
                     { n: 'cor', l: 'Cor do card (fallback sem imagem)', t: 'select', opts: ['lavanda', 'menta', 'pessego'] },
                     { n: 'ordem', l: 'Ordem', t: 'num' },
-                    { n: 'destaque', l: '❤️ Destacar no início (aparece no carrossel "Em destaque")', t: 'bool' },
                     { n: 'ativo', l: 'Ativo (aparece na Store)', t: 'bool', def: true }
                 ]
             },
@@ -295,6 +316,7 @@
             const flagField = cfg.flag || (cfg.campos.some(c => c.n === 'publicado') ? 'publicado' : null);
             const prev = PREVIEWS[atual];
             const ferramentas = (r) => `<span class="dir">
+                ${cfg.coracao ? `<button class="btn-cor${r.destaque ? ' on' : ''}" data-acao="coracao" data-k="${esc(String(r[chave]))}" title="${r.destaque ? 'Tirar do carrossel Em destaque' : 'Colocar no carrossel Em destaque'}" aria-label="Destacar">${r.destaque ? '❤️' : '🤍'}</button>` : ''}
                 <button class="btn ghost mini" data-acao="editar" data-k="${esc(String(r[chave]))}">Editar</button>
                 <button class="btn perigo mini" data-acao="apagar" data-k="${esc(String(r[chave]))}">Apagar</button>
             </span>`;
@@ -303,7 +325,7 @@
                 el('lista').innerHTML = data.map((r, i) => `
                     <div class="admin-card">
                         <div class="admin-barra">
-                            <span class="nome">${flagField ? (r[flagField] ? '● no ar' : '○ oculto') : ''}${r.destaque ? ' · ❤️ em destaque' : ''}</span>
+                            <span class="nome">${flagField ? (r[flagField] ? '● no ar' : '○ oculto') : ''}${r.destaque ? ' · em destaque' : ''}</span>
                             ${ferramentas(r)}
                         </div>
                         <div class="admin-prev">${prev(r, i)}</div>
@@ -324,7 +346,24 @@
                 abrirForm(r);
             }));
             el('lista').querySelectorAll('[data-acao="apagar"]').forEach(b => b.addEventListener('click', () => apagar(b.dataset.k)));
+            el('lista').querySelectorAll('[data-acao="coracao"]').forEach(b => b.addEventListener('click', () => {
+                const r = data.find(x => String(x[chave]) === b.dataset.k);
+                toggleDestaque(b.dataset.k, !r.destaque);
+            }));
             if (window.lucide) lucide.createIcons();
+        }
+
+        async function toggleDestaque(id, novo) {
+            const cfg = ENTIDADES[atual];
+            const { error } = await sb.from(cfg.tabela).update({ destaque: novo }).eq(cfg.chave || 'id', id);
+            if (error) {
+                if (/column .*destaque.* does not exist/i.test(error.message || '')) {
+                    recado('Falta a coluna "destaque" no banco. Rode o SQL de configuração primeiro.');
+                } else { recado('Não consegui atualizar o destaque: ' + error.message); }
+                return;
+            }
+            recado(novo ? 'Colocado no carrossel Em destaque ❤️' : 'Removido do carrossel.', 'ok');
+            carregar();
         }
 
         function campoHTML(c, valor) {
