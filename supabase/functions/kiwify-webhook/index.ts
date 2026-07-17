@@ -2,9 +2,9 @@
 //
 // Só os produtos marcados no admin (aba "Acesso" -> imersao_produtos_acesso)
 // liberam a comunidade. Assim a Lara separa os nichos.
-// Compra aprovada de produto liberado -> entra em imersao_alunas (ativo = true)
-// Reembolso, ou compra de produto que não libera -> não dá acesso.
-// Nunca mexe em quem foi liberado na mão (obs sem "Kiwify").
+// Compra aprovada de produto liberado -> entra em imersao_alunas (ativo = true).
+// Compra de produto que não libera -> só registra, NÃO altera o acesso.
+// Reembolso -> tira o acesso só se não sobrar produto liberado (nunca mexe no manual).
 //
 // Precisa ser deployada com --no-verify-jwt: quem chama é a Kiwify, não um usuário logado.
 // A segurança vem da assinatura: a Kiwify assina o corpo com o token do webhook.
@@ -128,60 +128,66 @@ Deno.serve(async (req) => {
 
   // ── Acesso à comunidade: só os produtos marcados no admin liberam.
   // A Lara liga/desliga cada produto na aba "Acesso" (imersao_produtos_acesso).
-  // Todo produto novo é registrado aqui DESLIGADO, pra ela decidir depois.
+  // Regra segura: COMPRA só ADICIONA acesso; só REEMBOLSO pode tirar.
   if (aprovou || removeu) {
-    // 1) Registra o produto pra ele aparecer no admin (nasce desligado).
+    // Registra o produto pra ele aparecer no admin (nasce desligado).
     if (produtoId) {
       const linha: Record<string, any> = { produto_id: produtoId };
       if (produtoNome) linha.produto_nome = produtoNome;
       await admin.from('imersao_produtos_acesso').upsert(linha, { onConflict: 'produto_id' });
     }
 
-    // 2) Quais produtos liberam a comunidade hoje?
+    // Quais produtos liberam a comunidade hoje?
     const { data: liberadores } = await admin
       .from('imersao_produtos_acesso')
       .select('produto_id')
       .eq('libera_comunidade', true);
     const idsQueLiberam = new Set((liberadores || []).map((p) => p.produto_id));
 
-    // 3) Essa pessoa tem alguma compra ATIVA de um produto que libera?
-    const { data: comprasAtivas } = await admin
-      .from('kiwify_acessos')
-      .select('produto_id')
-      .ilike('email', email)
-      .eq('ativo', true);
-    const temAcesso = (comprasAtivas || []).some((c) => idsQueLiberam.has(c.produto_id));
-
-    // Já existe na lista da comunidade? (traz a obs pra saber se foi manual)
-    const { data: existe } = await admin
-      .from('imersao_alunas')
-      .select('id, obs')
-      .ilike('email', email)
-      .maybeSingle();
-
-    if (temAcesso) {
-      if (existe) {
-        await admin.from('imersao_alunas').update({ ativo: true }).eq('id', existe.id);
-        await registrar('liberada (produto libera a comunidade)');
+    if (aprovou) {
+      // Compra aprovada: se o produto libera, dá acesso. Se não libera, apenas
+      // registra a compra — NUNCA tira o acesso de ninguém por causa de uma compra.
+      if (produtoId && idsQueLiberam.has(produtoId)) {
+        const { data: existe } = await admin
+          .from('imersao_alunas').select('id').ilike('email', email).maybeSingle();
+        if (existe) {
+          await admin.from('imersao_alunas').update({ ativo: true }).eq('id', existe.id);
+          await registrar('liberada (produto libera a comunidade)');
+        } else {
+          const { error } = await admin.from('imersao_alunas').insert({
+            nome: nome || email.split('@')[0],
+            email,
+            whatsapp: fone || null,
+            ativo: true,
+            obs: `Kiwify${produtoNome ? ' · ' + produtoNome : ''}`,
+          });
+          await registrar(error ? `ERRO ao inserir: ${error.message}` : 'liberada');
+        }
       } else {
-        const { error } = await admin.from('imersao_alunas').insert({
-          nome: nome || email.split('@')[0],
-          email,
-          whatsapp: fone || null,
-          ativo: true,
-          obs: `Kiwify${produtoNome ? ' · ' + produtoNome : ''}`,
-        });
-        await registrar(error ? `ERRO ao inserir: ${error.message}` : 'liberada');
+        await registrar('compra registrada, produto nao libera a comunidade');
       }
     } else {
-      // Sem produto liberado. Só cortamos quem entrou PELA Kiwify — nunca tira
-      // acesso de quem foi liberado na mão (turma antiga, convidadas, admins).
-      const veioDaKiwify = existe && typeof existe.obs === 'string' && existe.obs.startsWith('Kiwify');
-      if (existe && veioDaKiwify) {
-        await admin.from('imersao_alunas').update({ ativo: false }).eq('id', existe.id);
-        await registrar('sem acesso (nenhum produto liberado)');
+      // Reembolso/estorno: só tira o acesso se NÃO sobrar nenhuma compra ativa
+      // de produto que libera. E nunca mexe em quem foi liberado na mão.
+      const { data: comprasAtivas } = await admin
+        .from('kiwify_acessos')
+        .select('produto_id')
+        .ilike('email', email)
+        .eq('ativo', true);
+      const aindaTemAcesso = (comprasAtivas || []).some((c) => idsQueLiberam.has(c.produto_id));
+
+      if (!aindaTemAcesso) {
+        const { data: existe } = await admin
+          .from('imersao_alunas').select('id, obs').ilike('email', email).maybeSingle();
+        const veioDaKiwify = existe && typeof existe.obs === 'string' && existe.obs.startsWith('Kiwify');
+        if (existe && veioDaKiwify) {
+          await admin.from('imersao_alunas').update({ ativo: false }).eq('id', existe.id);
+          await registrar('sem acesso (reembolso, nada mais libera)');
+        } else {
+          await registrar('reembolso, mas acesso manual/nao encontrado: nao mexo');
+        }
       } else {
-        await registrar('mantida (acesso manual, nao mexo)');
+        await registrar('reembolso de um produto, ainda tem outro que libera');
       }
     }
 
