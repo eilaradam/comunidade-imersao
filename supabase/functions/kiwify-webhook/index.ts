@@ -1,7 +1,8 @@
 // Recebe os avisos de compra da Kiwify e libera (ou tira) o acesso à comunidade.
 //
+// QUALQUER produto vendido na Kiwify libera a comunidade.
 // Compra aprovada  -> entra em imersao_alunas com ativo = true  (ela já consegue criar a senha)
-// Reembolso/estorno -> ativo = false (o cadastro fica, o acesso não)
+// Reembolso/estorno -> só corta o acesso se NÃO sobrar nenhum outro produto ativo
 //
 // Precisa ser deployada com --no-verify-jwt: quem chama é a Kiwify, não um usuário logado.
 // A segurança vem da assinatura: a Kiwify assina o corpo com o token do webhook.
@@ -123,41 +124,49 @@ Deno.serve(async (req) => {
     if (erroAcesso) console.error('nao consegui gravar em kiwify_acessos:', erroAcesso.message);
   }
 
-  // Se a Lara vender mais de um produto na Kiwify, só o da Imersão libera a comunidade.
-  const soEsteProduto = (Deno.env.get('KIWIFY_PRODUTO_ID') || '').trim();
-  if (soEsteProduto && produtoId && produtoId !== soEsteProduto) {
-    await registrar(`ignorado pra comunidade: outro produto (${produtoNome || produtoId})`);
-    return new Response('ok', { status: 200 });
-  }
+  // ── Acesso à comunidade: QUALQUER produto comprado na Kiwify libera.
+  // Recalculamos a partir do kiwify_acessos (que já foi atualizado logo acima),
+  // então compras e reembolsos de vários produtos se resolvem sozinhos: a aluna
+  // só perde o acesso quando NÃO sobra NENHUM produto ativo (devolveu tudo).
+  if (aprovou || removeu) {
+    const { data: aindaAtivo } = await admin
+      .from('kiwify_acessos')
+      .select('email')
+      .ilike('email', email)
+      .eq('ativo', true)
+      .limit(1);
 
-  if (aprovou) {
-    // Já está na lista? Então só religa o acesso. Senão, entra agora.
+    const temAlgumaCompraAtiva = !!(aindaAtivo && aindaAtivo.length);
+
+    // Já existe na lista da comunidade?
     const { data: existe } = await admin
       .from('imersao_alunas')
       .select('id')
       .ilike('email', email)
       .maybeSingle();
 
-    if (existe) {
-      await admin.from('imersao_alunas').update({ ativo: true }).eq('id', existe.id);
-      await registrar('liberada (ja estava na lista)');
+    if (temAlgumaCompraAtiva) {
+      if (existe) {
+        await admin.from('imersao_alunas').update({ ativo: true }).eq('id', existe.id);
+        await registrar('liberada (ja estava na lista)');
+      } else {
+        const { error } = await admin.from('imersao_alunas').insert({
+          nome: nome || email.split('@')[0],
+          email,
+          whatsapp: fone || null,
+          ativo: true,
+          obs: `Kiwify${produtoNome ? ' · ' + produtoNome : ''}`,
+        });
+        await registrar(error ? `ERRO ao inserir: ${error.message}` : 'liberada');
+      }
     } else {
-      const { error } = await admin.from('imersao_alunas').insert({
-        nome: nome || email.split('@')[0],
-        email,
-        whatsapp: fone || null,
-        ativo: true,
-        obs: `Kiwify${produtoNome ? ' · ' + produtoNome : ''}`,
-      });
-      await registrar(error ? `ERRO ao inserir: ${error.message}` : 'liberada');
+      // Reembolsou/estornou tudo, sem nenhuma compra ativa sobrando: corta o acesso.
+      if (existe) {
+        await admin.from('imersao_alunas').update({ ativo: false }).eq('id', existe.id);
+      }
+      await registrar('acesso removido (nenhuma compra ativa)');
     }
 
-    return new Response('ok', { status: 200 });
-  }
-
-  if (removeu) {
-    await admin.from('imersao_alunas').update({ ativo: false }).ilike('email', email);
-    await registrar('acesso removido (reembolso ou estorno)');
     return new Response('ok', { status: 200 });
   }
 
