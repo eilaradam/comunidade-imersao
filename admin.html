@@ -255,6 +255,16 @@
                     { n: 'ativo', l: 'Ativo (aparece na Store)', t: 'bool', def: true }
                 ]
             },
+            acesso: {
+                tabela: 'imersao_produtos_acesso', nome: 'Acesso', ordena: 'produto_nome', asc: true, flag: 'libera_comunidade',
+                titulo: r => r.produto_nome || r.produto_id || '(produto sem nome)',
+                sub: r => r.libera_comunidade ? '✅ Libera a comunidade' : '🚫 Não libera',
+                campos: [
+                    { n: 'produto_nome', l: 'Nome do produto (só pra você reconhecer)', t: 'text' },
+                    { n: 'produto_id', l: 'ID do produto na Kiwify', t: 'text', req: true },
+                    { n: 'libera_comunidade', l: 'Este produto dá acesso à comunidade', t: 'bool' }
+                ]
+            },
             materiais: {
                 tabela: 'imersao_materiais', nome: 'Materiais', ordena: 'ordem', asc: true,
                 titulo: r => r.titulo, sub: r => r.descricao || '—',
