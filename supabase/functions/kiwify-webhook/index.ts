@@ -107,8 +107,8 @@ Deno.serve(async (req) => {
 
   // ── Registro de compra, de QUALQUER produto dela.
   // Serve pros materiais que ficam fora da comunidade (ex: a página do
-  // prompt, que confere o e-mail aqui). Isso é separado do acesso à
-  // comunidade, que continua sendo só a Imersão, logo abaixo.
+  // prompt, que confere o e-mail aqui) e também alimenta a decisão de
+  // acesso à comunidade, logo abaixo.
   if (aprovou || removeu) {
     // O e-mail já vem em minúsculas do garimpar(), e a tabela conta com isso.
     const { error: erroAcesso } = await admin.from('kiwify_acessos').upsert({
