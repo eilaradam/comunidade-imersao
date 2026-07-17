@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
 
     // Já existe conta para esse e-mail?
     const { data: lista } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-    const usuario = lista?.users?.find((u) => (u.email || '').toLowerCase() === email);
+    let usuario = lista?.users?.find((u) => (u.email || '').toLowerCase() === email);
     const jaTemConta = !!usuario;
 
     if (action === 'status') {
@@ -79,6 +79,38 @@ Deno.serve(async (req) => {
       }
 
       return json({ na_lista: true, tem_conta: jaTemConta, conta_antiga: contaAntiga, nome: nomeDela });
+    }
+
+    if (action === 'preparar') {
+      // Login por link mágico: garante que a conta e o perfil existem ANTES
+      // de mandar o link. Assim, quando ela clicar no e-mail, já entra redondo.
+      // Como só chegamos aqui se está na lista, o gate continua no servidor.
+      if (!usuario) {
+        const { data: criado, error: erroCriar } = await admin.auth.admin.createUser({
+          email,
+          email_confirm: true,
+          user_metadata: { nome: nomeDela, origem: 'comunidade_imersao' },
+        });
+        if (erroCriar || !criado?.user) {
+          return json({ error: erroCriar?.message || 'Não consegui preparar a conta.' }, 500);
+        }
+        usuario = criado.user;
+      }
+
+      const { data: perfil } = await admin
+        .from('imersao_perfis')
+        .select('usuario_id')
+        .eq('usuario_id', usuario.id)
+        .maybeSingle();
+
+      if (!perfil) {
+        await admin.from('imersao_perfis').insert({
+          usuario_id: usuario.id,
+          nome: nomeDela || email.split('@')[0],
+        });
+      }
+
+      return json({ na_lista: true, nome: nomeDela });
     }
 
     if (action === 'criar') {

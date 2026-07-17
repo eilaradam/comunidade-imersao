@@ -221,38 +221,14 @@
                 <div class="recado" id="recadoEmail"></div>
             </div>
 
-            <!-- Etapa 2: senha -->
-            <div class="etapa" id="etapaSenha">
-                <h2 id="oiVolta">Que bom te ver de novo</h2>
-                <p class="dizeres" id="dizeresSenha">Digite sua senha pra entrar.</p>
-                <p class="quem-e" id="ecoSenha"></p>
-                <form id="formSenha" novalidate>
-                    <div class="pill">
-                        <input type="password" id="senha" placeholder="Sua senha" autocomplete="current-password" required>
-                        <button type="submit" class="btn-pill" id="btnSenha">Entrar <span class="seta">→</span></button>
-                    </div>
-                </form>
-                <div class="recado" id="recadoSenha"></div>
+            <!-- Etapa 2: link mágico enviado -->
+            <div class="etapa" id="etapaEnviado">
+                <h2>Confira seu e-mail 📩</h2>
+                <p class="dizeres">Te enviei um <b>link mágico</b> pra entrar — é só abrir seu e-mail e clicar no botão. Sem senha! (dá uma olhada também na aba <b>Promoções</b>/spam.)</p>
+                <p class="quem-e" id="ecoEnviado"></p>
+                <div class="recado" id="recadoEnviado"></div>
                 <div class="abaixo">
-                    <button type="button" id="linkEsqueci">Criar uma senha nova</button>
-                    <button type="button" data-voltar>Usar outro e-mail</button>
-                </div>
-            </div>
-
-            <!-- Etapa 3: criar senha -->
-            <div class="etapa" id="etapaCriar">
-                <h2 id="oiNova">Boas-vindas</h2>
-                <p class="dizeres">Primeiro acesso. Crie uma senha de pelo menos 6 caracteres.</p>
-                <p class="quem-e" id="ecoCriar"></p>
-                <form id="formCriar" novalidate>
-                    <div class="par">
-                        <div class="campo"><input type="password" id="senhaNova" placeholder="Crie sua senha" autocomplete="new-password" required></div>
-                        <div class="campo"><input type="password" id="senhaConf" placeholder="Repita a senha" autocomplete="new-password" required></div>
-                    </div>
-                    <button type="submit" class="entrar" id="btnCriar">Criar conta</button>
-                </form>
-                <div class="recado" id="recadoCriar"></div>
-                <div class="abaixo">
+                    <button type="button" id="reenviar">Reenviar o link</button>
                     <button type="button" data-voltar>Usar outro e-mail</button>
                 </div>
             </div>
@@ -273,10 +249,12 @@
 
         const etapas = {
             email: document.getElementById('etapaEmail'),
-            senha: document.getElementById('etapaSenha'),
-            criar: document.getElementById('etapaCriar')
+            enviado: document.getElementById('etapaEnviado')
         };
         let emailAtual = '';
+
+        /* Pra onde o link mágico leva ela depois de clicar no e-mail. */
+        const REDIRECT = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'app.html';
 
         function mostrar(nome) {
             Object.values(etapas).forEach(e => e.classList.remove('ativa'));
@@ -300,7 +278,37 @@
             if (session) window.location.replace('app.html');
         })();
 
-        /* Etapa 1: o e-mail está na lista da turma? */
+        /* Confere se o e-mail comprou (o servidor decide) e, se sim, manda o
+           link mágico. A conta e o perfil são preparados no servidor antes. */
+        async function enviarLink(email, btn, original, recadoId) {
+            recado(recadoId, '');
+            if (btn) carregando(btn, true, original);
+            try {
+                // 1) porteira: está na lista? + prepara conta/perfil (roda no servidor)
+                const { data, error } = await sb.functions.invoke('imersao-conta', {
+                    body: { action: 'preparar', email }
+                });
+                if (error) throw error;
+                if (!data || !data.na_lista) {
+                    recado('recadoEmail', (data && data.mensagem) || 'Esse e-mail não está na lista da turma. Use o mesmo e-mail da compra ou fale com a Lara.');
+                    return false;
+                }
+                // 2) envia o link mágico pro e-mail dela
+                const { error: erroOtp } = await sb.auth.signInWithOtp({
+                    email,
+                    options: { emailRedirectTo: REDIRECT, shouldCreateUser: false }
+                });
+                if (erroOtp) throw erroOtp;
+                return true;
+            } catch (e) {
+                recado(recadoId, 'Não consegui enviar o link agora. Tente de novo em instantes.');
+                return false;
+            } finally {
+                if (btn) carregando(btn, false, original);
+            }
+        }
+
+        /* Etapa 1: e-mail → manda o link mágico. */
         document.getElementById('formEmail').addEventListener('submit', async (ev) => {
             ev.preventDefault();
             const btn = document.getElementById('btnEmail');
@@ -308,112 +316,25 @@
             const email = document.getElementById('email').value.trim().toLowerCase();
             if (!email || !email.includes('@')) return recado('recadoEmail', 'Digite um e-mail válido.');
 
-            recado('recadoEmail', '');
-            carregando(btn, true, original);
-            try {
-                const { data, error } = await sb.functions.invoke('imersao-conta', {
-                    body: { action: 'status', email }
-                });
-                if (error) throw error;
-
-                if (!data.na_lista) {
-                    recado('recadoEmail', data.mensagem || 'Esse e-mail não está na lista da turma.');
-                    return;
-                }
-
+            const ok = await enviarLink(email, btn, original, 'recadoEmail');
+            if (ok) {
                 emailAtual = email;
-                const primeiroNome = (data.nome || '').split(' ')[0];
-
-                if (data.tem_conta) {
-                    document.getElementById('ecoSenha').textContent = email;
-                    if (primeiroNome) document.getElementById('oiVolta').textContent = `Oi de novo, ${primeiroNome}`;
-
-                    document.getElementById('dizeresSenha').textContent = data.conta_antiga
-                        ? 'Esse e-mail já tinha uma conta no site da Lara. Se você não lembra a senha, clique em "criar uma senha nova" aqui embaixo e eu te mando um link por e-mail.'
-                        : 'Digite sua senha pra entrar.';
-
-                    mostrar('senha');
-                    document.getElementById('senha').focus();
-                } else {
-                    document.getElementById('ecoCriar').textContent = email;
-                    if (primeiroNome) document.getElementById('oiNova').textContent = `Boas-vindas, ${primeiroNome}`;
-                    mostrar('criar');
-                    document.getElementById('senhaNova').focus();
-                }
-            } catch (e) {
-                recado('recadoEmail', 'Não consegui verificar agora. Tente de novo em instantes.');
-            } finally {
-                carregando(btn, false, original);
+                document.getElementById('ecoEnviado').textContent = email;
+                mostrar('enviado');
             }
         });
 
-        /* Etapa 2: entrar com senha. */
-        document.getElementById('formSenha').addEventListener('submit', async (ev) => {
-            ev.preventDefault();
-            const btn = document.getElementById('btnSenha');
-            const original = btn.innerHTML;
-            const senha = document.getElementById('senha').value;
-            recado('recadoSenha', '');
-            carregando(btn, true, original);
-            const { error } = await sb.auth.signInWithPassword({ email: emailAtual, password: senha });
-            carregando(btn, false, original);
-            if (error) {
-                recado('recadoSenha', error.message === 'Invalid login credentials'
-                    ? 'Senha incorreta. Tente de novo ou peça uma senha nova.'
-                    : 'Não consegui entrar agora. Tente de novo.');
-                return;
-            }
-            window.location.href = 'app.html';
-        });
-
-        /* Etapa 3: criar a conta (a função no servidor confere a lista de novo). */
-        document.getElementById('formCriar').addEventListener('submit', async (ev) => {
-            ev.preventDefault();
-            const btn = document.getElementById('btnCriar');
-            const original = btn.innerHTML;
-            const senha = document.getElementById('senhaNova').value;
-            const conf = document.getElementById('senhaConf').value;
-
-            if (senha.length < 6) return recado('recadoCriar', 'A senha precisa ter pelo menos 6 caracteres.');
-            if (senha !== conf) return recado('recadoCriar', 'As duas senhas não são iguais.');
-
-            recado('recadoCriar', '');
-            carregando(btn, true, original);
-            try {
-                const { data, error } = await sb.functions.invoke('imersao-conta', {
-                    body: { action: 'criar', email: emailAtual, senha }
-                });
-                if (error || data?.error) throw new Error(data?.error || 'erro');
-
-                const { error: erroLogin } = await sb.auth.signInWithPassword({ email: emailAtual, password: senha });
-                if (erroLogin) throw erroLogin;
-
-                window.location.href = 'app.html';
-            } catch (e) {
-                recado('recadoCriar', 'Não consegui criar seu acesso agora. Tente de novo em instantes.');
-                carregando(btn, false, original);
-            }
-        });
-
-        /* Esqueci a senha. */
-        document.getElementById('linkEsqueci').addEventListener('click', async (ev) => {
-            ev.preventDefault();
+        /* Reenviar o link. */
+        document.getElementById('reenviar').addEventListener('click', async () => {
             if (!emailAtual) return;
-            recado('recadoSenha', '');
-            const { error } = await sb.auth.resetPasswordForEmail(emailAtual, {
-                redirectTo: window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'nova-senha.html'
-            });
-            recado('recadoSenha', error
-                ? 'Não consegui enviar o e-mail agora. Tente de novo em instantes.'
-                : 'Pronto. Te mandei um link por e-mail pra criar uma senha nova (confira a aba promoções).',
-                error ? 'erro' : 'ok');
+            const ok = await enviarLink(emailAtual, null, '', 'recadoEnviado');
+            if (ok) recado('recadoEnviado', 'Link reenviado! Confira seu e-mail.', 'ok');
         });
 
         document.querySelectorAll('[data-voltar]').forEach(b => b.addEventListener('click', () => {
             emailAtual = '';
-            ['recadoEmail', 'recadoSenha', 'recadoCriar'].forEach(r => recado(r, ''));
-            document.getElementById('formSenha').reset();
-            document.getElementById('formCriar').reset();
+            ['recadoEmail', 'recadoEnviado'].forEach(r => recado(r, ''));
+            document.getElementById('formEmail').reset();
             mostrar('email');
             document.getElementById('email').focus();
         }));
